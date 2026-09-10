@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceED - Where Every Student's Voice Matters</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="user-menu.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <nav class="navbar">
+                    <ul class="nav-links">
+                        <li><a href="#" class="dashboard-nav-link nav-active">Dashboard</a></li>
+                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="#" id="wellnessBtn">WellnessED</a></li>
+                        <li><a href="#" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn"><i class="fas fa-cog"></i></a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Main Content -->
+    <main class="dashboard-main">
+        <div class="dashboard-container">
+            
+            <!-- Main Dashboard Layout -->
+            <div class="dashboard-wrapper">
+                <!-- Left Sidebar -->
+                <div class="left-sidebar">
+                    <div class="quick-actions-card">
+                        <h3>Quick Actions</h3>
+                        <div class="quick-actions">
+                            <button class="action-btn" id="messageBtn">
+                                <i class="fas fa-envelope"></i>
+                                <span>Send Message</span>
+                            </button>
+                            <button class="action-btn" id="reportBtn">
+                                <i class="fas fa-flag"></i>
+                                <span>Report Issue</span>
+                            </button>
+                            <button class="action-btn" id="resourceBtn">
+                                <i class="fas fa-book"></i>
+                                <span>Resources</span>
+                            </button>
+                            <button class="action-btn" id="supportBtn">
+                                <i class="fas fa-life-ring"></i>
+                                <span>Get Support</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="upcoming-events-card">
+                        <h3>Upcoming Events</h3>
+                        <div class="events-list">
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <span class="date">15</span>
+                                    <span class="month">MAR</span>
+                                </div>
+                                <div class="event-info">
+                                    <h4>Safety Workshop</h4>
+                                    <p>Learn about online safety and digital citizenship</p>
+                                </div>
+                            </div>
+                            <div class="event-item">
+                                <div class="event-date">
+                                    <span class="date">22</span>
+                                    <span class="month">MAR</span>
+                                </div>
+                                <div class="event-info">
+                                    <h4>Wellness Wednesday</h4>
+                                    <p>Join us for mindfulness and stress management</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="main-content">
+                    <!-- Welcome Section -->
+                    <div class="welcome-section">
+                        <h1>Welcome back, <span id="dashboardUsername">_____</span>!</h1>
+                        <p>Thanks for signing in—VoiceED is ready to be your hub for safety, wellness, and collaboration, where every student's voice matters.</p>
+                        <div class="quote-box">
+                            <p><em>"Education is not the filling of a pail, but the lighting of a fire."</em></p>
+                            <span>- William Butler Yeats</span>
+                        </div>
+                    </div>
+
+                    
+                    <!-- Content Grid -->
+                    <div class="content-grid">
+                        <!-- Recent Activity -->
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3>Recent Activity</h3>
+                                <a href="#" class="view-all">View All</a>
+                            </div>
+                            <div class="activity-feed">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p class="activity-text">Logged in to your account</p>
+                                        <span class="activity-time">Just now</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p class="activity-text">Account created successfully</p>
+                                        <span class="activity-time">Today</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p class="activity-text">Profile secured with VoiceED</p>
+                                        <span class="activity-time">Today</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <!-- Progress Chart -->
+                        <div class="content-card">
+                            <div class="card-header">
+                                <h3>Learning Progress</h3>
+                            </div>
+                            <div class="progress-chart">
+                                <div class="progress-item">
+                                    <div class="progress-info">
+                                        <span class="progress-title">Profile Completion</span>
+                                        <span class="progress-percentage">75%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                                <div class="progress-item">
+                                    <div class="progress-info">
+                                        <span class="progress-title">Safety Training</span>
+                                        <span class="progress-percentage">60%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                                <div class="progress-item">
+                                    <div class="progress-info">
+                                        <span class="progress-title">Wellness Activities</span>
+                                        <span class="progress-percentage">85%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                                            </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="right-sidebar">
+                    <!-- Quick Links -->
+                    <div class="sidebar-widget">
+                        <h3>Quick Links</h3>
+                        <div class="links-list">
+                            <a href="#" class="link-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Learning Resources</span>
+                            </a>
+                            <a href="#" class="link-item">
+                                <i class="fas fa-users"></i>
+                                <span>Community Forum</span>
+                            </a>
+                            <a href="#" class="link-item">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help Center</span>
+                            </a>
+                            <a href="#" class="link-item">
+                                <i class="fas fa-download"></i>
+                                <span>Downloads</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Profile Actions -->
+                    <div class="sidebar-widget">
+                        <h3>Profile</h3>
+                        <div class="profile-actions">
+                            <button class="profile-btn" id="editProfileBtn">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit Profile</span>
+                            </button>
+                            <button class="profile-btn" id="settingsBtn">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu Modal -->
+    <div id="userMenuModal" class="modal">
+        <div class="modal-content user-menu-modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Menu</h2>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="menuUsername">Admin</h3>
+                    <p id="menuEmail">Admin@voiceed.com</p>
+                </div>
+            </div>
+            <div class="menu-actions">
+                <button class="user-menu-button" id="profileBtn">
+                    <i class="fas fa-user"></i>
+                    <span>View Profile</span>
+                </button>
+                <button class="user-menu-button" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="particles.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceED - Messages</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <nav class="navbar">
+                    <ul class="nav-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="contacts.html">Contact</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn"><i class="fas fa-cog"></i></a></li>
+                        <li><a href="#" id="loginBtn" class="login-nav-btn">Login</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages Content -->
+    <main class="services-main">
+        <div class="container">
+            <div class="services-welcome">
+                <h2>User Messages</h2>
+                <p>View and manage all messages submitted through the VoiceED contact form.</p>
+            </div>
+
+            <div class="services-container">
+                <!-- Messages Overview -->
+                <div class="service-box">
+                    <div class="service-header">
+                        <div class="service-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <h3>All Messages</h3>
+                    </div>
+                    <div class="service-details">
+                        <div class="message-controls">
+                            <div class="message-stats">
+                                <span class="stat-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span id="totalMessages">0</span> Total Messages
+                                </span>
+                                <span class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="recentMessages">0</span> Recent (Last 7 Days)
+                                </span>
+                            </div>
+                            <div class="message-actions">
+                                <button class="cta-button" onclick="refreshMessages()">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
+                                <button class="cta-button" onclick="clearAllMessages()">
+                                    <i class="fas fa-trash"></i> Clear All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="messagesList" class="messages-list">
+                            <!-- Messages will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>VoiceED Description</h3>
+                    <p>Essentially a community-driven platform that blends student safety with accessible education. The idea is to empower students and schools by giving them practical tools to report issues, access learning resources, and collaborate with peers. It's not about futuristic or impossible features—it's about things that can realistically be implemented in schools, universities, and communities.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="contacts.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VoiceED. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="options">
+                    <label>
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="forgot-password.html">Forgot Password?</a>
+                </div>
+                <button type="submit" class="login-button">Login</button>
+                <p class="register-text">Don't have an account? <a href="#">Register</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="particles.js"></script>
+    <script src="login-fixed.js"></script>
+    <script>
+        // Message Management System
+        class MessageManager {
+            constructor() {
+                this.messages = this.loadMessages();
+                this.init();
+            }
+
+            init() {
+                this.displayMessages();
+                this.updateStats();
+            }
+
+            loadMessages() {
+                const stored = localStorage.getItem('shielded_messages');
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            saveMessages() {
+                localStorage.setItem('shielded_messages', JSON.stringify(this.messages));
+            }
+
+            addMessage(message) {
+                message.id = Date.now();
+                message.timestamp = new Date().toISOString();
+                this.messages.unshift(message);
+                this.saveMessages();
+                this.displayMessages();
+                this.updateStats();
+            }
+
+            deleteMessage(id) {
+                this.messages = this.messages.filter(msg => msg.id !== id);
+                this.saveMessages();
+                this.displayMessages();
+                this.updateStats();
+            }
+
+            clearAll() {
+                if (confirm('Are you sure you want to delete all messages?')) {
+                    this.messages = [];
+                    this.saveMessages();
+                    this.displayMessages();
+                    this.updateStats();
+                }
+            }
+
+            displayMessages() {
+                const container = document.getElementById('messagesList');
+                
+                if (this.messages.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-messages">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No Messages Yet</h3>
+                            <p>When users submit messages through the contact form, they will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.messages.map(msg => `
+                    <div class="message-item">
+                        <div class="message-header">
+                            <div class="message-info">
+                                <h4>${msg.name}</h4>
+                                <span class="message-email">${msg.email}</span>
+                            </div>
+                            <div class="message-meta">
+                                <span class="message-date">${this.formatDate(msg.timestamp)}</span>
+                                <button class="delete-btn" onclick="messageManager.deleteMessage(${msg.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="message-subject">
+                            <strong>Subject:</strong> ${msg.subject}
+                        </div>
+                        <div class="message-content">
+                            <p>${msg.message}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            formatDate(timestamp) {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffTime = Math.abs(now - date);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 0) {
+                    return 'Today, ' + date.toLocaleTimeString();
+                } else if (diffDays === 1) {
+                    return 'Yesterday, ' + date.toLocaleTimeString();
+                } else if (diffDays < 7) {
+                    return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric' });
+                } else {
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+            }
+
+            updateStats() {
+                document.getElementById('totalMessages').textContent = this.messages.length;
+                
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const recentCount = this.messages.filter(msg => new Date(msg.timestamp) > weekAgo).length;
+                document.getElementById('recentMessages').textContent = recentCount;
+            }
+        }
+
+        // Initialize Message Manager
+        let messageManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            messageManager = new MessageManager();
+        });
+
+        // Global functions for button clicks
+        function refreshMessages() {
+            messageManager.displayMessages();
+            messageManager.updateStats();
+        }
+
+        function clearAllMessages() {
+            messageManager.clearAll();
+        }
+
+        // Handle form submission from contacts.html
+        if (window.location.search.includes('new_message=true')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = {
+                name: urlParams.get('name'),
+                email: urlParams.get('email'),
+                subject: urlParams.get('subject'),
+                message: urlParams.get('message')
+            };
+            
+            if (message.name && message.email && message.subject && message.message) {
+                messageManager.addMessage(message);
+                // Clear the URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+    </script>
+</body>
+</html>

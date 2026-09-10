@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceED - Where Every Student's Voice Matters</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="user-menu.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <nav class="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="#" id="wellnessBtn">WellnessED</a></li>
+                        <li><a href="#" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn"><i class="fas fa-cog"></i></a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <br><br><br><br>
+
+    <!-- Profile Content -->
+    <main class="profile-main">
+        <div class="container">
+            <div class="profile-header">
+                <h2>My Profile</h2>
+                <p>View and manage your personal information</p>
+            </div>
+
+            <div class="profile-container">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar-section">
+                        <div class="profile-avatar">
+                            <img src="pfp.jpg" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profileUsername">Student</h3>
+                            <p id="profileEmail">student@voiceed.com</p>
+                            <p id="profileMember">Member since <span id="memberSince">Today</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="info-section">
+                    <h3>Personal Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Username</label>
+                            <p id="infoUsername">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <p id="infoEmail">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Birthday</label>
+                            <p id="infoBirthday">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Gender</label>
+                            <p id="infoGender">-</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Account Status</label>
+                            <p class="status-active">Active</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Member Since</label>
+                            <p id="infoMemberSince">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Statistics -->
+                <div class="stats-section">
+                    <h3>Account Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4 id="statLoginCount">0</h4>
+                                <p>Total Logins</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4 id="statLastLogin">Today</h4>
+                                <p>Last Login</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4 id="statAccountAge">New</h4>
+                                <p>Account Age</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>Verified</h4>
+                                <p>Account Status</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                            </div>
+        </div>
+    </main>
+
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu Modal -->
+    <div id="userMenuModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Menu</h2>
+            <div class="user-menu-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3 id="menuUsername">Admin</h3>
+                        <p id="menuEmail">Admin@voiceed.com</p>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="menu-actions">
+                    <button class="user-menu-button" id="profileBtn" onclick="window.location.href='dashboard.html'">
+                        <i class="fas fa-user-circle"></i>
+                        <span>View Profile</span>
+                    </button>
+                    <button class="user-menu-button" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="profile.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+</body>
+</html>

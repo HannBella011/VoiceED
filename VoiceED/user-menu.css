@@ -1,0 +1,121 @@
+/* User Menu Modal Styles */
+#userMenuModal .modal-content {
+    background: #000000;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    max-width: 400px;
+    width: 90%;
+    padding: 2.5rem;
+    position: relative;
+    color: #ffffff;
+    text-align: center;
+}
+
+#userMenuModal h2 {
+    color: var(--accent-cyan);
+    margin: 0 0 2rem;
+    font-size: 2rem;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.7);
+}
+
+.user-info {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+    border: 2px solid var(--accent-cyan);
+}
+
+.user-avatar i {
+    font-size: 2.5rem;
+    color: #1a1a1a;
+}
+
+.user-details h3 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    text-shadow: 0 0 5px rgba(0, 212, 255, 0.4);
+}
+
+.user-details p {
+    color: #cccccc;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.user-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    border: none;
+    border-radius: 10px;
+    color: var(--primary-dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    gap: 0.7rem;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+.user-menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.6);
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+}
+
+.user-menu-button i {
+    font-size: 1.1rem;
+    color: var(--primary-dark);
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #cccccc;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.close-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    transform: scale(1.1);
+}
