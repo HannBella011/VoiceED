@@ -1245,6 +1245,26 @@ body.orange-theme .notification-header {
     }
 }
 
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    color: var(--accent-cyan);
+}
+
+.mobile-menu-btn.active i {
+    transform: rotate(90deg);
+}
+
 @media (max-width: 768px) {
     .dashboard-wrapper {
         grid-template-columns: 1fr;
@@ -1284,6 +1304,10 @@ body.orange-theme .notification-header {
         justify-content: center;
     }
     
+    .mobile-menu-btn {
+        display: block;
+    }
+    
     .header-content {
         flex-direction: row;
         gap: 0.5rem;
@@ -1295,6 +1319,7 @@ body.orange-theme .notification-header {
         flex-direction: row;
         align-items: center;
         gap: 0.5rem;
+        flex: 1;
     }
     
     .logo img {
@@ -1310,16 +1335,42 @@ body.orange-theme .notification-header {
         font-size: 0.7rem;
     }
     
+    .navbar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: rgba(10, 14, 39, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        transform: translateY(-150%);
+        transition: transform 0.3s ease;
+        z-index: 999;
+        box-shadow: var(--shadow-glow);
+    }
+    
+    .navbar.active {
+        transform: translateY(0);
+    }
+    
     .navbar ul {
-        flex-direction: row;
-        gap: 0.3rem;
+        flex-direction: column;
+        gap: 0;
         text-align: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
     }
     
     .nav-links li {
-        font-size: 0.75rem;
+        font-size: 1rem;
+        padding: 0.8rem 0;
+        width: 100%;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: 0.8rem;
+        width: 100%;
     }
     
     .welcome-section {
@@ -1334,6 +1385,14 @@ body.orange-theme .notification-header {
         margin: 1rem;
         max-width: 95%;
         padding: 1.5rem;
+    }
+    
+    .dashboard-card {
+        padding: 1.5rem;
+    }
+    
+    .dashboard-card h3 {
+        font-size: 1.2rem;
     }
 }
 
@@ -1356,9 +1415,18 @@ body.orange-theme .notification-header {
         font-size: 0.6rem;
     }
     
+    .mobile-menu-btn {
+        font-size: 1.2rem;
+        padding: 0.3rem;
+    }
+    
+    .navbar {
+        top: 60px;
+    }
+    
     .nav-links li {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.3rem;
+        font-size: 0.9rem;
+        padding: 0.6rem 0;
     }
     
     .welcome-section h1 {
@@ -1372,6 +1440,14 @@ body.orange-theme .notification-header {
     .user-menu-button {
         padding: 0.6rem;
         font-size: 0.85rem;
+    }
+    
+    .dashboard-card {
+        padding: 1rem;
+    }
+    
+    .dashboard-card h3 {
+        font-size: 1rem;
     }
 }
 

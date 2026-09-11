@@ -1736,8 +1736,32 @@ main .main-content .container .register-container .register-card .signup-btn {
     line-height: 1.6;
 }
 
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    color: var(--accent-cyan);
+}
+
+.mobile-menu-btn.active i {
+    transform: rotate(90deg);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+    
     .header-content {
         flex-direction: row;
         gap: 0.5rem;
@@ -1749,6 +1773,7 @@ main .main-content .container .register-container .register-card .signup-btn {
         flex-direction: row;
         align-items: center;
         gap: 0.5rem;
+        flex: 1;
     }
     
     .logo img {
@@ -1764,16 +1789,42 @@ main .main-content .container .register-container .register-card .signup-btn {
         font-size: 0.7rem;
     }
     
+    .navbar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: rgba(10, 14, 39, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        transform: translateY(-150%);
+        transition: transform 0.3s ease;
+        z-index: 999;
+        box-shadow: var(--shadow-glow);
+    }
+    
+    .navbar.active {
+        transform: translateY(0);
+    }
+    
     .navbar ul {
-        flex-direction: row;
-        gap: 0.3rem;
+        flex-direction: column;
+        gap: 0;
         text-align: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: center;
     }
     
     .nav-links li {
-        font-size: 0.75rem;
+        font-size: 1rem;
+        padding: 0.8rem 0;
+        width: 100%;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: 0.8rem;
+        width: 100%;
     }
     
     .hero-content h2 {
@@ -1782,6 +1833,18 @@ main .main-content .container .register-container .register-card .signup-btn {
     
     .features-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.9rem;
     }
     
     .footer-content {
@@ -1806,6 +1869,7 @@ main .main-content .container .register-container .register-card .signup-btn {
     .register-card {
         padding: 2rem;
         margin: 1rem;
+        max-width: 100%;
     }
     
     .register-info h2 {
@@ -1824,6 +1888,16 @@ main .main-content .container .register-container .register-card .signup-btn {
         margin: 1rem;
         max-width: 95%;
         padding: 1.5rem;
+    }
+    
+    .form-field input,
+    .form-field select {
+        width: 100%;
+    }
+    
+    .signup-btn,
+    .login-button {
+        width: 100%;
     }
 }
 
@@ -1846,9 +1920,18 @@ main .main-content .container .register-container .register-card .signup-btn {
         font-size: 0.6rem;
     }
     
+    .mobile-menu-btn {
+        font-size: 1.2rem;
+        padding: 0.3rem;
+    }
+    
+    .navbar {
+        top: 60px;
+    }
+    
     .nav-links li {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.3rem;
+        font-size: 0.9rem;
+        padding: 0.6rem 0;
     }
     
     .hero-content h2 {
@@ -1873,5 +1956,17 @@ main .main-content .container .register-container .register-card .signup-btn {
     
     .modal-content {
         padding: 1rem;
+    }
+    
+    .feature-card {
+        padding: 1rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 1rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.8rem;
     }
 }
