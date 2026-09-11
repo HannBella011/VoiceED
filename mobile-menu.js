@@ -3,54 +3,81 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const navbar = document.getElementById('navbar');
     
-    // Create backdrop element
-    const backdrop = document.createElement('div');
-    backdrop.className = 'mobile-menu-backdrop';
-    backdrop.style.cssText = `
+    // Create modal wrapper (like login modal) - only for mobile
+    const modalWrapper = document.createElement('div');
+    modalWrapper.className = 'mobile-menu-modal';
+    modalWrapper.style.cssText = `
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
         z-index: 2000;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
     `;
-    document.body.appendChild(backdrop);
+    document.body.appendChild(modalWrapper);
+    
+    // Store original navbar parent for desktop restoration
+    const originalNavbarParent = navbar ? navbar.parentElement : null;
     
     if (mobileMenuBtn && navbar) {
         mobileMenuBtn.addEventListener('click', function() {
-            navbar.classList.toggle('active');
-            mobileMenuBtn.classList.toggle('active');
+            // Check if mobile view
+            const isMobile = window.innerWidth <= 768;
             
-            if (navbar.classList.contains('active')) {
-                backdrop.style.opacity = '1';
-                backdrop.style.visibility = 'visible';
+            if (isMobile) {
+                // Move navbar inside modal wrapper for mobile
+                if (navbar.parentElement !== modalWrapper) {
+                    modalWrapper.appendChild(navbar);
+                }
+                
+                if (modalWrapper.style.display === 'none') {
+                    modalWrapper.style.display = 'block';
+                    navbar.classList.add('active');
+                    mobileMenuBtn.classList.add('active');
+                } else {
+                    modalWrapper.style.display = 'none';
+                    navbar.classList.remove('active');
+                    mobileMenuBtn.classList.remove('active');
+                }
             } else {
-                backdrop.style.opacity = '0';
-                backdrop.style.visibility = 'hidden';
+                // Desktop: just toggle active class for any desktop-specific behavior
+                navbar.classList.toggle('active');
+                mobileMenuBtn.classList.toggle('active');
             }
         });
         
         // Close menu when clicking backdrop
-        backdrop.addEventListener('click', function() {
-            navbar.classList.remove('active');
-            mobileMenuBtn.classList.remove('active');
-            backdrop.style.opacity = '0';
-            backdrop.style.visibility = 'hidden';
+        modalWrapper.addEventListener('click', function(event) {
+            if (event.target === modalWrapper) {
+                modalWrapper.style.display = 'none';
+                navbar.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+            }
         });
         
         // Close menu when clicking on a nav link
         const navLinks = navbar.querySelectorAll('.nav-links a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
+                modalWrapper.style.display = 'none';
                 navbar.classList.remove('active');
                 mobileMenuBtn.classList.remove('active');
-                backdrop.style.opacity = '0';
-                backdrop.style.visibility = 'hidden';
             });
+        });
+        
+        // Handle window resize - restore navbar to original position on desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768 && navbar.parentElement === modalWrapper) {
+                if (originalNavbarParent) {
+                    originalNavbarParent.appendChild(navbar);
+                }
+                modalWrapper.style.display = 'none';
+                navbar.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+            }
         });
     }
 });

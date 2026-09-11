@@ -594,6 +594,20 @@ body {
     box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
 }
 
+.settings-nav-btn {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    color: var(--text-primary) !important;
+    padding: 8px 20px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.settings-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+}
+
 /* Dashboard Styles */
 .dashboard-main {
     padding: 120px 0 80px;
@@ -1911,6 +1925,13 @@ main .main-content .container .register-container .register-card .signup-btn {
         padding: 2.5rem;
         width: auto;
         min-width: 300px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #settingsModal .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .form-field input,
@@ -1992,6 +2013,13 @@ main .main-content .container .register-container .register-card .signup-btn {
         padding: 2rem;
         width: auto;
         min-width: 280px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #settingsModal .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .feature-card {

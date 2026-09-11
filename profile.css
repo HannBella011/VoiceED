@@ -423,6 +423,13 @@ body.pink-theme .profile-main {
         padding: 2.5rem;
         width: auto;
         min-width: 300px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #settingsModal .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .profile-card {
@@ -486,6 +493,13 @@ body.pink-theme .profile-main {
         padding: 2rem;
         width: auto;
         min-width: 280px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #settingsModal .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .user-menu-button {

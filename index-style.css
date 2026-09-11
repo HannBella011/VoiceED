@@ -274,67 +274,31 @@ body {
 }
 
 .settings-nav-btn {
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-cyan);
-    font-size: 1rem;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    color: var(--primary-dark) !important;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: 600;
     transition: all 0.3s ease;
-    margin-right: 0.5rem;
-    position: relative;
-    animation: pulse-glow 2s infinite;
 }
 
 .settings-nav-btn:hover {
-    transform: translateY(-2px) rotate(90deg) scale(1.1);
-    box-shadow: 0 0 25px rgba(0, 212, 255, 0.8);
-    background: rgba(0, 212, 255, 0.3);
-    animation: rotate-glow 1s infinite;
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
 }
 
-.settings-nav-btn::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, var(--accent-cyan), var(--accent-blue), var(--accent-cyan));
-    border-radius: 50%;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+.light-theme .settings-nav-btn {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    color: var(--primary-dark) !important;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
-.settings-nav-btn:hover::before {
-    opacity: 1;
-    animation: border-rotate 2s linear infinite;
-}
-
-@keyframes pulse-glow {
-    0%, 100% {
-        box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
-    }
-}
-
-@keyframes rotate-glow {
-    0% {
-        transform: translateY(-2px) rotate(90deg) scale(1.1);
-    }
-    50% {
-        transform: translateY(-2px) rotate(180deg) scale(1.15);
-    }
-    100% {
-        transform: translateY(-2px) rotate(270deg) scale(1.1);
-    }
+.light-theme .settings-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 168, 204, 0.5);
 }
 
 @keyframes border-rotate {
@@ -1263,9 +1227,9 @@ body.pink-theme {
 }
 
 .services-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
     margin-bottom: 3rem;
 }
 
@@ -2896,6 +2860,13 @@ body.orange-theme .notification-header {
         padding: 2.5rem;
         width: auto;
         min-width: 300px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #settingsModal .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .notification {
@@ -2984,7 +2955,6 @@ body.orange-theme .notification-header {
     .about-section-content p {
         font-size: 0.95rem;
         line-height: 1.7;
-        text-align: justify;
     }
     
     .about-key-points {
@@ -3013,9 +2983,6 @@ body.orange-theme .notification-header {
     
     .services-container {
         gap: 1.5rem;
-        max-height: calc(100vh - 300px);
-        overflow-y: auto;
-        padding-bottom: 2rem;
     }
     
     .service-box {
@@ -3026,10 +2993,18 @@ body.orange-theme .notification-header {
         font-size: 1.4rem;
     }
     
+    .service-header .service-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .service-header .service-icon i {
+        font-size: 1.5rem;
+    }
+    
     .service-details p {
         font-size: 0.95rem;
         line-height: 1.7;
-        text-align: justify;
     }
     
     .service-features {
@@ -3042,22 +3017,36 @@ body.orange-theme .notification-header {
     }
     
     .emergency-sub-container {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .emergency-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
     
     .emergency-header h4 {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
+    }
+    
+    .emergency-icon {
+        font-size: 1.5rem;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
     }
     
     .emergency-content ul {
-        gap: 0.6rem;
+        gap: 1rem;
     }
     
     .emergency-content li {
-        font-size: 0.9rem;
-        line-height: 1.6;
-        text-align: justify;
+        font-size: 1rem;
+        line-height: 1.8;
+        padding: 0.5rem 0;
     }
     
     .emergency-horizontal-container {
@@ -3130,6 +3119,13 @@ body.orange-theme .notification-header {
         padding: 2rem;
         width: auto;
         min-width: 280px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    #settingsModal .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
     }
     
     .form-field input,
@@ -3178,7 +3174,6 @@ body.orange-theme .notification-header {
     .about-section-content p {
         font-size: 0.9rem;
         line-height: 1.6;
-        text-align: justify;
     }
     
     .about-key-point {
@@ -3194,10 +3189,18 @@ body.orange-theme .notification-header {
         font-size: 1.2rem;
     }
     
+    .service-header .service-icon {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .service-header .service-icon i {
+        font-size: 1.4rem;
+    }
+    
     .service-details p {
         font-size: 0.9rem;
         line-height: 1.6;
-        text-align: justify;
     }
     
     .feature-item {
@@ -3206,17 +3209,36 @@ body.orange-theme .notification-header {
     }
     
     .emergency-sub-container {
-        padding: 1.2rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .emergency-header {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 1.5rem;
     }
     
     .emergency-header h4 {
-        font-size: 1.1rem;
+        font-size: 1.3rem;
+    }
+    
+    .emergency-icon {
+        font-size: 1.4rem;
+        width: 55px;
+        height: 55px;
+        flex-shrink: 0;
+    }
+    
+    .emergency-content ul {
+        gap: 0.9rem;
     }
     
     .emergency-content li {
-        font-size: 0.85rem;
-        line-height: 1.5;
-        text-align: justify;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        padding: 0.4rem 0;
     }
     
     .services-welcome h2 {
