@@ -1492,7 +1492,7 @@ body.orange-theme .notification-header {
     .card-content p {
         font-size: 0.95rem;
         line-height: 1.7;
-        text-align: justify;
+        text-align: center;
     }
     
     .profile-info {
@@ -1677,7 +1677,7 @@ body.orange-theme .notification-header {
     .card-content p {
         font-size: 0.9rem;
         line-height: 1.6;
-        text-align: justify;
+        text-align: center;
     }
     
     .profile-info {
