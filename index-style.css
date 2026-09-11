@@ -2803,59 +2803,72 @@ body.orange-theme .notification-header {
     }
     
     .logo img {
-        width: 70px;
-        height: 70px;
+        width: 80px;
+        height: 80px;
     }
     
     .brand-text h1 {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
     }
     
     .brand-text p {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
     }
     
     .navbar {
         position: fixed;
-        top: 90px;
-        left: 0;
-        right: 0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
         background: rgba(10, 14, 39, 0.98);
         backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        transform: translateY(-150%);
-        transition: transform 0.3s ease;
+        padding: 2rem;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 400px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
         z-index: 999;
-        box-shadow: var(--shadow-glow);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 2px solid rgba(0, 212, 255, 0.3);
     }
     
     .navbar.active {
-        transform: translateY(0);
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        visibility: visible;
     }
     
     .navbar ul {
         flex-direction: column;
-        gap: 0;
+        gap: 0.5rem;
         text-align: center;
         flex-wrap: nowrap;
         justify-content: center;
     }
     
     .nav-links li {
-        font-size: 1.1rem;
-        padding: 1rem 0;
+        font-size: 1.2rem;
+        padding: 0.8rem 0;
         width: 100%;
     }
     
     .nav-links a {
         display: block;
-        padding: 1rem;
+        padding: 0.8rem;
         width: 100%;
+        border-radius: 8px;
+        transition: background 0.3s ease;
     }
     
-    /* Hide settings button on mobile */
+    .nav-links a:hover {
+        background: rgba(0, 212, 255, 0.1);
+    }
+    
+    /* Settings button visible on mobile */
     .settings-nav-btn {
-        display: none !important;
+        display: block !important;
     }
     
     .dashboard-grid {
@@ -2938,14 +2951,33 @@ body.orange-theme .notification-header {
     
     .about-section {
         padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
     }
     
     .about-section-header {
         margin-bottom: 1rem;
+        order: 1;
+    }
+    
+    .about-header-content {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    
+    .about-header-icon {
+        order: 1;
+        font-size: 1.5rem;
     }
     
     .about-header-title {
+        order: 2;
         font-size: 1.3rem;
+    }
+    
+    .about-section-content {
+        order: 2;
     }
     
     .about-section-content p {
@@ -2955,6 +2987,7 @@ body.orange-theme .notification-header {
     
     .about-key-points {
         gap: 0.5rem;
+        order: 3;
     }
     
     .about-key-point {
@@ -2962,8 +2995,25 @@ body.orange-theme .notification-header {
         padding: 0.6rem;
     }
     
+    .services-welcome h2 {
+        font-size: 1.5rem;
+    }
+    
+    .services-welcome p {
+        font-size: 0.9rem;
+    }
+    
+    /* Make Services and Contact behave like Home - no page scrolling */
+    .services-main {
+        min-height: calc(100vh - 150px);
+        overflow-y: auto;
+    }
+    
     .services-container {
         gap: 1.5rem;
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+        padding-bottom: 2rem;
     }
     
     .service-box {
@@ -3027,16 +3077,16 @@ body.orange-theme .notification-header {
     }
     
     .logo img {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
     }
     
     .brand-text h1 {
-        font-size: 1.3rem;
+        font-size: 1.6rem;
     }
     
     .brand-text p {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
     
     .mobile-menu-btn {
@@ -3045,16 +3095,17 @@ body.orange-theme .notification-header {
     }
     
     .navbar {
-        top: 80px;
+        width: 95%;
+        padding: 1.5rem;
     }
     
     .nav-links li {
-        font-size: 1rem;
-        padding: 0.9rem 0;
+        font-size: 1.1rem;
+        padding: 0.7rem 0;
     }
     
     .nav-links a {
-        padding: 0.9rem;
+        padding: 0.7rem;
     }
     
     .hero h1 {
