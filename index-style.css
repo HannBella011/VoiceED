@@ -2925,36 +2925,50 @@ body.orange-theme .notification-header {
         display: flex;
         flex-direction: column;
         max-width: 100%;
+        overflow: hidden;
     }
     
     .about-section-header {
         margin-bottom: 1rem;
         order: 1;
+        padding: 1.5rem;
     }
     
     .about-header-content {
         display: flex;
+        flex-direction: column;
         align-items: center;
         gap: 0.8rem;
+        text-align: center;
     }
     
     .about-header-icon {
         order: 1;
         font-size: 1.8rem;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
     }
     
     .about-header-title {
         order: 2;
         font-size: 1.4rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .about-section-content {
         order: 2;
+        padding: 1.5rem;
+        overflow: hidden;
     }
     
     .about-section-content p {
         font-size: 0.95rem;
         line-height: 1.7;
+        text-align: justify;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .about-key-points {
@@ -2987,24 +3001,44 @@ body.orange-theme .notification-header {
     
     .service-box {
         padding: 2rem;
+        overflow: hidden;
     }
     
     .service-header h3 {
         font-size: 1.4rem;
     }
     
+    .service-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
     .service-header .service-icon {
         width: 60px;
         height: 60px;
+        margin-right: 0;
+        margin-bottom: 0;
+        flex-shrink: 0;
     }
     
     .service-header .service-icon i {
         font-size: 1.5rem;
     }
     
+    .service-details {
+        padding: 1.5rem;
+        overflow: hidden;
+    }
+    
     .service-details p {
         font-size: 0.95rem;
         line-height: 1.7;
+        text-align: justify;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .service-features {
@@ -3019,6 +3053,7 @@ body.orange-theme .notification-header {
     .emergency-sub-container {
         padding: 2.5rem;
         margin-bottom: 2.5rem;
+        overflow: hidden;
     }
     
     .emergency-header {
@@ -3030,6 +3065,8 @@ body.orange-theme .notification-header {
     
     .emergency-header h4 {
         font-size: 1.4rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .emergency-icon {
@@ -3037,6 +3074,10 @@ body.orange-theme .notification-header {
         width: 60px;
         height: 60px;
         flex-shrink: 0;
+    }
+    
+    .emergency-content {
+        overflow: hidden;
     }
     
     .emergency-content ul {
@@ -3047,6 +3088,18 @@ body.orange-theme .notification-header {
         font-size: 1rem;
         line-height: 1.8;
         padding: 0.5rem 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .service-details p:nth-child(2) {
+        text-align: left !important;
+    }
+    
+    .emergency-sub-container {
+        padding: 3rem;
+        margin-bottom: 3rem;
+        min-height: 750px;
     }
     
     .emergency-horizontal-container {
@@ -3161,19 +3214,41 @@ body.orange-theme .notification-header {
     /* About, Services, Contact mobile fixes for 480px */
     .about-section {
         padding: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .about-header-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+        text-align: center;
     }
     
     .about-header-title {
         font-size: 1.2rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .about-header-icon {
         font-size: 1.5rem;
+        width: 55px;
+        height: 55px;
+        flex-shrink: 0;
+    }
+    
+    .about-section-content {
+        padding: 1.2rem;
+        overflow: hidden;
     }
     
     .about-section-content p {
         font-size: 0.9rem;
         line-height: 1.6;
+        text-align: justify;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .about-key-point {
@@ -3183,24 +3258,44 @@ body.orange-theme .notification-header {
     
     .service-box {
         padding: 1.5rem;
+        overflow: hidden;
     }
     
     .service-header h3 {
         font-size: 1.2rem;
     }
     
+    .service-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.2rem;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
     .service-header .service-icon {
         width: 55px;
         height: 55px;
+        margin-right: 0;
+        margin-bottom: 0;
+        flex-shrink: 0;
     }
     
     .service-header .service-icon i {
         font-size: 1.4rem;
     }
     
+    .service-details {
+        padding: 1.2rem;
+        overflow: hidden;
+    }
+    
     .service-details p {
         font-size: 0.9rem;
         line-height: 1.6;
+        text-align: justify;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .feature-item {
@@ -3209,8 +3304,9 @@ body.orange-theme .notification-header {
     }
     
     .emergency-sub-container {
-        padding: 2rem;
+        padding: 0rem;
         margin-bottom: 2rem;
+        overflow: hidden;
     }
     
     .emergency-header {
@@ -3222,6 +3318,8 @@ body.orange-theme .notification-header {
     
     .emergency-header h4 {
         font-size: 1.3rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .emergency-icon {
@@ -3229,6 +3327,10 @@ body.orange-theme .notification-header {
         width: 55px;
         height: 55px;
         flex-shrink: 0;
+    }
+    
+    .emergency-content {
+        overflow: hidden;
     }
     
     .emergency-content ul {
@@ -3239,6 +3341,20 @@ body.orange-theme .notification-header {
         font-size: 0.95rem;
         line-height: 1.7;
         padding: 0.4rem 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .service-details p:nth-child(2) {
+        text-align: left !important;
+    }
+    
+    .emergency-sub-container {
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        min-height: 700px;
+        width: 119%;
+        margin-left: -10%;
     }
     
     .services-welcome h2 {
