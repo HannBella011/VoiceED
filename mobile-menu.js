@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.7);
-        z-index: 998;
+        z-index: 2000;
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s ease;
