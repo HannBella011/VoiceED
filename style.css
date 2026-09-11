@@ -1777,21 +1777,21 @@ main .main-content .container .register-container .register-card .signup-btn {
     }
     
     .logo img {
-        width: 50px;
-        height: 50px;
+        width: 70px;
+        height: 70px;
     }
     
     .brand-text h1 {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
     }
     
     .brand-text p {
-        font-size: 0.7rem;
+        font-size: 0.85rem;
     }
     
     .navbar {
         position: fixed;
-        top: 70px;
+        top: 90px;
         left: 0;
         right: 0;
         background: rgba(10, 14, 39, 0.98);
@@ -1816,15 +1816,20 @@ main .main-content .container .register-container .register-card .signup-btn {
     }
     
     .nav-links li {
-        font-size: 1rem;
-        padding: 0.8rem 0;
+        font-size: 1.1rem;
+        padding: 1rem 0;
         width: 100%;
     }
     
     .nav-links a {
         display: block;
-        padding: 0.8rem;
+        padding: 1rem;
         width: 100%;
+    }
+    
+    /* Hide settings button on mobile */
+    .settings-nav-btn {
+        display: none !important;
     }
     
     .hero-content h2 {
@@ -1885,9 +1890,14 @@ main .main-content .container .register-container .register-card .signup-btn {
     }
     
     .modal-content {
-        margin: 1rem;
-        max-width: 95%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        max-width: 90%;
         padding: 1.5rem;
+        width: auto;
     }
     
     .form-field input,
@@ -1903,35 +1913,39 @@ main .main-content .container .register-container .register-card .signup-btn {
 
 @media (max-width: 480px) {
     .header-content {
-        padding: 0.3rem 0;
-        gap: 0.3rem;
+        padding: 0.5rem 0;
+        gap: 0.5rem;
     }
     
     .logo img {
-        width: 40px;
-        height: 40px;
+        width: 60px;
+        height: 60px;
     }
     
     .brand-text h1 {
-        font-size: 1rem;
+        font-size: 1.3rem;
     }
     
     .brand-text p {
-        font-size: 0.6rem;
+        font-size: 0.75rem;
     }
     
     .mobile-menu-btn {
-        font-size: 1.2rem;
-        padding: 0.3rem;
+        font-size: 1.3rem;
+        padding: 0.5rem;
     }
     
     .navbar {
-        top: 60px;
+        top: 80px;
     }
     
     .nav-links li {
-        font-size: 0.9rem;
-        padding: 0.6rem 0;
+        font-size: 1rem;
+        padding: 0.9rem 0;
+    }
+    
+    .nav-links a {
+        padding: 0.9rem;
     }
     
     .hero-content h2 {
@@ -1955,7 +1969,14 @@ main .main-content .container .register-container .register-card .signup-btn {
     }
     
     .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        max-width: 95%;
         padding: 1rem;
+        width: auto;
     }
     
     .feature-card {
