@@ -337,11 +337,11 @@ body.pink-theme .profile-main {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%) scale(0.9);
+        transform: translate(-50%, -50%);
         background: rgba(10, 14, 39, 0.98);
         backdrop-filter: blur(10px);
-        padding: 2rem;
-        border-radius: 15px;
+        padding: 2.5rem;
+        border-radius: 20px;
         width: 90%;
         max-width: 400px;
         opacity: 0;
@@ -349,11 +349,10 @@ body.pink-theme .profile-main {
         transition: all 0.3s ease;
         z-index: 999;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        border: 2px solid rgba(0, 212, 255, 0.3);
+        border: 1px solid rgba(0, 212, 255, 0.3);
     }
     
     .navbar.active {
-        transform: translate(-50%, -50%) scale(1);
         opacity: 1;
         visibility: visible;
     }
@@ -421,8 +420,9 @@ body.pink-theme .profile-main {
         transform: translate(-50%, -50%);
         margin: 0;
         max-width: 90%;
-        padding: 1.5rem;
+        padding: 2.5rem;
         width: auto;
+        min-width: 300px;
     }
     
     .profile-card {
@@ -483,8 +483,9 @@ body.pink-theme .profile-main {
         transform: translate(-50%, -50%);
         margin: 0;
         max-width: 95%;
-        padding: 1rem;
+        padding: 2rem;
         width: auto;
+        min-width: 280px;
     }
     
     .user-menu-button {
