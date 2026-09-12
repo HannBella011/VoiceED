@@ -1919,10 +1919,24 @@ body.pink-theme {
 }
 
 .footer-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
     margin-bottom: 2rem;
+}
+
+.footer-top-row {
+    display: flex;
+    gap: 2rem;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-section.credentials-section {
+    width: 100%;
 }
 
 .footer-section h3,
@@ -1998,20 +2012,20 @@ body.pink-theme {
 
 .founders-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
     margin-top: 1rem;
 }
 
 .founders-grid,
 .fellows-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-top: 1rem;
 }
 
 .founders-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .fellows-grid {
@@ -2023,24 +2037,17 @@ body.pink-theme {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    border: 1px solid rgba(0, 212, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-.founder-card:hover,
-.fellow-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-cyan);
-    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    transition: none;
 }
 
 .founder-image,
 .fellow-image {
-    width: 100px;
-    height: 100px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--accent-cyan);
@@ -2051,7 +2058,7 @@ body.pink-theme {
 .founder-name,
 .fellow-name {
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 0.3rem;
     text-align: center;
@@ -2060,10 +2067,13 @@ body.pink-theme {
 .founder-title,
 .fellow-title {
     color: var(--accent-cyan);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 500;
     margin: 0;
-    text-align: center;
+    text-align: center !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 220px;
 }
 
 /* Main Content Styles */
@@ -2981,35 +2991,43 @@ body.orange-theme .notification-header {
         flex-direction: column;
     }
     
+    .footer-top-row {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
     .footer-section {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
     }
     
     /* Credentials section mobile styles */
     .founders-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
     .fellows-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
     .founder-image,
     .fellow-image {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
     }
     
     .founder-name,
     .fellow-name {
-        font-size: 0.85rem;
+        font-size: 1rem;
     }
     
     .founder-title,
     .fellow-title {
         font-size: 0.75rem;
+        max-width: 180px;
+        text-align: center !important;
     }
     
     .cta-button {
@@ -3474,24 +3492,26 @@ body.orange-theme .notification-header {
     }
     
     .fellows-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.8rem;
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
     
     .founder-image,
     .fellow-image {
-        width: 70px;
-        height: 70px;
+        width: 90px;
+        height: 90px;
     }
     
     .founder-name,
     .fellow-name {
-        font-size: 0.8rem;
+        font-size: 0.95rem;
     }
     
     .founder-title,
     .fellow-title {
         font-size: 0.7rem;
+        max-width: 160px;
+        text-align: center !important;
     }
 }
 
