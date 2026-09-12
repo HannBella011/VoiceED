@@ -1716,6 +1716,162 @@ body.orange-theme .notification-header {
     .dashboard-card h3 {
         font-size: 1rem;
     }
+    
+    /* Credentials section mobile styles for 480px */
+    .founders-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .fellows-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+    
+    .founder-image,
+    .fellow-image {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .founder-name,
+    .fellow-name {
+        font-size: 0.8rem;
+    }
+    
+    .founder-title,
+    .fellow-title {
+        font-size: 0.7rem;
+    }
+}
+
+/* Footer Styles */
+.footer {
+    background: rgba(10, 10, 31, 0.9);
+    padding: 3rem 0 1rem;
+    border-top: 1px solid var(--border-glow);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: var(--accent-cyan);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.footer-section p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.footer-section ul {
+    list-style: none;
+    text-align: center;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+    color: var(--accent-cyan);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+/* Credentials Section Styles */
+.credentials-section {
+    text-align: center;
+}
+
+.founders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.founders-grid,
+.fellows-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.founders-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.fellows-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.founder-card,
+.fellow-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.founder-card:hover,
+.fellow-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+}
+
+.founder-image,
+.fellow-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent-cyan);
+    margin-bottom: 0.8rem;
+    box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);
+}
+
+.founder-name,
+.fellow-name {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+
+.founder-title,
+.fellow-title {
+    color: var(--accent-cyan);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
 }
 
 /* Responsive Design */
@@ -1752,6 +1908,33 @@ body.orange-theme .notification-header {
     
     .link-grid {
         grid-template-columns: 1fr 1fr;
+    }
+    
+    /* Credentials section mobile styles */
+    .founders-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .fellows-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .founder-image,
+    .fellow-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .founder-name,
+    .fellow-name {
+        font-size: 0.85rem;
+    }
+    
+    .founder-title,
+    .fellow-title {
+        font-size: 0.75rem;
     }
 }
 

@@ -430,6 +430,81 @@ body {
     color: var(--text-secondary);
 }
 
+/* Credentials Section Styles */
+.credentials-section {
+    text-align: center;
+}
+
+.founders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.founders-grid,
+.fellows-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.founders-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.fellows-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.founder-card,
+.fellow-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.founder-card:hover,
+.fellow-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+}
+
+.founder-image,
+.fellow-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent-cyan);
+    margin-bottom: 0.8rem;
+    box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);
+}
+
+.founder-name,
+.fellow-name {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+
+.founder-title,
+.fellow-title {
+    color: var(--accent-cyan);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -1883,6 +1958,33 @@ main .main-content .container .register-container .register-card .signup-btn {
         text-align: center;
     }
     
+    /* Credentials section mobile styles */
+    .founders-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .fellows-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .founder-image,
+    .fellow-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .founder-name,
+    .fellow-name {
+        font-size: 0.85rem;
+    }
+    
+    .founder-title,
+    .fellow-title {
+        font-size: 0.75rem;
+    }
+    
     .social-links {
         justify-content: center;
     }
@@ -2032,5 +2134,32 @@ main .main-content .container .register-container .register-card .signup-btn {
     
     .feature-card p {
         font-size: 0.8rem;
+    }
+    
+    /* Credentials section mobile styles for 480px */
+    .founders-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .fellows-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+    
+    .founder-image,
+    .fellow-image {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .founder-name,
+    .fellow-name {
+        font-size: 0.8rem;
+    }
+    
+    .founder-title,
+    .fellow-title {
+        font-size: 0.7rem;
     }
 }
