@@ -231,6 +231,34 @@ body {
     gap: 2rem;
 }
 
+.nav-links a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-links a:hover {
+    color: var(--accent-cyan);
+    transform: translateY(-2px);
+}
+
+.nav-links a.nav-active {
+    color: var(--accent-cyan);
+}
+
+.nav-links a.nav-active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px var(--accent-cyan);
+}
+
 .navbar a {
     color: var(--text-primary);
     text-decoration: none;
@@ -3512,6 +3540,941 @@ body.orange-theme .notification-header {
         font-size: 0.7rem;
         max-width: 160px;
         text-align: center !important;
+    }
+}
+
+/* WellnessED Modern Card Design */
+.wellness-main {
+    padding: 120px 0 80px;
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Theme-based background changes for WellnessED */
+body.pink-theme .wellness-main {
+    background-image: url('bg5.png');
+}
+
+body.purple-theme .wellness-main {
+    background-image: url('bg1.png');
+}
+
+body.red-theme .wellness-main {
+    background-image: url('bg2.png');
+}
+
+body.green-theme .wellness-main {
+    background-image: url('bg3.png');
+}
+
+body.orange-theme .wellness-main {
+    background-image: url('bg4.png');
+}
+
+body.blue-theme .wellness-main {
+    background-image: url('bg.png');
+}
+
+.wellness-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.wellness-hero h2 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.wellness-hero p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.wellness-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.wellness-card {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.4);
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.activity-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.activity-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3);
+    border-color: rgba(0, 212, 255, 0.6);
+}
+
+.card-description {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.card-link {
+    color: var(--accent-cyan);
+    font-size: 1rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.activity-card:hover .card-link {
+    gap: 0.75rem;
+}
+
+.back-button-container {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.breathing-steps {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.breathing-steps li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 212, 255, 0.05);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-primary);
+}
+
+.breathing-steps li strong {
+    color: var(--accent-cyan);
+}
+
+/* Journal Styles */
+.journal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.journal-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.journal-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+.journal-textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.journal-entries {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.journal-entry {
+    background: rgba(0, 212, 255, 0.05);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.journal-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.journal-entry-date {
+    color: var(--accent-cyan);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.journal-entry-mood {
+    font-size: 1.5rem;
+}
+
+.journal-entry-content {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+}
+
+.card-header h3 {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Breathing Exercise Card */
+.breathing-circle-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.breathing-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 168, 204, 0.1));
+    border: 3px solid rgba(0, 212, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 4s ease-in-out;
+}
+
+.breathing-text {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.breathing-info {
+    text-align: center;
+}
+
+.breathing-phase {
+    color: var(--accent-cyan);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.breathing-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Mood Tracker Card */
+.card-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.mood-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.mood-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 212, 255, 0.08);
+    border: 2px solid rgba(0, 212, 255, 0.2);
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mood-btn:hover {
+    background: rgba(0, 212, 255, 0.15);
+    transform: scale(1.1);
+    border-color: rgba(0, 212, 255, 0.4);
+}
+
+.mood-log {
+    margin-top: 1rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.log-empty {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.mood-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(0, 212, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.mood-entry-emoji {
+    font-size: 1.5rem;
+}
+
+.mood-entry-time {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Daily Goals Card */
+.goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.goal-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.goal-item:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.goal-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent-cyan);
+}
+
+.goal-text {
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.goals-progress {
+    margin-top: 1.5rem;
+}
+
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Focus Timer Card */
+.timer-display {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    margin: 1rem 0;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+}
+
+.timer-presets {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.preset-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: rgba(0, 212, 255, 0.08);
+    border: 2px solid rgba(0, 212, 255, 0.2);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preset-btn:hover {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.4);
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.wellness-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    color: var(--primary-dark);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+}
+
+.secondary-btn {
+    background: rgba(0, 212, 255, 0.15);
+    color: var(--text-primary);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+}
+
+.secondary-btn:hover {
+    background: rgba(0, 212, 255, 0.25);
+}
+
+.outline-btn {
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+}
+
+.outline-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wellness-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wellness-hero h2 {
+        font-size: 2rem;
+    }
+    
+    .breathing-circle {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .timer-display {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wellness-card {
+        padding: 1.5rem;
+    }
+    
+    .breathing-circle {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .mood-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.5rem;
+    }
+    
+    .timer-display {
+        font-size: 2rem;
+    }
+}
+
+/* WellnessED Specific Styles - Legacy */
+.wellness-content {
+    padding: 1.5rem;
+}
+
+.wellness-content h4 {
+    color: var(--accent-cyan);
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.5rem 0;
+    font-weight: 600;
+}
+
+.wellness-content h4:first-child {
+    margin-top: 0;
+}
+
+.wellness-content p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.wellness-content ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1rem;
+}
+
+.wellness-content ul li {
+    color: var(--text-secondary);
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    line-height: 1.6;
+}
+
+.wellness-content ul li:before {
+    content: "•";
+    color: var(--accent-cyan);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.wellness-content strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.wellness-tip {
+    background: rgba(0, 212, 255, 0.05);
+    border-left: 3px solid var(--accent-cyan);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.wellness-tip h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--accent-cyan);
+    font-size: 1rem;
+}
+
+.wellness-tip p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Breathing Exercise Styles */
+.breathing-exercise {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem;
+}
+
+.breathing-circle {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 168, 204, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 4s ease-in-out;
+    margin-bottom: 2rem;
+    border: 3px solid rgba(0, 212, 255, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.breathing-text {
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.breathing-controls {
+    margin-bottom: 1.5rem;
+}
+
+.breathing-instruction {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-align: center;
+    max-width: 400px;
+}
+
+/* Mood Tracker Styles */
+.mood-tracker {
+    padding: 2rem;
+}
+
+.mood-question {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.mood-options {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.mood-btn {
+    background: rgba(0, 212, 255, 0.08);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 100px;
+}
+
+.mood-btn:hover {
+    background: rgba(0, 212, 255, 0.15);
+    transform: translateY(-2px);
+    border-color: rgba(0, 212, 255, 0.5);
+}
+
+.mood-emoji {
+    font-size: 2.5rem;
+}
+
+.mood-label {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.mood-history {
+    margin-top: 1.5rem;
+}
+
+.mood-history h4 {
+    color: var(--accent-cyan);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mood-history-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.mood-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 212, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.mood-entry-emoji {
+    font-size: 1.5rem;
+}
+
+.mood-entry-time {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.no-moods {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Wellness Checklist Styles */
+.wellness-checklist {
+    padding: 2rem;
+}
+
+.checklist-item {
+    margin-bottom: 1.25rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    cursor: pointer;
+    padding: 1rem;
+    border-radius: 12px;
+    transition: background 0.3s ease;
+}
+
+.checkbox-label:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.checkbox-custom {
+    width: 28px;
+    height: 28px;
+    border: 2px solid rgba(0, 212, 255, 0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.checkbox-custom:before {
+    content: '✓';
+    color: var(--text-primary);
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wellness-checkbox {
+    display: none;
+}
+
+.wellness-checkbox:checked + .checkbox-custom {
+    background: rgba(0, 212, 255, 0.3);
+    border-color: rgba(0, 212, 255, 0.6);
+}
+
+.wellness-checkbox:checked + .checkbox-custom:before {
+    opacity: 1;
+}
+
+.checklist-text {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+}
+
+.checklist-progress {
+    margin-top: 2.5rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.6), rgba(0, 168, 204, 0.4));
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-text {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Meditation Timer Styles */
+.meditation-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem;
+}
+
+.timer-display {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.timer-btn {
+    background: rgba(0, 212, 255, 0.08);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timer-btn:hover {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.timer-actions {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.timer-instruction {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-align: center;
+    max-width: 400px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wellness-content {
+        padding: 1rem;
+    }
+    
+    .wellness-content h4 {
+        font-size: 1rem;
+    }
+    
+    .wellness-tip {
+        padding: 0.75rem 1rem;
+    }
+    
+    .breathing-circle {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .breathing-text {
+        font-size: 1.5rem;
+    }
+    
+    .mood-options {
+        gap: 1rem;
+    }
+    
+    .mood-btn {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .mood-emoji {
+        font-size: 2rem;
+    }
+    
+    .timer-display {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wellness-content h4 {
+        font-size: 0.95rem;
+    }
+    
+    .wellness-content p,
+    .wellness-content ul li {
+        font-size: 0.9rem;
+    }
+    
+    .breathing-circle {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .breathing-text {
+        font-size: 1.3rem;
+    }
+    
+    .timer-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .timer-btn {
+        width: 100%;
+    }
+    
+    .timer-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .timer-actions .cta-button {
+        width: 100%;
     }
 }
 

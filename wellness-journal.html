@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellness Journal - VoiceED</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html" class="dashboard-nav-link">Dashboard</a></li>
+                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="wellnessED.html" class="nav-active">WellnessED</a></li>
+                        <li><a href="#" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Wellness Journal Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <div class="wellness-hero">
+                <h2>Wellness Journal</h2>
+                <p>Write and reflect on your thoughts, feelings, and daily experiences</p>
+            </div>
+
+            <div class="wellness-grid">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-pen"></i>
+                        </div>
+                        <h3>New Entry</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="journal-form">
+                            <div class="form-group">
+                                <label for="journalDate">Date</label>
+                                <input type="date" id="journalDate" class="journal-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="journalMood">How are you feeling?</label>
+                                <select id="journalMood" class="journal-input">
+                                    <option value="great">😊 Great</option>
+                                    <option value="good">🙂 Good</option>
+                                    <option value="okay">😐 Okay</option>
+                                    <option value="bad">😔 Bad</option>
+                                    <option value="terrible">😢 Terrible</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="journalContent">Your thoughts...</label>
+                                <textarea id="journalContent" class="journal-input journal-textarea" rows="6" placeholder="Write about your day, your feelings, or anything on your mind..."></textarea>
+                            </div>
+                            <button class="wellness-btn primary-btn" id="saveJournal">Save Entry</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>Recent Entries</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="journal-entries" id="journalEntries">
+                            <p class="log-empty">No journal entries yet. Start writing!</p>
+                        </div>
+                        <button class="wellness-btn outline-btn" id="clearJournal" style="margin-top: 1rem;">Clear All Entries</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-button-container">
+                <a href="wellnessED.html" class="wellness-btn outline-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h4>About VoiceED</h4>
+                        <p>VoiceED is a student-focused platform designed to support mental health, safety, and academic success.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="dashboard.html">Dashboard</a></li>
+                            <li><a href="wellnessED.html">WellnessED</a></li>
+                            <li><a href="contacts.html">Emergency Contacts</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-top-row">
+                    <div class="footer-section credentials-section">
+                        <h4>Founders</h4>
+                        <div class="founders-grid">
+                            <div class="founder-card">
+                                <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                                <p class="founder-name">Hannah Bella C. Atay</p>
+                                <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                            </div>
+                            <div class="founder-card">
+                                <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                                <p class="founder-name">John Erwin F. Cadiz</p>
+                                <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-section credentials-section">
+                        <h4>Millennium Fellows</h4>
+                        <div class="fellows-grid">
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                                <p class="fellow-name">Hannah A. Hontiveros</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                                <p class="fellow-name">Jason James E. Azcona</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                                <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                                <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 VoiceED. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="particles.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+    <script>
+        // Wellness Journal
+        const journalDate = document.getElementById('journalDate');
+        const journalMood = document.getElementById('journalMood');
+        const journalContent = document.getElementById('journalContent');
+        const saveJournalBtn = document.getElementById('saveJournal');
+        const clearJournalBtn = document.getElementById('clearJournal');
+        const journalEntries = document.getElementById('journalEntries');
+        
+        let journals = JSON.parse(localStorage.getItem('wellness_journals') || '[]');
+
+        // Set today's date as default
+        journalDate.value = new Date().toISOString().split('T')[0];
+
+        const moodEmojis = {
+            'great': '😊',
+            'good': '🙂',
+            'okay': '😐',
+            'bad': '😔',
+            'terrible': '😢'
+        };
+
+        function displayJournals() {
+            if (journals.length === 0) {
+                journalEntries.innerHTML = '<p class="log-empty">No journal entries yet. Start writing!</p>';
+                return;
+            }
+            
+            journalEntries.innerHTML = journals.map(j => `
+                <div class="journal-entry">
+                    <div class="journal-entry-header">
+                        <span class="journal-entry-date">${j.date}</span>
+                        <span class="journal-entry-mood">${moodEmojis[j.mood] || ''}</span>
+                    </div>
+                    <p class="journal-entry-content">${j.content}</p>
+                </div>
+            `).join('');
+        }
+
+        saveJournalBtn.addEventListener('click', () => {
+            const entry = {
+                date: journalDate.value,
+                mood: journalMood.value,
+                content: journalContent.value,
+                timestamp: new Date().toISOString()
+            };
+
+            if (!entry.content.trim()) {
+                alert('Please write something in your journal entry.');
+                return;
+            }
+
+            journals.unshift(entry);
+            if (journals.length > 10) journals.pop();
+            localStorage.setItem('wellness_journals', JSON.stringify(journals));
+            
+            journalContent.value = '';
+            displayJournals();
+        });
+
+        clearJournalBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all journal entries?')) {
+                journals = [];
+                localStorage.setItem('wellness_journals', JSON.stringify(journals));
+                displayJournals();
+            }
+        });
+
+        displayJournals();
+    </script>
+</body>
+</html>

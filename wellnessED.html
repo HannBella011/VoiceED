@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceED - WellnessED</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="wellnessED.html" class="nav-active">WellnessED</a></li>
+                        <li><a href="#" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- WellnessED Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <div class="wellness-hero">
+                <h2>WellnessED</h2>
+                <p>Your personal wellness companion for balanced student life</p>
+            </div>
+
+            <div class="wellness-grid">
+                <!-- Breathing Exercise Card -->
+                <a href="breathing.html" class="wellness-card activity-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <h3>Breathing Exercise</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Practice guided breathing exercises to reduce stress and improve focus.</p>
+                        <span class="card-link">Start Exercise <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <!-- Mood Tracker Card -->
+                <a href="mood-tracker.html" class="wellness-card activity-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Mood Tracker</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Track your daily mood and emotional patterns for better self-awareness.</p>
+                        <span class="card-link">Track Mood <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <!-- Daily Goals Card -->
+                <a href="daily-goals.html" class="wellness-card activity-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h3>Daily Goals</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Set and track daily wellness goals to build healthy habits.</p>
+                        <span class="card-link">Set Goals <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <!-- Focus Timer Card -->
+                <a href="focus-timer.html" class="wellness-card activity-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <h3>Focus Timer</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Use the Pomodoro technique to boost productivity and manage study time.</p>
+                        <span class="card-link">Start Timer <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <!-- Meditation Card -->
+                <a href="meditation.html" class="wellness-card activity-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-spa"></i>
+                        </div>
+                        <h3>Meditation</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Guided meditation sessions for relaxation and mental clarity.</p>
+                        <span class="card-link">Start Meditation <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <!-- Wellness Journal Card -->
+                <a href="wellness-journal.html" class="wellness-card activity-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3>Wellness Journal</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Write and reflect on your thoughts, feelings, and daily experiences.</p>
+                        <span class="card-link">Write Journal <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h3>VoiceED Description</h3>
+                        <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="services.html">Services</a></li>
+                            <li><a href="contacts.html">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Founders & Campus Directors</h4>
+                    <div class="founders-grid">
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <p class="founder-name">Junie Jebreel M. Botawan II</p>
+                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                            <p class="founder-name">Hannah Bella C. Atay</p>
+                            <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                            <p class="founder-name">John Erwin F. Cadiz</p>
+                            <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Millennium Fellows</h4>
+                    <div class="fellows-grid">
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                            <p class="fellow-name">Hannah A. Hontiveros</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                            <p class="fellow-name">Jason James E. Azcona</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                            <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VoiceED. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu Modal -->
+    <div id="userMenuModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Menu</h2>
+            <div class="user-menu-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3 id="menuUsername">Admin</h3>
+                        <p id="menuEmail">Admin@voiceed.com</p>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="menu-actions">
+                    <button class="user-menu-button" id="profileBtn" onclick="window.location.href='profile.html'">
+                        <i class="fas fa-user-circle"></i>
+                        <span>View Profile</span>
+                    </button>
+                    <button class="user-menu-button" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="particles.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+</body>
+</html>

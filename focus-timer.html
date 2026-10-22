@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer - VoiceED</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html" class="dashboard-nav-link">Dashboard</a></li>
+                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="wellnessED.html" class="nav-active">WellnessED</a></li>
+                        <li><a href="#" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Focus Timer Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <div class="wellness-hero">
+                <h2>Focus Timer</h2>
+                <p>Use the Pomodoro technique to boost productivity and manage study time</p>
+            </div>
+
+            <div class="wellness-grid">
+                <div class="wellness-card timer-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <h3>Pomodoro Timer</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="timer-display" id="timerDisplay">25:00</div>
+                        <div class="timer-presets">
+                            <button class="preset-btn" data-time="25">25</button>
+                            <button class="preset-btn" data-time="45">45</button>
+                            <button class="preset-btn" data-time="60">60</button>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="wellness-btn primary-btn" id="startTimer">Start</button>
+                            <button class="wellness-btn secondary-btn" id="pauseTimer" style="display: none;">Pause</button>
+                            <button class="wellness-btn outline-btn" id="resetTimer">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h3>About Pomodoro</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">The Pomodoro Technique is a time management method:</p>
+                        <ul class="breathing-steps">
+                            <li>Work on a task for 25 minutes</li>
+                            <li>Take a short 5-minute break</li>
+                            <li>After 4 pomodoros, take a longer 15-30 minute break</li>
+                            <li>Repeat the cycle as needed</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-button-container">
+                <a href="wellnessED.html" class="wellness-btn outline-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h4>About VoiceED</h4>
+                        <p>VoiceED is a student-focused platform designed to support mental health, safety, and academic success.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="dashboard.html">Dashboard</a></li>
+                            <li><a href="wellnessED.html">WellnessED</a></li>
+                            <li><a href="contacts.html">Emergency Contacts</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-top-row">
+                    <div class="footer-section credentials-section">
+                        <h4>Founders</h4>
+                        <div class="founders-grid">
+                            <div class="founder-card">
+                                <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                                <p class="founder-name">Hannah Bella C. Atay</p>
+                                <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                            </div>
+                            <div class="founder-card">
+                                <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                                <p class="founder-name">John Erwin F. Cadiz</p>
+                                <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-section credentials-section">
+                        <h4>Millennium Fellows</h4>
+                        <div class="fellows-grid">
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                                <p class="fellow-name">Hannah A. Hontiveros</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                                <p class="fellow-name">Jason James E. Azcona</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                                <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                                <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 VoiceED. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="particles.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+    <script>
+        // Focus Timer
+        let timerInterval;
+        let timerSeconds = 1500;
+        let isTimerRunning = false;
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startTimerBtn = document.getElementById('startTimer');
+        const pauseTimerBtn = document.getElementById('pauseTimer');
+        const resetTimerBtn = document.getElementById('resetTimer');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const minutes = parseInt(btn.dataset.time);
+                timerSeconds = minutes * 60;
+                updateTimerDisplay();
+            });
+        });
+
+        startTimerBtn.addEventListener('click', () => {
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                startTimerBtn.style.display = 'none';
+                pauseTimerBtn.style.display = 'inline-block';
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        startTimerBtn.style.display = 'inline-block';
+                        pauseTimerBtn.style.display = 'none';
+                        alert('Focus session complete!');
+                    }
+                }, 1000);
+            }
+        });
+
+        pauseTimerBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            startTimerBtn.style.display = 'inline-block';
+            pauseTimerBtn.style.display = 'none';
+        });
+
+        resetTimerBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = 1500;
+            updateTimerDisplay();
+            startTimerBtn.style.display = 'inline-block';
+            pauseTimerBtn.style.display = 'none';
+        });
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

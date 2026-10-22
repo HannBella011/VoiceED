@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breathing Exercise - VoiceED</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html" class="dashboard-nav-link">Dashboard</a></li>
+                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="wellnessED.html" class="nav-active">WellnessED</a></li>
+                        <li><a href="#" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breathing Exercise Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <div class="wellness-hero">
+                <h2>Breathing Exercise</h2>
+                <p>Practice guided breathing to reduce stress and improve focus</p>
+            </div>
+
+            <div class="wellness-grid">
+                <div class="wellness-card breathing-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <h3>4-7-8 Breathing Technique</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="breathing-circle-wrapper">
+                            <div class="breathing-circle" id="breathingCircle">
+                                <span class="breathing-text" id="breathingText">Start</span>
+                            </div>
+                        </div>
+                        <div class="breathing-info">
+                            <p class="breathing-phase" id="breathingPhase">Ready to begin</p>
+                            <p class="breathing-count" id="breathingCount">0 cycles</p>
+                        </div>
+                        <button class="wellness-btn primary-btn" id="startBreathing">Start Exercise</button>
+                        <button class="wellness-btn secondary-btn" id="stopBreathing" style="display: none;">Stop</button>
+                    </div>
+                </div>
+
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h3>How It Works</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">The 4-7-8 breathing technique is a simple yet powerful method to calm your nervous system:</p>
+                        <ul class="breathing-steps">
+                            <li><strong>Inhale</strong> for 4 seconds through your nose</li>
+                            <li><strong>Hold</strong> your breath for 7 seconds</li>
+                            <li><strong>Exhale</strong> for 8 seconds through your mouth</li>
+                        </ul>
+                        <p class="card-description">Repeat for 4-8 cycles to feel relaxed and focused.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-button-container">
+                <a href="wellnessED.html" class="wellness-btn outline-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h4>About VoiceED</h4>
+                        <p>VoiceED is a student-focused platform designed to support mental health, safety, and academic success.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="dashboard.html">Dashboard</a></li>
+                            <li><a href="wellnessED.html">WellnessED</a></li>
+                            <li><a href="contacts.html">Emergency Contacts</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-top-row">
+                    <div class="footer-section credentials-section">
+                        <h4>Founders</h4>
+                        <div class="founders-grid">
+                            <div class="founder-card">
+                                <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                                <p class="founder-name">Hannah Bella C. Atay</p>
+                                <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                            </div>
+                            <div class="founder-card">
+                                <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                                <p class="founder-name">John Erwin F. Cadiz</p>
+                                <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-section credentials-section">
+                        <h4>Millennium Fellows</h4>
+                        <div class="fellows-grid">
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                                <p class="fellow-name">Hannah A. Hontiveros</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                                <p class="fellow-name">Jason James E. Azcona</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                                <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                            <div class="fellow-card">
+                                <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                                <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                                <p class="fellow-title">Millennium Fellow</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 VoiceED. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="particles.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+    <script>
+        // Breathing Exercise
+        let breathingInterval;
+        let breathingCycles = 0;
+        const breathingCircle = document.getElementById('breathingCircle');
+        const breathingText = document.getElementById('breathingText');
+        const breathingPhase = document.getElementById('breathingPhase');
+        const breathingCount = document.getElementById('breathingCount');
+        const startBreathingBtn = document.getElementById('startBreathing');
+        const stopBreathingBtn = document.getElementById('stopBreathing');
+
+        startBreathingBtn.addEventListener('click', () => {
+            startBreathingBtn.style.display = 'none';
+            stopBreathingBtn.style.display = 'inline-block';
+            startBreathingExercise();
+        });
+
+        stopBreathingBtn.addEventListener('click', () => {
+            stopBreathingExercise();
+        });
+
+        function startBreathingExercise() {
+            let phase = 'inhale';
+            let count = 0;
+            
+            breathingInterval = setInterval(() => {
+                if (phase === 'inhale') {
+                    breathingCircle.style.transform = 'scale(1.3)';
+                    breathingText.textContent = 'Inhale';
+                    breathingPhase.textContent = 'Breathe in...';
+                    count++;
+                    if (count >= 4) {
+                        phase = 'hold';
+                        count = 0;
+                    }
+                } else if (phase === 'hold') {
+                    breathingText.textContent = 'Hold';
+                    breathingPhase.textContent = 'Hold your breath...';
+                    count++;
+                    if (count >= 7) {
+                        phase = 'exhale';
+                        count = 0;
+                    }
+                } else if (phase === 'exhale') {
+                    breathingCircle.style.transform = 'scale(1)';
+                    breathingText.textContent = 'Exhale';
+                    breathingPhase.textContent = 'Breathe out...';
+                    count++;
+                    if (count >= 8) {
+                        phase = 'inhale';
+                        count = 0;
+                        breathingCycles++;
+                        breathingCount.textContent = breathingCycles + ' cycles';
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopBreathingExercise() {
+            clearInterval(breathingInterval);
+            breathingCircle.style.transform = 'scale(1)';
+            breathingText.textContent = 'Start';
+            breathingPhase.textContent = 'Ready to begin';
+            startBreathingBtn.style.display = 'inline-block';
+            stopBreathingBtn.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

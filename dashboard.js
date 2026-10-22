@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('wellnessBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        // Future: window.location.href = 'wellnessed.html';
+        window.location.href = 'wellnessED.html';
     });
 
     document.getElementById('inspireBtn').addEventListener('click', function(e) {
