@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceED - InspireED</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="user-menu.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="ReportED.html">ReportED</a></li>
+                        <li><a href="wellnessED.html">WellnessED</a></li>
+                        <li><a href="inspireED.html" class="nav-active">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <!-- Hero Section -->
+            <div class="wellness-hero">
+                <h2>InspireED</h2>
+                <p class="hero-subtitle">A dedicated platform highlighting motivational stories, student achievements, and encouraging quotes.</p>
+            </div>
+
+            <!-- InspireED Layout with Sidebar -->
+            <div class="inspireED-layout">
+                <!-- Left Sidebar Navigation -->
+                <aside class="inspireED-sidebar">
+                    <nav class="sidebar-nav">
+                        <button class="sidebar-tab active" data-tab="home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </button>
+                        <button class="sidebar-tab" data-tab="quotes">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Quotes</span>
+                        </button>
+                        <button class="sidebar-tab" data-tab="stories">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Stories</span>
+                        </button>
+                        <button class="sidebar-tab" data-tab="kudos">
+                            <i class="fas fa-heart"></i>
+                            <span>Kudos</span>
+                        </button>
+                        <button class="sidebar-tab" data-tab="milestones">
+                            <i class="fas fa-trophy"></i>
+                            <span>Milestones</span>
+                        </button>
+                        <button class="sidebar-tab" data-tab="activity">
+                            <i class="fas fa-chart-line"></i>
+                            <span>My Activity</span>
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="inspireED-content">
+                    <!-- Home Tab - Feed of All Posts -->
+                    <div class="tab-content active" id="home-tab">
+                        <div class="content-container">
+                            <div class="feed-header">
+                                <h3>Latest Posts</h3>
+                                <div class="header-actions">
+                                    <div class="search-bar">
+                                        <input type="text" class="search-input" id="searchPosts" placeholder="Search posts...">
+                                        <i class="fas fa-search search-icon"></i>
+                                    </div>
+                                    <button class="create-post-btn" id="createPostBtn">
+                                        <i class="fas fa-plus"></i>
+                                        Create Post
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="posts-feed" id="postsFeed">
+                                <!-- Posts will be dynamically added -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quotes Tab -->
+                    <div class="tab-content" id="quotes-tab">
+                        <div class="content-container">
+                            <div class="feed-header">
+                                <h3>Quotes</h3>
+                                <button class="create-post-btn" id="addQuoteBtn">
+                                    <i class="fas fa-plus"></i>
+                                    Add Quote
+                                </button>
+                            </div>
+                            <div class="daily-quote-card">
+                            <div class="quote-content">
+                                <i class="fas fa-quote-left quote-icon"></i>
+                                <p class="quote-text" id="dailyQuote">"The only way to do great work is to love what you do."</p>
+                                <p class="quote-author" id="quoteAuthor">- Steve Jobs</p>
+                            </div>
+                            <div class="quote-actions">
+                                <button class="quote-btn" id="prevQuoteBtn">
+                                    <i class="fas fa-chevron-left"></i>
+                                    Previous
+                                </button>
+                                <button class="quote-btn" id="copyQuoteBtn">
+                                    <i class="fas fa-copy"></i>
+                                    Copy Quote
+                                </button>
+                                <button class="quote-btn" id="deleteQuoteBtn">
+                                    <i class="fas fa-trash"></i>
+                                    Delete Quote
+                                </button>
+                                <button class="quote-btn" id="nextQuoteBtn">
+                                    Next
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="quote-interactions">
+                                <button class="interaction-btn heart-btn" id="heartQuoteBtn">
+                                    <i class="fas fa-heart"></i>
+                                    <span id="heartCount">0</span>
+                                </button>
+                                <button class="interaction-btn comment-btn" id="commentQuoteBtn">
+                                    <i class="fas fa-comment"></i>
+                                    <span id="commentCount">0</span>
+                                </button>
+                                <button class="interaction-btn share-btn" id="shareQuoteBtn">
+                                    <i class="fas fa-share"></i>
+                                    <span id="shareCount">0</span>
+                                </button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Stories Tab -->
+                    <div class="tab-content" id="stories-tab">
+                        <div class="content-container">
+                            <div class="feed-header">
+                                <h3>Stories</h3>
+                                <button class="create-post-btn" id="shareStoryBtn">
+                                    <i class="fas fa-pen"></i>
+                                    Share Your Story
+                                </button>
+                            </div>
+                            <div class="stories-grid" id="storiesGrid">
+                                <!-- Story cards will be dynamically added -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kudos Tab -->
+                    <div class="tab-content" id="kudos-tab">
+                        <div class="content-container">
+                            <div class="feed-header">
+                                <h3>Kudos</h3>
+                                <div class="header-actions">
+                                    <div class="search-bar">
+                                        <input type="text" class="search-input" id="searchKudos" placeholder="Search name...">
+                                        <i class="fas fa-search search-icon"></i>
+                                    </div>
+                                    <button class="create-post-btn" id="sendKudosBtn">
+                                        <i class="fas fa-heart"></i>
+                                        Send Kudos
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="kudos-grid" id="kudosGrid">
+                            <!-- Kudos cards will be dynamically added -->
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Milestones Tab -->
+                    <div class="tab-content" id="milestones-tab">
+                        <div class="content-container">
+                            <div class="feed-header">
+                                <h3>Milestones</h3>
+                                <button class="create-post-btn" id="addMilestoneBtn">
+                                    <i class="fas fa-trophy"></i>
+                                    Add Milestone
+                                </button>
+                            </div>
+                            <div class="milestones-grid" id="milestonesGrid">
+                            <!-- Milestone cards will be dynamically added -->
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- My Activity Tab -->
+                    <div class="tab-content" id="activity-tab">
+                        <div class="content-container">
+                            <div class="feed-header">
+                                <h3>My Activity</h3>
+                            </div>
+                            <div class="activity-feed" id="activityFeed">
+                                <!-- Activity items will be dynamically added -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h3>VoiceED Description</h3>
+                        <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="services.html">Services</a></li>
+                            <li><a href="contacts.html">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Founders & Campus Directors</h4>
+                    <div class="founders-grid">
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <p class="founder-name">Junie Jebreel M. Botawan II</p>
+                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                            <p class="founder-name">Hannah Bella C. Atay</p>
+                            <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                            <p class="founder-name">John Erwin F. Cadiz</p>
+                            <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Millennium Fellows</h4>
+                    <div class="fellows-grid">
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                            <p class="fellow-name">Hannah A. Hontiveros</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                            <p class="fellow-name">Jason James E. Azcona</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                            <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VoiceED. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="particles.js"></script>
+    
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal">
+        <div class="modal-content">
+            <h2>Create Post</h2>
+            <div class="add-comment-form">
+                <textarea id="postContent" placeholder="What's on your mind?" rows="4"></textarea>
+                <div class="form-submit">
+                    <button class="cancel-btn" id="cancelCreatePostBtn">Cancel</button>
+                    <button class="submit-btn" id="submitPostBtn">Post</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Quote Modal -->
+    <div id="addQuoteModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Your Quote</h2>
+            <div class="add-comment-form">
+                <input type="text" id="quoteText" placeholder="Enter your quote">
+                <input type="text" id="quoteAuthor" placeholder="Author">
+                <div class="form-submit">
+                    <button class="cancel-btn" id="cancelAddQuoteBtn">Cancel</button>
+                    <button class="submit-btn" id="submitQuoteBtn">Add Quote</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Story Modal -->
+    <div id="shareStoryModal" class="modal">
+        <div class="modal-content">
+            <h2>Share Your Story</h2>
+            <div class="add-comment-form">
+                <textarea id="storyContent" placeholder="Share your story..." rows="4"></textarea>
+                <div class="form-submit">
+                    <button class="cancel-btn" id="cancelShareStoryBtn">Cancel</button>
+                    <button class="submit-btn" id="submitStoryBtn">Share Story</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Kudos Modal -->
+    <div id="sendKudosModal" class="modal">
+        <div class="modal-content">
+            <h2>Send Kudos</h2>
+            <div class="add-comment-form">
+                <input type="text" id="kudosRecipient" placeholder="Who do you want to recognize?">
+                <textarea id="kudosContent" placeholder="What did they do?" rows="4"></textarea>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label style="color: var(--text-primary); font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="kudosAnonymous" style="width: 18px; height: 18px; accent-color: var(--accent-cyan);">
+                        Send anonymously
+                    </label>
+                </div>
+                <div class="form-submit">
+                    <button class="cancel-btn" id="cancelSendKudosBtn">Cancel</button>
+                    <button class="submit-btn" id="submitKudosBtn">Send Kudos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Milestone Modal -->
+    <div id="addMilestoneModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Milestone</h2>
+            <div class="add-comment-form">
+                <input type="text" id="milestoneTitle" placeholder="Milestone title">
+                <textarea id="milestoneDescription" placeholder="Describe your achievement..." rows="4"></textarea>
+                <div class="form-submit">
+                    <button class="cancel-btn" id="cancelAddMilestoneBtn">Cancel</button>
+                    <button class="submit-btn" id="submitMilestoneBtn">Add Milestone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div id="commentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Comments</h2>
+            <div class="comments-list" id="commentsList">
+                <!-- Comments will be dynamically added here -->
+            </div>
+            <div class="add-comment-form">
+                <textarea id="newComment" class="report-input report-textarea" rows="3" placeholder="Add your comment..."></textarea>
+                <button class="save-settings-btn" id="submitCommentBtn">Submit Comment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu Modal -->
+    <div class="modal user-menu-modal" id="userMenuModal">
+        <div class="modal-content user-menu-modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Menu</h2>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="menuUsername">Admin</h3>
+                    <p id="menuEmail">Admin@voiceed.com</p>
+                </div>
+            </div>
+            <div class="menu-actions">
+                <button class="user-menu-button" id="profileBtn">
+                    <i class="fas fa-user"></i>
+                    <span>View Profile</span>
+                </button>
+                <button class="user-menu-button" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="particles.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+    <script>
+        // Sidebar Tab Navigation
+        const sidebarTabs = document.querySelectorAll('.sidebar-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        sidebarTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                sidebarTabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
+            });
+        });
+
+        // Posts Feed System
+        let posts = [
+            {
+                id: 1,
+                type: 'quote',
+                author: 'System',
+                avatar: 'S',
+                time: '2 hours ago',
+                content: {
+                    text: 'The only way to do great work is to love what you do.',
+                    author: 'Steve Jobs'
+                },
+                likes: 28,
+                comments: 15,
+                shares: 12,
+                userLiked: false,
+                isUserCreated: false
+            },
+            {
+                id: 2,
+                type: 'story',
+                author: 'Jane Doe',
+                avatar: 'J',
+                time: '5 hours ago',
+                content: {
+                    text: 'I started my freshman year with failing grades. Through dedication and seeking help from professors, I turned my academic journey around. Never be afraid to ask for help!',
+                    category: 'Academic Growth'
+                },
+                likes: 42,
+                comments: 12,
+                shares: 8,
+                userLiked: false,
+                isUserCreated: false
+            },
+            {
+                id: 3,
+                type: 'kudos',
+                author: 'John Smith',
+                avatar: 'J',
+                time: '1 day ago',
+                content: {
+                    text: 'Big congratulations to the study group for acing the finals! Your hard work and dedication really paid off.',
+                    recipient: 'Study Group A'
+                },
+                likes: 35,
+                comments: 8,
+                shares: 5,
+                userLiked: false,
+                isUserCreated: false
+            }
+        ];
+
+        // User Activity Tracking
+        let userActivities = [];
+
+        function addActivity(type, description) {
+            const activity = {
+                id: userActivities.length + 1,
+                type: type,
+                description: description,
+                time: 'Just now'
+            };
+            userActivities.unshift(activity);
+            renderActivity();
+        }
+
+        function renderActivity() {
+            const activityFeed = document.getElementById('activityFeed');
+            activityFeed.innerHTML = '';
+
+            if (userActivities.length === 0) {
+                activityFeed.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No activity yet.</p>';
+                return;
+            }
+
+            userActivities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                
+                let icon = '';
+                if (activity.type === 'post') icon = 'fa-pen';
+                else if (activity.type === 'like') icon = 'fa-heart';
+                else if (activity.type === 'comment') icon = 'fa-comment';
+                else if (activity.type === 'share') icon = 'fa-share';
+                else if (activity.type === 'delete') icon = 'fa-trash';
+                else icon = 'fa-circle';
+
+                activityItem.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">${activity.description}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                `;
+                activityFeed.appendChild(activityItem);
+            });
+        }
+
+        function renderPosts() {
+            const postsFeed = document.getElementById('postsFeed');
+            postsFeed.innerHTML = '';
+
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+                
+                let contentHTML = '';
+                if (post.type === 'quote') {
+                    contentHTML = `<div class="post-quote">"${post.content.text}" - ${post.content.author}</div>`;
+                } else if (post.type === 'kudos') {
+                    contentHTML = `<p class="post-text"><strong>To: ${post.content.recipient}</strong><br>${post.content.text}</p>`;
+                } else if (post.type === 'milestone') {
+                    contentHTML = `<p class="post-text"><strong>${post.content.title}</strong><br>${post.content.text}</p>`;
+                } else {
+                    contentHTML = `<p class="post-text">${post.content.text}</p>`;
+                }
+
+                postCard.innerHTML = `
+                    <div class="post-header">
+                        <div class="post-avatar">${post.avatar}</div>
+                        <div class="post-author-info">
+                            <div class="post-author-name">${post.author}</div>
+                            <div class="post-time">${post.time}</div>
+                        </div>
+                        <span class="post-type">${post.type.charAt(0).toUpperCase() + post.type.slice(1)}</span>
+                    </div>
+                    <div class="post-content">
+                        ${contentHTML}
+                    </div>
+                    <div class="post-interactions">
+                        <button class="post-interaction-btn ${post.userLiked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                            <i class="fas fa-heart"></i>
+                            <span>${post.likes}</span>
+                        </button>
+                        <button class="post-interaction-btn" onclick="openComments(${post.id})">
+                            <i class="fas fa-comment"></i>
+                            <span>${post.comments}</span>
+                        </button>
+                        <button class="post-interaction-btn" onclick="sharePost(${post.id})">
+                            <i class="fas fa-share"></i>
+                            <span>${post.shares}</span>
+                        </button>
+                        ${post.isUserCreated ? `<button class="post-interaction-btn delete-btn" onclick="deletePost(${post.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>` : ''}
+                    </div>
+                `;
+                postsFeed.appendChild(postCard);
+            });
+        }
+
+        function toggleLike(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                if (post.userLiked) {
+                    post.likes--;
+                    post.userLiked = false;
+                    addActivity('like', 'You unliked a post');
+                } else {
+                    post.likes++;
+                    post.userLiked = true;
+                    addActivity('like', 'You liked a post');
+                }
+                renderPosts();
+            }
+        }
+
+        function openComments(postId) {
+            addActivity('comment', 'You opened comments on a post');
+            alert('Comments modal would open for post ' + postId);
+        }
+
+        function sharePost(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.shares++;
+                renderPosts();
+                addActivity('share', 'You shared a post');
+                alert('Post shared!');
+            }
+        }
+
+        function deletePost(postId) {
+            if (confirm('Are you sure you want to delete this post?')) {
+                posts = posts.filter(p => p.id !== postId);
+                renderPosts();
+                addActivity('delete', 'You deleted a post');
+                alert('Post deleted!');
+            }
+        }
+
+        // Create Post Button - Open Modal
+        document.getElementById('createPostBtn').addEventListener('click', function() {
+            document.getElementById('createPostModal').style.display = 'block';
+        });
+
+        // Cancel Create Post Modal
+        document.getElementById('cancelCreatePostBtn').addEventListener('click', function() {
+            document.getElementById('createPostModal').style.display = 'none';
+            document.getElementById('postContent').value = '';
+        });
+
+        // Submit Post
+        document.getElementById('submitPostBtn').addEventListener('click', function() {
+            const postContent = document.getElementById('postContent').value;
+            if (postContent) {
+                const newPost = {
+                    id: posts.length + 1,
+                    type: 'post',
+                    author: 'You',
+                    avatar: 'Y',
+                    time: 'Just now',
+                    content: {
+                        text: postContent
+                    },
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    userLiked: false,
+                    isUserCreated: true
+                };
+                posts.unshift(newPost);
+                renderPosts();
+                addActivity('post', 'You created a new post');
+                document.getElementById('createPostModal').style.display = 'none';
+                document.getElementById('postContent').value = '';
+                alert('Post created!');
+            }
+        });
+
+        // Add Quote Button - Open Modal
+        document.getElementById('addQuoteBtn').addEventListener('click', function() {
+            document.getElementById('addQuoteModal').style.display = 'block';
+        });
+
+        // Cancel Add Quote Modal
+        document.getElementById('cancelAddQuoteBtn').addEventListener('click', function() {
+            document.getElementById('addQuoteModal').style.display = 'none';
+            document.getElementById('quoteText').value = '';
+            document.getElementById('quoteAuthor').value = '';
+        });
+
+        // Submit Quote
+        document.getElementById('submitQuoteBtn').addEventListener('click', function() {
+            const quoteText = document.getElementById('quoteText').value;
+            const quoteAuthor = document.getElementById('quoteAuthor').value;
+            if (quoteText && quoteAuthor) {
+                quotes.push({
+                    text: quoteText,
+                    author: quoteAuthor,
+                    isUserAdded: true
+                });
+                currentQuoteIndex = quotes.length - 1;
+                updateQuoteDisplay();
+                
+                // Also add to posts feed
+                const newQuotePost = {
+                    id: posts.length + 1,
+                    type: 'quote',
+                    author: 'You',
+                    avatar: 'Y',
+                    time: 'Just now',
+                    content: {
+                        text: quoteText,
+                        author: quoteAuthor
+                    },
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    userLiked: false,
+                    isUserCreated: true
+                };
+                posts.unshift(newQuotePost);
+                renderPosts();
+                
+                addActivity('post', 'You added a new quote');
+                document.getElementById('addQuoteModal').style.display = 'none';
+                document.getElementById('quoteText').value = '';
+                document.getElementById('quoteAuthor').value = '';
+                alert('Quote added!');
+            }
+        });
+
+        // Share Story Button - Open Modal
+        document.getElementById('shareStoryBtn').addEventListener('click', function() {
+            document.getElementById('shareStoryModal').style.display = 'block';
+        });
+
+        // Cancel Share Story Modal
+        document.getElementById('cancelShareStoryBtn').addEventListener('click', function() {
+            document.getElementById('shareStoryModal').style.display = 'none';
+            document.getElementById('storyContent').value = '';
+        });
+
+        // Submit Story
+        document.getElementById('submitStoryBtn').addEventListener('click', function() {
+            const storyContent = document.getElementById('storyContent').value;
+            if (storyContent) {
+                const newStory = {
+                    id: posts.length + 1,
+                    type: 'story',
+                    author: 'You',
+                    avatar: 'Y',
+                    time: 'Just now',
+                    content: {
+                        text: storyContent
+                    },
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    userLiked: false,
+                    isUserCreated: true
+                };
+                posts.unshift(newStory);
+                renderPosts();
+                addActivity('post', 'You shared a story');
+                document.getElementById('shareStoryModal').style.display = 'none';
+                document.getElementById('storyContent').value = '';
+                alert('Story shared!');
+            }
+        });
+
+        // Send Kudos Button - Open Modal
+        document.getElementById('sendKudosBtn').addEventListener('click', function() {
+            document.getElementById('sendKudosModal').style.display = 'block';
+        });
+
+        // Cancel Send Kudos Modal
+        document.getElementById('cancelSendKudosBtn').addEventListener('click', function() {
+            document.getElementById('sendKudosModal').style.display = 'none';
+            document.getElementById('kudosRecipient').value = '';
+            document.getElementById('kudosContent').value = '';
+            document.getElementById('kudosAnonymous').checked = false;
+        });
+
+        // Submit Kudos
+        document.getElementById('submitKudosBtn').addEventListener('click', function() {
+            const kudosRecipient = document.getElementById('kudosRecipient').value;
+            const kudosContent = document.getElementById('kudosContent').value;
+            const isAnonymous = document.getElementById('kudosAnonymous').checked;
+            if (kudosRecipient && kudosContent) {
+                const newKudos = {
+                    id: posts.length + 1,
+                    type: 'kudos',
+                    author: isAnonymous ? 'Anonymous' : 'You',
+                    avatar: isAnonymous ? 'A' : 'Y',
+                    time: 'Just now',
+                    content: {
+                        text: kudosContent,
+                        recipient: kudosRecipient
+                    },
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    userLiked: false,
+                    isUserCreated: true
+                };
+                posts.unshift(newKudos);
+                renderPosts();
+                addActivity('post', 'You sent kudos to ' + kudosRecipient);
+                document.getElementById('sendKudosModal').style.display = 'none';
+                document.getElementById('kudosRecipient').value = '';
+                document.getElementById('kudosContent').value = '';
+                document.getElementById('kudosAnonymous').checked = false;
+                alert('Kudos sent!');
+            }
+        });
+
+        // Add Milestone Button - Open Modal
+        document.getElementById('addMilestoneBtn').addEventListener('click', function() {
+            document.getElementById('addMilestoneModal').style.display = 'block';
+        });
+
+        // Cancel Add Milestone Modal
+        document.getElementById('cancelAddMilestoneBtn').addEventListener('click', function() {
+            document.getElementById('addMilestoneModal').style.display = 'none';
+            document.getElementById('milestoneTitle').value = '';
+            document.getElementById('milestoneDescription').value = '';
+        });
+
+        // Submit Milestone
+        document.getElementById('submitMilestoneBtn').addEventListener('click', function() {
+            const milestoneTitle = document.getElementById('milestoneTitle').value;
+            const milestoneDescription = document.getElementById('milestoneDescription').value;
+            if (milestoneTitle && milestoneDescription) {
+                const newMilestone = {
+                    id: posts.length + 1,
+                    type: 'milestone',
+                    author: 'You',
+                    avatar: 'Y',
+                    time: 'Just now',
+                    content: {
+                        text: milestoneDescription,
+                        title: milestoneTitle
+                    },
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    userLiked: false,
+                    isUserCreated: true
+                };
+                posts.unshift(newMilestone);
+                renderPosts();
+                addActivity('post', 'You added a milestone: ' + milestoneTitle);
+                document.getElementById('addMilestoneModal').style.display = 'none';
+                document.getElementById('milestoneTitle').value = '';
+                document.getElementById('milestoneDescription').value = '';
+                alert('Milestone added!');
+            }
+        });
+
+        // Initialize posts feed
+        renderPosts();
+
+        // Search Posts Functionality
+        document.getElementById('searchPosts').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredPosts = posts.filter(post => {
+                const contentText = post.content.text.toLowerCase();
+                const authorName = post.author.toLowerCase();
+                return contentText.includes(searchTerm) || authorName.includes(searchTerm);
+            });
+            
+            const postsFeed = document.getElementById('postsFeed');
+            postsFeed.innerHTML = '';
+
+            if (filteredPosts.length === 0) {
+                postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No posts found matching your search.</p>';
+                return;
+            }
+
+            filteredPosts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+                
+                let contentHTML = '';
+                if (post.type === 'quote') {
+                    contentHTML = `<div class="post-quote">"${post.content.text}" - ${post.content.author}</div>`;
+                } else {
+                    contentHTML = `<p class="post-text">${post.content.text}</p>`;
+                }
+
+                postCard.innerHTML = `
+                    <div class="post-header">
+                        <div class="post-avatar">${post.avatar}</div>
+                        <div class="post-author-info">
+                            <div class="post-author-name">${post.author}</div>
+                            <div class="post-time">${post.time}</div>
+                        </div>
+                        <span class="post-type">${post.type.charAt(0).toUpperCase() + post.type.slice(1)}</span>
+                    </div>
+                    <div class="post-content">
+                        ${contentHTML}
+                    </div>
+                    <div class="post-interactions">
+                        <button class="post-interaction-btn ${post.userLiked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                            <i class="fas fa-heart"></i>
+                            <span>${post.likes}</span>
+                        </button>
+                        <button class="post-interaction-btn" onclick="openComments(${post.id})">
+                            <i class="fas fa-comment"></i>
+                            <span>${post.comments}</span>
+                        </button>
+                        <button class="post-interaction-btn" onclick="sharePost(${post.id})">
+                            <i class="fas fa-share"></i>
+                            <span>${post.shares}</span>
+                        </button>
+                        ${post.isUserCreated ? `<button class="post-interaction-btn delete-btn" onclick="deletePost(${post.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>` : ''}
+                    </div>
+                `;
+                postsFeed.appendChild(postCard);
+            });
+        });
+
+        // Search Kudos Functionality
+        document.getElementById('searchKudos').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            // Filter kudos based on search term
+            // Implementation would go here
+            console.log('Searching kudos:', searchTerm);
+        });
+
+        // Daily Quotes
+        const quotes = [
+            { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", isUserAdded: false },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", isUserAdded: false },
+            { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt", isUserAdded: false },
+            { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", isUserAdded: false },
+            { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", isUserAdded: false },
+            { text: "Your limitation—it's only your imagination.", author: "Unknown", isUserAdded: false },
+            { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown", isUserAdded: false },
+            { text: "Great things never come from comfort zones.", author: "Unknown", isUserAdded: false },
+            { text: "Dream it. Wish it. Do it.", author: "Unknown", isUserAdded: false },
+            { text: "Success doesn't just find you. You have to go out and get it.", author: "Unknown", isUserAdded: false }
+        ];
+
+        let currentQuoteIndex = 0;
+        let userHeartedQuotes = new Set(); // Track which quotes user has hearted
+        let quoteComments = {}; // Store comments for each quote by index
+
+        // Previous Quote Button
+        document.getElementById('prevQuoteBtn').addEventListener('click', function() {
+            currentQuoteIndex = (currentQuoteIndex - 1 + quotes.length) % quotes.length;
+            updateQuoteDisplay();
+        });
+
+        // Next Quote Button
+        document.getElementById('nextQuoteBtn').addEventListener('click', function() {
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            updateQuoteDisplay();
+        });
+
+        function updateQuoteDisplay() {
+            document.getElementById('dailyQuote').textContent = `"${quotes[currentQuoteIndex].text}"`;
+            document.getElementById('quoteAuthor').textContent = `- ${quotes[currentQuoteIndex].author}`;
+            
+            // Update heart button state
+            const heartBtn = document.getElementById('heartQuoteBtn');
+            if (userHeartedQuotes.has(currentQuoteIndex)) {
+                heartBtn.classList.add('active');
+            } else {
+                heartBtn.classList.remove('active');
+            }
+            
+            // Update delete button visibility
+            const deleteBtn = document.getElementById('deleteQuoteBtn');
+            if (quotes[currentQuoteIndex].isUserAdded) {
+                deleteBtn.style.display = 'flex';
+            } else {
+                deleteBtn.style.display = 'none';
+            }
+        }
+
+        // Copy Quote Button
+        document.getElementById('copyQuoteBtn').addEventListener('click', function() {
+            const quote = document.getElementById('dailyQuote').textContent;
+            const author = document.getElementById('quoteAuthor').textContent;
+            const fullQuote = `${quote} ${author}`;
+            navigator.clipboard.writeText(fullQuote).then(() => {
+                alert('Quote copied to clipboard!');
+            });
+        });
+
+        // Share Quote Button
+        document.getElementById('shareQuoteBtn').addEventListener('click', function() {
+            const quote = document.getElementById('dailyQuote').textContent;
+            const author = document.getElementById('quoteAuthor').textContent;
+            const fullQuote = `${quote} ${author}`;
+            
+            // Increment share count
+            let shareCount = parseInt(document.getElementById('shareCount').textContent);
+            document.getElementById('shareCount').textContent = shareCount + 1;
+            this.classList.add('active');
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Daily Inspiration',
+                    text: fullQuote
+                });
+            } else {
+                alert('Share feature not supported on this browser. Quote copied instead!');
+                navigator.clipboard.writeText(fullQuote);
+            }
+        });
+
+        // Delete Quote Button
+        document.getElementById('deleteQuoteBtn').addEventListener('click', function() {
+            if (quotes[currentQuoteIndex].isUserAdded) {
+                if (confirm('Are you sure you want to delete this quote?')) {
+                    quotes.splice(currentQuoteIndex, 1);
+                    currentQuoteIndex = Math.min(currentQuoteIndex, quotes.length - 1);
+                    updateQuoteDisplay();
+                    alert('Quote has been deleted!');
+                }
+            } else {
+                alert('You can only delete quotes you have added!');
+            }
+        });
+
+        // Heart Button
+        document.getElementById('heartQuoteBtn').addEventListener('click', function() {
+            if (userHeartedQuotes.has(currentQuoteIndex)) {
+                alert('You have already liked this quote!');
+                return;
+            }
+            
+            userHeartedQuotes.add(currentQuoteIndex);
+            let heartCount = parseInt(document.getElementById('heartCount').textContent);
+            document.getElementById('heartCount').textContent = heartCount + 1;
+            this.classList.add('active');
+        });
+
+        // Comment Button - Open Modal
+        document.getElementById('commentQuoteBtn').addEventListener('click', function() {
+            const commentModal = document.getElementById('commentModal');
+            commentModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            loadComments();
+        });
+
+        // Close Comment Modal
+        document.querySelector('#commentModal .close').addEventListener('click', function() {
+            const commentModal = document.getElementById('commentModal');
+            commentModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        });
+
+        // Load Comments for Current Quote
+        function loadComments() {
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = '';
+            
+            const comments = quoteComments[currentQuoteIndex] || [];
+            
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No comments yet. Be the first to comment!</p>';
+                return;
+            }
+            
+            comments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment-item';
+                commentDiv.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.author}</span>
+                        <span class="comment-time">${comment.time}</span>
+                    </div>
+                    <p class="comment-text">${comment.text}</p>
+                `;
+                commentsList.appendChild(commentDiv);
+            });
+        }
+
+        // Submit Comment
+        document.getElementById('submitCommentBtn').addEventListener('click', function() {
+            const newCommentText = document.getElementById('newComment').value;
+            
+            if (newCommentText.trim()) {
+                if (!quoteComments[currentQuoteIndex]) {
+                    quoteComments[currentQuoteIndex] = [];
+                }
+                
+                quoteComments[currentQuoteIndex].push({
+                    text: newCommentText,
+                    author: 'You',
+                    time: 'Just now'
+                });
+                
+                // Update comment count
+                let commentCount = parseInt(document.getElementById('commentCount').textContent);
+                document.getElementById('commentCount').textContent = commentCount + 1;
+                
+                document.getElementById('newComment').value = '';
+                loadComments();
+            } else {
+                alert('Please enter a comment!');
+            }
+        });
+
+        // Initialize quote display
+        updateQuoteDisplay();
+
+        // Sample Stories Data
+        const sampleStories = [
+            {
+                id: 1,
+                category: 'academic',
+                title: 'From Struggling Student to Dean\'s Lister',
+                narrative: 'I started my freshman year with failing grades. Through dedication and seeking help from professors, I turned my academic journey around.',
+                keyTakeaways: 'Never be afraid to ask for help. Consistency beats intensity.',
+                year: '2024',
+                author: 'Anonymous',
+                reactions: { inspiring: 45, proud: 32, support: 28 }
+            },
+            {
+                id: 2,
+                category: 'challenges',
+                title: 'Overcoming Financial Hurdles',
+                narrative: 'Working part-time while studying full-time was challenging, but it taught me time management and resilience.',
+                keyTakeaways: 'Challenges make us stronger. Balance is key.',
+                year: '2023',
+                author: 'Maria Santos',
+                reactions: { inspiring: 67, proud: 54, support: 41 }
+            },
+            {
+                id: 3,
+                category: 'leadership',
+                title: 'Leading a Community Project',
+                narrative: 'Organized a literacy program for local children. It was challenging but incredibly rewarding.',
+                keyTakeaways: 'Leadership is about service. Community impact matters.',
+                year: '2024',
+                author: 'Juan Dela Cruz',
+                reactions: { inspiring: 89, proud: 76, support: 65 }
+            }
+        ];
+
+        // Render Stories
+        function renderStories(filter = 'all') {
+            const grid = document.getElementById('storiesGrid');
+            grid.innerHTML = '';
+            
+            const filteredStories = filter === 'all' 
+                ? sampleStories 
+                : sampleStories.filter(s => s.category === filter);
+            
+            filteredStories.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'story-card';
+                card.innerHTML = `
+                    <div class="story-header">
+                        <div class="story-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="story-info">
+                            <h4>${story.title}</h4>
+                            <p class="story-author">${story.author} • ${story.year}</p>
+                        </div>
+                    </div>
+                    <p class="story-narrative">${story.narrative}</p>
+                    <p class="story-takeaways"><strong>Key Takeaways:</strong> ${story.keyTakeaways}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Initial Render
+        renderStories();
+
+        // Sample Kudos Data
+        const sampleKudos = [
+            { recipient: 'Study Group A', message: 'Amazing work on the final project! Team effort at its best.', sender: 'Anonymous', time: '2 hours ago' },
+            { recipient: 'Maria', message: 'Thank you for staying up late to help me debug my code!', sender: 'John', time: '5 hours ago' },
+            { recipient: 'CS Department', message: 'The faculty has been incredibly supportive this semester.', sender: 'Anonymous', time: '1 day ago' }
+        ];
+
+        // Render Kudos
+        function renderKudos() {
+            const grid = document.getElementById('kudosGrid');
+            grid.innerHTML = '';
+            
+            sampleKudos.forEach(kudo => {
+                const card = document.createElement('div');
+                card.className = 'kudos-card';
+                card.innerHTML = `
+                    <div class="kudos-header">
+                        <span class="kudos-recipient">To: ${kudo.recipient}</span>
+                        <span class="kudos-time">${kudo.time}</span>
+                    </div>
+                    <p class="kudos-message">${kudo.message}</p>
+                    <p class="kudos-sender">From: ${kudo.sender}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        renderKudos();
+
+        // Sample Milestones Data
+        const sampleMilestones = [
+            { title: 'Dean\'s List', description: 'Achieved Dean\'s List for 3 consecutive semesters', category: 'academic', cheers: 124 },
+            { title: 'Research Grant', description: 'Received undergraduate research grant', category: 'innovation', cheers: 89 },
+            { title: 'Hackathon Winner', description: '1st Place in University Hackathon 2024', category: 'innovation', cheers: 156 },
+            { title: 'Community Service Award', description: 'Recognized for 100+ hours of community service', category: 'leadership', cheers: 98 }
+        ];
+
+        // Render Milestones
+        function renderMilestones() {
+            const grid = document.getElementById('milestonesGrid');
+            grid.innerHTML = '';
+            
+            sampleMilestones.forEach(milestone => {
+                const card = document.createElement('div');
+                card.className = 'milestone-card';
+                card.innerHTML = `
+                    <div class="milestone-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h4>${milestone.title}</h4>
+                    <p class="milestone-description">${milestone.description}</p>
+                    <div class="cheer-system">
+                        <button class="cheer-btn" data-id="${milestone.title}">
+                            <i class="fas fa-heart"></i>
+                            Send Congratulations
+                        </button>
+                        <span class="cheer-count">${milestone.cheers} cheers</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        renderMilestones();
+
+    </script>
+</body>
+</html>
