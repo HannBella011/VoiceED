@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReportED | Safe Reporting System</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="user-menu.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html" class="dashboard-nav-link">Dashboard</a></li>
+                        <li><a href="ReportED.html" class="dashboard-nav-link nav-active">ReportED</a></li>
+                        <li><a href="wellnessED.html" id="wellnessBtn">WellnessED</a></li>
+                        <li><a href="inspireED.html" id="inspireBtn">InspireED</a></li>
+                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <div class="wellness-hero">
+                <h2>ReportED</h2>
+                <p>A secure channel for reporting campus safety issues, incidents, and student concerns without fear of retaliation.</p>
+            </div>
+
+            <!-- Immediate Help Section -->
+            <div class="immediate-help-section">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>Immediate Help Area</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">"If you or someone else is in immediate danger, please contact emergency services directly."</p>
+                        <div class="emergency-links">
+                            <button onclick="window.location.href='tel:911'" class="emergency-btn">
+                                <i class="fas fa-phone"></i>
+                                <span>Emergency Services</span>
+                                <span class="emergency-number">911</span>
+                            </button>
+                            <button onclick="window.location.href='tel:1553'" class="emergency-btn">
+                                <i class="fas fa-heartbeat"></i>
+                                <span>Mental Health Crisis</span>
+                                <span class="emergency-number">1553</span>
+                            </button>
+                            <a href="https://www.google.com/maps/search/hospitals+near+me" target="_blank" class="emergency-btn">
+                                <i class="fas fa-hospital"></i>
+                                <span>Find Hospital</span>
+                                <span class="emergency-number">Near Me</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Section -->
+            <div class="wellness-grid">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <h3>1. Received</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Your report is securely routed to the VoiceED review team.</p>
+                    </div>
+                </div>
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>2. Reviewed</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">We assess the situation and coordinate with the appropriate campus authorities or counselors.</p>
+                    </div>
+                </div>
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>3. Action</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Appropriate interventions are made to ensure a safe learning environment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Resources Map Section -->
+            <div class="help-map-section">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3>Find Help Near You</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Access comprehensive emergency hotlines and support organizations for immediate assistance.</p>
+                        <div class="map-container">
+                            <iframe
+                                src="https://www.google.com/maps?q=Iligan+City+police+station&output=embed"
+                                width="100%"
+                                height="400"
+                                style="border:0; border-radius: 12px;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                        <div class="map-search">
+                            <input type="text" id="mapSearch" class="report-input" placeholder="Search for police station, DSWD, or help center...">
+                            <button class="search-map-btn" id="searchMapBtn">
+                                <i class="fas fa-search"></i>
+                                Search
+                            </button>
+                        </div>
+                        <div class="help-resources">
+                            <h4>Emergency Hotlines & Support Organizations</h4>
+                            <div class="resource-links-grid">
+                                <a href="tel:911" class="resource-link-box">
+                                    <i class="fas fa-phone-alt"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">National Emergency Hotline</span>
+                                        <span class="resource-hotline">911</span>
+                                    </div>
+                                </a>
+                                <a href="tel:85256028" class="resource-link-box">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">NBI - Cybercrime & Threats</span>
+                                        <span class="resource-hotline">(02) 8525-6028</span>
+                                    </div>
+                                </a>
+                                <a href="tel:9197777377" class="resource-link-box">
+                                    <i class="fas fa-female"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">PNP WCPC (Women & Children)</span>
+                                        <span class="resource-hotline">0919-777-7377</span>
+                                    </div>
+                                </a>
+                                <a href="tel:9178671907" class="resource-link-box">
+                                    <i class="fas fa-hands-helping"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">PCW Referral System</span>
+                                        <span class="resource-hotline">0917-867-1907</span>
+                                    </div>
+                                </a>
+                                <a href="tel:1383" class="resource-link-box">
+                                    <i class="fas fa-child"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">Makabata Helpline (Children)</span>
+                                        <span class="resource-hotline">1383</span>
+                                    </div>
+                                </a>
+                                <a href="tel:89318101" class="resource-link-box">
+                                    <i class="fas fa-hands-helping"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">DSWD Crisis Intervention</span>
+                                        <span class="resource-hotline">(02) 8931-8101</span>
+                                    </div>
+                                </a>
+                                <a href="tel:9959218461" class="resource-link-box">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">DepEd Child Protection</span>
+                                        <span class="resource-hotline">0995-921-8461</span>
+                                    </div>
+                                </a>
+                                <a href="tel:82448467" class="resource-link-box">
+                                    <i class="fas fa-user"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">NCSC (Senior Citizens)</span>
+                                        <span class="resource-hotline">(02) 8244-8467</span>
+                                    </div>
+                                </a>
+                                <a href="tel:1553" class="resource-link-box">
+                                    <i class="fas fa-brain"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">NCMH Mental Health Crisis</span>
+                                        <span class="resource-hotline">1553</span>
+                                    </div>
+                                </a>
+                                <a href="https://www.google.com/maps/search/hospitals+near+me" target="_blank" class="resource-link-box">
+                                    <i class="fas fa-hospital"></i>
+                                    <div class="resource-info">
+                                        <span class="resource-name">Find Hospitals Near You</span>
+                                        <span class="resource-hotline">Map Search</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reporting Form Section -->
+            <div class="report-form-section">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Submit a Report</h3>
+                    </div>
+                    <div class="card-body">
+                    <form id="reportForm" class="report-form">
+                        <!-- Anonymity Toggle -->
+                        <div class="form-group anonymity-group">
+                            <label class="anonymity-toggle">
+                                <input type="checkbox" id="anonymousToggle" name="anonymous">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-text">Keep my identity anonymous</span>
+                            </label>
+                            <p class="anonymity-note">If checked, your name and email will not be shared with anyone.</p>
+                        </div>
+
+                        <!-- Name and Email (hidden if anonymous) -->
+                        <div class="form-group identity-group" id="identityGroup">
+                            <label for="reporterName">Your Name</label>
+                            <input type="text" id="reporterName" class="report-input" placeholder="Enter your name">
+                        </div>
+
+                        <div class="form-group identity-group" id="emailGroup">
+                            <label for="reporterEmail">Your Email</label>
+                            <input type="email" id="reporterEmail" class="report-input" placeholder="Enter your email">
+                        </div>
+
+                        <!-- Incident Category -->
+                        <div class="form-group">
+                            <label for="incidentCategory">Incident Category</label>
+                            <select id="incidentCategory" class="report-input" required>
+                                <option value="">Select category...</option>
+                                <option value="academic">Academic Concern</option>
+                                <option value="harassment">Harassment or Bullying</option>
+                                <option value="safety">Facility/Safety Hazard</option>
+                                <option value="discrimination">Discrimination</option>
+                                <option value="mental-health">Mental Health Concern</option>
+                                <option value="violence">Violence or Threat</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Date & Time -->
+                        <div class="form-group">
+                            <label for="incidentDate">Date & Time of Incident</label>
+                            <input type="datetime-local" id="incidentDate" class="report-input">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="rightNowToggle">
+                                <span>Right Now (current time)</span>
+                            </label>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="form-group">
+                            <label for="incidentLocation">Location</label>
+                            <input type="text" id="incidentLocation" class="report-input" placeholder="Where did this happen?" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label for="incidentDescription">Description</label>
+                            <textarea id="incidentDescription" class="report-input report-textarea" rows="6" placeholder="Please describe what happened in detail..." required></textarea>
+                        </div>
+
+                        <!-- Evidence Upload -->
+                        <div class="form-group">
+                            <label for="evidenceUpload">Evidence (Optional)</label>
+                            <div class="file-upload-area" id="dropZone">
+                                <input type="file" id="evidenceUpload" class="file-input" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx">
+                                <div class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag and drop files here or click to browse</p>
+                                    <span class="file-types">Supports: Images, Videos, PDF, Word, Excel, PowerPoint, Text files</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="selectedFiles" class="selected-files"></div>
+
+                        <!-- Submit Button -->
+                        <div class="form-submit">
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                Submit Report
+                            </button>
+                            <p class="data-handling-statement">
+                                <i class="fas fa-shield-alt"></i>
+                                Your safety is our priority. All reports are encrypted, and if you choose to remain anonymous, your identity will never be disclosed or tracked.
+                            </p>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h3>VoiceED Description</h3>
+                        <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="services.html">Services</a></li>
+                            <li><a href="contacts.html">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Founders & Campus Directors</h4>
+                    <div class="founders-grid">
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <p class="founder-name">Junie Jebreel M. Botawan II</p>
+                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                            <p class="founder-name">Hannah Bella C. Atay</p>
+                            <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                            <p class="founder-name">John Erwin F. Cadiz</p>
+                            <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Millennium Fellows</h4>
+                    <div class="fellows-grid">
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                            <p class="fellow-name">Hannah A. Hontiveros</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                            <p class="fellow-name">Jason James E. Azcona</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                            <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VoiceED. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- User Menu Modal -->
+    <div class="modal user-menu-modal" id="userMenuModal">
+        <div class="modal-content user-menu-modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Menu</h2>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="menuUsername">Admin</h3>
+                    <p id="menuEmail">Admin@voiceed.com</p>
+                </div>
+            </div>
+            <div class="menu-actions">
+                <button class="user-menu-button" id="profileBtn">
+                    <i class="fas fa-user"></i>
+                    <span>View Profile</span>
+                </button>
+                <button class="user-menu-button" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="particles.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+    <script>
+        // Anonymity Toggle
+        const anonymousToggle = document.getElementById('anonymousToggle');
+        const identityGroup = document.getElementById('identityGroup');
+        const emailGroup = document.getElementById('emailGroup');
+        const reporterName = document.getElementById('reporterName');
+        const reporterEmail = document.getElementById('reporterEmail');
+
+        anonymousToggle.addEventListener('change', function() {
+            if (this.checked) {
+                identityGroup.style.display = 'none';
+                emailGroup.style.display = 'none';
+                reporterName.value = '';
+                reporterEmail.value = '';
+                reporterName.required = false;
+                reporterEmail.required = false;
+            } else {
+                identityGroup.style.display = 'block';
+                emailGroup.style.display = 'block';
+                reporterName.required = true;
+                reporterEmail.required = true;
+            }
+        });
+
+        // Right Now Toggle
+        const rightNowToggle = document.getElementById('rightNowToggle');
+        const incidentDate = document.getElementById('incidentDate');
+
+        rightNowToggle.addEventListener('change', function() {
+            if (this.checked) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                incidentDate.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                incidentDate.disabled = true;
+            } else {
+                incidentDate.disabled = false;
+                incidentDate.value = '';
+            }
+        });
+
+        // File Upload Display and Drag & Drop
+        const evidenceUpload = document.getElementById('evidenceUpload');
+        const selectedFiles = document.getElementById('selectedFiles');
+        const dropZone = document.getElementById('dropZone');
+
+        // Click to browse
+        dropZone.addEventListener('click', () => {
+            evidenceUpload.click();
+        });
+
+        // Drag and drop events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.style.borderColor = 'rgba(0, 212, 255, 0.6)';
+                dropZone.style.background = 'rgba(0, 212, 255, 0.1)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.style.borderColor = 'rgba(0, 212, 255, 0.3)';
+                dropZone.style.background = 'rgba(0, 0, 0, 0.2)';
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        evidenceUpload.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    // Check if file already exists
+                    const existingFiles = Array.from(selectedFiles.querySelectorAll('.selected-file span:first-of-type'));
+                    const fileNames = existingFiles.map(el => el.textContent);
+                    
+                    if (!fileNames.includes(file.name)) {
+                        const fileElement = document.createElement('div');
+                        fileElement.className = 'selected-file';
+                        fileElement.innerHTML = `
+                            <i class="fas fa-file"></i>
+                            <span>${file.name}</span>
+                            <span class="file-size">(${(file.size / 1024).toFixed(1)} KB)</span>
+                            <button class="remove-file" onclick="event.stopPropagation(); this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        selectedFiles.appendChild(fileElement);
+                    }
+                });
+            }
+        }
+
+        // Form Submission
+        const reportForm = document.getElementById('reportForm');
+        reportForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                anonymous: anonymousToggle.checked,
+                name: reporterName.value,
+                email: reporterEmail.value,
+                category: document.getElementById('incidentCategory').value,
+                date: incidentDate.value,
+                location: document.getElementById('incidentLocation').value,
+                description: document.getElementById('incidentDescription').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Store in localStorage
+            let reports = JSON.parse(localStorage.getItem('voiceed_reports') || '[]');
+            reports.unshift(formData);
+            localStorage.setItem('voiceed_reports', JSON.stringify(reports));
+
+            alert('Thank you for your report. Your submission has been received securely. The VoiceED team will review it promptly.');
+            reportForm.reset();
+            identityGroup.style.display = 'block';
+            emailGroup.style.display = 'block';
+            incidentDate.disabled = false;
+            selectedFiles.innerHTML = '';
+        });
+
+        // Map Search Functionality
+        const searchMapBtn = document.getElementById('searchMapBtn');
+        const mapSearch = document.getElementById('mapSearch');
+
+        searchMapBtn.addEventListener('click', function() {
+            const searchTerm = mapSearch.value.trim();
+            if (searchTerm) {
+                const encodedSearch = encodeURIComponent(searchTerm + ' near me');
+                window.open(`https://www.google.com/maps/search/${encodedSearch}`, '_blank');
+            } else {
+                alert('Please enter a location or organization to search for.');
+            }
+        });
+
+        mapSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMapBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

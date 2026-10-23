@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('inspireBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        // Future: window.location.href = 'inspireed.html';
+        window.location.href = 'inspireED.html';
     });
 
     document.getElementById('shareBtn').addEventListener('click', function(e) {
