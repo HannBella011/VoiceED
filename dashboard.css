@@ -3,10 +3,6 @@
 /* Navigation Active State */
 .nav-links .nav-active {
     color: var(--accent-cyan) !important;
-    text-decoration: underline;
-    text-decoration-color: var(--accent-cyan);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
 }
 .dashboard-main {
     padding: 6rem 0 3rem 0;

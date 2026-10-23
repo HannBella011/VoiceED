@@ -59,33 +59,35 @@
                         <h3>Today's Goals</h3>
                     </div>
                     <div class="card-body">
-                        <div class="goals-list">
-                            <label class="goal-item">
+                        <div class="goals-list" id="goalsList">
+                            <label class="goal-item default-goal">
                                 <input type="checkbox" class="goal-checkbox" data-goal="sleep">
                                 <span class="goal-text">7-8 hours sleep</span>
                             </label>
-                            <label class="goal-item">
+                            <label class="goal-item default-goal">
                                 <input type="checkbox" class="goal-checkbox" data-goal="water">
                                 <span class="goal-text">8 glasses water</span>
                             </label>
-                            <label class="goal-item">
+                            <label class="goal-item default-goal">
                                 <input type="checkbox" class="goal-checkbox" data-goal="exercise">
                                 <span class="goal-text">30 min exercise</span>
                             </label>
-                            <label class="goal-item">
+                            <label class="goal-item default-goal">
                                 <input type="checkbox" class="goal-checkbox" data-goal="breaks">
                                 <span class="goal-text">Study breaks</span>
                             </label>
-                            <label class="goal-item">
-                                <input type="checkbox" class="goal-checkbox" data-goal="mindfulness">
-                                <span class="goal-text">Mindfulness</span>
-                            </label>
+                        </div>
+                        <div class="add-goal-section">
+                            <div class="add-goal-input-group">
+                                <input type="text" id="customGoalInput" class="custom-goal-input" placeholder="Add your custom goal...">
+                                <button class="add-goal-btn" id="addGoalBtn"><i class="fas fa-plus"></i></button>
+                            </div>
                         </div>
                         <div class="goals-progress">
                             <div class="progress-track">
                                 <div class="progress-bar-fill" id="goalsProgress"></div>
                             </div>
-                            <p class="progress-label"><span id="goalsCount">0</span>/5 completed</p>
+                            <p class="progress-label"><span id="goalsCount">0</span>/<span id="totalGoals">4</span> completed</p>
                         </div>
                     </div>
                 </div>
@@ -109,7 +111,7 @@
             </div>
 
             <div class="back-button-container">
-                <a href="wellnessED.html" class="wellness-btn outline-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
+                <a href="wellnessED.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
             </div>
         </div>
     </main>
@@ -120,63 +122,67 @@
             <div class="footer-content">
                 <div class="footer-top-row">
                     <div class="footer-section">
-                        <h4>About VoiceED</h4>
-                        <p>VoiceED is a student-focused platform designed to support mental health, safety, and academic success.</p>
+                        <h3>VoiceED Description</h3>
+                        <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
                     </div>
                     <div class="footer-section">
                         <h4>Quick Links</h4>
                         <ul>
-                            <li><a href="dashboard.html">Dashboard</a></li>
-                            <li><a href="wellnessED.html">WellnessED</a></li>
-                            <li><a href="contacts.html">Emergency Contacts</a></li>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="services.html">Services</a></li>
+                            <li><a href="contacts.html">Contact</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="footer-top-row">
-                    <div class="footer-section credentials-section">
-                        <h4>Founders</h4>
-                        <div class="founders-grid">
-                            <div class="founder-card">
-                                <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
-                                <p class="founder-name">Hannah Bella C. Atay</p>
-                                <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
-                            </div>
-                            <div class="founder-card">
-                                <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
-                                <p class="founder-name">John Erwin F. Cadiz</p>
-                                <p class="founder-title">Co-Founder and Millennium Fellow</p>
-                            </div>
+                <div class="footer-section credentials-section">
+                    <h4>Founders & Campus Directors</h4>
+                    <div class="founders-grid">
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <p class="founder-name">Junie Jebreel M. Botawan II</p>
+                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
                         </div>
-                    </div>
-                    <div class="footer-section credentials-section">
-                        <h4>Millennium Fellows</h4>
-                        <div class="fellows-grid">
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
-                                <p class="fellow-name">Hannah A. Hontiveros</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
-                                <p class="fellow-name">Jason James E. Azcona</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
-                                <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
-                                <p class="fellow-name">Joshua Louise R. Villanueva</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
+                        <div class="founder-card">
+                            <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                            <p class="founder-name">Hannah Bella C. Atay</p>
+                            <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                            <p class="founder-name">John Erwin F. Cadiz</p>
+                            <p class="founder-title">Co-Founder and Millennium Fellow</p>
                         </div>
                     </div>
                 </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2026 VoiceED. All rights reserved.</p>
+                <div class="footer-section credentials-section">
+                    <h4>Millennium Fellows</h4>
+                    <div class="fellows-grid">
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                            <p class="fellow-name">Hannah A. Hontiveros</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                            <p class="fellow-name">Jason James E. Azcona</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                            <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VoiceED. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -186,11 +192,96 @@
     <script src="user-menu.js"></script>
     <script>
         // Daily Goals
+        const goalsList = document.getElementById('goalsList');
         const goalCheckboxes = document.querySelectorAll('.goal-checkbox');
         const goalsProgress = document.getElementById('goalsProgress');
         const goalsCount = document.getElementById('goalsCount');
+        const totalGoals = document.getElementById('totalGoals');
+        const customGoalInput = document.getElementById('customGoalInput');
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        
         let goalsState = JSON.parse(localStorage.getItem('wellness_goals') || '{}');
+        let customGoals = JSON.parse(localStorage.getItem('wellness_custom_goals') || '[]');
 
+        // Load custom goals on page load
+        function loadCustomGoals() {
+            customGoals.forEach(goal => {
+                addCustomGoalToDOM(goal.text, goal.id, false);
+            });
+            updateTotalGoals();
+        }
+
+        function addCustomGoalToDOM(text, id, save = true) {
+            const goalItem = document.createElement('label');
+            goalItem.className = 'goal-item custom-goal';
+            goalItem.innerHTML = `
+                <input type="checkbox" class="goal-checkbox" data-goal="custom-${id}">
+                <span class="goal-text">${text}</span>
+                <span class="delete-goal" data-id="${id}"><i class="fas fa-times"></i></span>
+            `;
+            
+            goalsList.appendChild(goalItem);
+            
+            // Add event listener for checkbox
+            const checkbox = goalItem.querySelector('.goal-checkbox');
+            if (goalsState[`custom-${id}`]) {
+                checkbox.checked = true;
+            }
+            
+            checkbox.addEventListener('change', () => {
+                goalsState[`custom-${id}`] = checkbox.checked;
+                localStorage.setItem('wellness_goals', JSON.stringify(goalsState));
+                updateGoalsProgress();
+            });
+            
+            // Add event listener for delete
+            const deleteBtn = goalItem.querySelector('.delete-goal');
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                deleteCustomGoal(id, goalItem);
+            });
+            
+            if (save) {
+                customGoals.push({ id, text });
+                localStorage.setItem('wellness_custom_goals', JSON.stringify(customGoals));
+            }
+            
+            updateTotalGoals();
+        }
+
+        function deleteCustomGoal(id, element) {
+            customGoals = customGoals.filter(g => g.id !== id);
+            localStorage.setItem('wellness_custom_goals', JSON.stringify(customGoals));
+            delete goalsState[`custom-${id}`];
+            localStorage.setItem('wellness_goals', JSON.stringify(goalsState));
+            element.remove();
+            updateTotalGoals();
+            updateGoalsProgress();
+        }
+
+        function updateTotalGoals() {
+            const total = document.querySelectorAll('.goal-checkbox').length;
+            totalGoals.textContent = total;
+        }
+
+        // Add custom goal
+        addGoalBtn.addEventListener('click', () => {
+            const text = customGoalInput.value.trim();
+            if (text) {
+                const id = Date.now();
+                addCustomGoalToDOM(text, id);
+                customGoalInput.value = '';
+            }
+        });
+
+        // Add goal on Enter key
+        customGoalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addGoalBtn.click();
+            }
+        });
+
+        // Default goals event listeners
         goalCheckboxes.forEach(checkbox => {
             const goal = checkbox.dataset.goal;
             if (goalsState[goal]) {
@@ -205,12 +296,17 @@
         });
 
         function updateGoalsProgress() {
-            const completed = Object.values(goalsState).filter(v => v).length;
-            const percentage = (completed / 5) * 100;
+            const allCheckboxes = document.querySelectorAll('.goal-checkbox');
+            const completed = Array.from(allCheckboxes).filter(cb => cb.checked).length;
+            const total = allCheckboxes.length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
             goalsProgress.style.width = percentage + '%';
             goalsCount.textContent = completed;
+            totalGoals.textContent = total;
         }
 
+        // Initialize
+        loadCustomGoals();
         updateGoalsProgress();
     </script>
 </body>

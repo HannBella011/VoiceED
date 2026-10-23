@@ -66,11 +66,17 @@
                             </div>
                             <div class="form-group">
                                 <label for="journalMood">How are you feeling?</label>
-                                <select id="journalMood" class="journal-input">
-                                    <option value="great">😊 Great</option>
+                                <select id="journalMood" class="journal-input journal-mood-select">
+                                    <option value="">Select your mood...</option>
+                                    <option value="excited">🤩 Excited</option>
+                                    <option value="happy">😊 Happy</option>
                                     <option value="good">🙂 Good</option>
+                                    <option value="calm">😌 Calm</option>
                                     <option value="okay">😐 Okay</option>
-                                    <option value="bad">😔 Bad</option>
+                                    <option value="tired">😴 Tired</option>
+                                    <option value="worried">😟 Worried</option>
+                                    <option value="sad">😔 Sad</option>
+                                    <option value="angry">😠 Angry</option>
                                     <option value="terrible">😢 Terrible</option>
                                 </select>
                             </div>
@@ -100,7 +106,7 @@
             </div>
 
             <div class="back-button-container">
-                <a href="wellnessED.html" class="wellness-btn outline-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
+                <a href="wellnessED.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to WellnessED</a>
             </div>
         </div>
     </main>
@@ -111,63 +117,67 @@
             <div class="footer-content">
                 <div class="footer-top-row">
                     <div class="footer-section">
-                        <h4>About VoiceED</h4>
-                        <p>VoiceED is a student-focused platform designed to support mental health, safety, and academic success.</p>
+                        <h3>VoiceED Description</h3>
+                        <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
                     </div>
                     <div class="footer-section">
                         <h4>Quick Links</h4>
                         <ul>
-                            <li><a href="dashboard.html">Dashboard</a></li>
-                            <li><a href="wellnessED.html">WellnessED</a></li>
-                            <li><a href="contacts.html">Emergency Contacts</a></li>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="services.html">Services</a></li>
+                            <li><a href="contacts.html">Contact</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="footer-top-row">
-                    <div class="footer-section credentials-section">
-                        <h4>Founders</h4>
-                        <div class="founders-grid">
-                            <div class="founder-card">
-                                <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
-                                <p class="founder-name">Hannah Bella C. Atay</p>
-                                <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
-                            </div>
-                            <div class="founder-card">
-                                <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
-                                <p class="founder-name">John Erwin F. Cadiz</p>
-                                <p class="founder-title">Co-Founder and Millennium Fellow</p>
-                            </div>
+                <div class="footer-section credentials-section">
+                    <h4>Founders & Campus Directors</h4>
+                    <div class="founders-grid">
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <p class="founder-name">Junie Jebreel M. Botawan II</p>
+                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
                         </div>
-                    </div>
-                    <div class="footer-section credentials-section">
-                        <h4>Millennium Fellows</h4>
-                        <div class="fellows-grid">
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
-                                <p class="fellow-name">Hannah A. Hontiveros</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
-                                <p class="fellow-name">Jason James E. Azcona</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
-                                <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
-                            <div class="fellow-card">
-                                <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
-                                <p class="fellow-name">Joshua Louise R. Villanueva</p>
-                                <p class="fellow-title">Millennium Fellow</p>
-                            </div>
+                        <div class="founder-card">
+                            <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                            <p class="founder-name">Hannah Bella C. Atay</p>
+                            <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                            <p class="founder-name">John Erwin F. Cadiz</p>
+                            <p class="founder-title">Co-Founder and Millennium Fellow</p>
                         </div>
                     </div>
                 </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2026 VoiceED. All rights reserved.</p>
+                <div class="footer-section credentials-section">
+                    <h4>Millennium Fellows</h4>
+                    <div class="fellows-grid">
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                            <p class="fellow-name">Hannah A. Hontiveros</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                            <p class="fellow-name">Jason James E. Azcona</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                            <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 VoiceED. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -190,11 +200,19 @@
         journalDate.value = new Date().toISOString().split('T')[0];
 
         const moodEmojis = {
-            'great': '😊',
+            'excited': '🤩',
+            'happy': '😊',
             'good': '🙂',
+            'calm': '😌',
             'okay': '😐',
-            'bad': '😔',
-            'terrible': '😢'
+            'tired': '😴',
+            'worried': '😟',
+            'sad': '😔',
+            'angry': '😠',
+            'terrible': '😢',
+            // Legacy mood values for backward compatibility
+            'great': '😊',
+            'bad': '😔'
         };
 
         function displayJournals() {
@@ -203,21 +221,38 @@
                 return;
             }
             
-            journalEntries.innerHTML = journals.map(j => `
-                <div class="journal-entry">
+            journalEntries.innerHTML = journals.map((j, index) => `
+                <div class="journal-entry" data-index="${index}">
                     <div class="journal-entry-header">
                         <span class="journal-entry-date">${j.date}</span>
-                        <span class="journal-entry-mood">${moodEmojis[j.mood] || ''}</span>
+                        <span class="journal-entry-mood">${moodEmojis[j.mood] || '😐'}</span>
+                        <span class="journal-entry-delete" data-index="${index}"><i class="fas fa-trash"></i></span>
                     </div>
                     <p class="journal-entry-content">${j.content}</p>
                 </div>
             `).join('');
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.journal-entry-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index);
+                    deleteJournalEntry(index);
+                });
+            });
+        }
+
+        function deleteJournalEntry(index) {
+            if (confirm('Are you sure you want to delete this journal entry?')) {
+                journals.splice(index, 1);
+                localStorage.setItem('wellness_journals', JSON.stringify(journals));
+                displayJournals();
+            }
         }
 
         saveJournalBtn.addEventListener('click', () => {
             const entry = {
                 date: journalDate.value,
-                mood: journalMood.value,
+                mood: journalMood.value || 'okay',
                 content: journalContent.value,
                 timestamp: new Date().toISOString()
             };
@@ -232,6 +267,8 @@
             localStorage.setItem('wellness_journals', JSON.stringify(journals));
             
             journalContent.value = '';
+            journalMood.value = '';
+            journalDate.value = new Date().toISOString().split('T')[0];
             displayJournals();
         });
 
