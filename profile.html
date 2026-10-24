@@ -32,10 +32,10 @@
                 <nav class="navbar" id="navbar">
                     <ul class="nav-links">
                         <li><a href="dashboard.html">Dashboard</a></li>
-                        <li><a href="#" id="reportedBtn">ReportED</a></li>
+                        <li><a href="ReportED.html" id="reportedBtn">ReportED</a></li>
                         <li><a href="wellnessED.html" id="wellnessBtn">WellnessED</a></li>
-                        <li><a href="#" id="inspireBtn">InspireED</a></li>
-                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="inspireED.html" id="inspireBtn">InspireED</a></li>
+                        <li><a href="ShareED.html" id="shareBtn">ShareED</a></li>
                         <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
                         <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
                     </ul>
@@ -296,5 +296,34 @@
     <script src="profile.js"></script>
     <script src="login-fixed.js"></script>
     <script src="user-menu.js"></script>
+    <script>
+        // Add navigation functionality for header buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const reportedBtn = document.getElementById('reportedBtn');
+            const inspireBtn = document.getElementById('inspireBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            
+            if (reportedBtn) {
+                reportedBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'ReportED.html';
+                });
+            }
+            
+            if (inspireBtn) {
+                inspireBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'inspireED.html';
+                });
+            }
+            
+            if (shareBtn) {
+                shareBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'ShareED.html';
+                });
+            }
+        });
+    </script>
 </body>
 </html>

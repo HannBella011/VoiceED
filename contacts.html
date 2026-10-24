@@ -312,7 +312,7 @@
     </div>
 
     <!-- User Menu Modal -->
-    <div id="userMenuModal" class="modal">
+    <div class="modal user-menu-modal" id="userMenuModal">
         <div class="modal-content user-menu-modal-content">
             <span class="close-button">&times;</span>
             <h2>User Menu</h2>
@@ -341,6 +341,36 @@
     <script src="particles.js"></script>
     <script src="login-fixed.js"></script>
     <script src="user-menu.js"></script>
+    <script>
+        // Override user menu behavior for contacts - always show user menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenuModal = document.getElementById('userMenuModal');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (userMenuBtn && userMenuModal) {
+                const newBtn = userMenuBtn.cloneNode(true);
+                userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    userMenuModal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const loginModal = document.getElementById('loginModal');
+                    if (loginModal) {
+                        loginModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            }
+        });
+    </script>
     <script>
         // Contact form functionality
         document.getElementById('contactForm').addEventListener('submit', function(e) {

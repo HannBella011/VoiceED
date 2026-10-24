@@ -176,33 +176,7 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div class="input-group">
-                    <input type="text" id="username" placeholder="Username" required>
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="password" placeholder="Password" required>
-                    <i class="fas fa-lock"></i>
-                </div>
-                <div class="options">
-                    <label>
-                        <input type="checkbox"> Remember me
-                    </label>
-                    <a href="forgot-password.html">Forgot Password?</a>
-                </div>
-                <button type="submit" class="login-button">Login</button>
-                <p class="register-text">Don't have an account? <a href="register.html">Register</a></p>
-            </form>
-        </div>
-    </div>
-
-   <!-- Footer -->
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -271,10 +245,36 @@
                 <p>&copy; 2026 VoiceED. All rights reserved.</p>
             </div>
         </div>
-    </footer>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="options">
+                    <label>
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="forgot-password.html">Forgot Password?</a>
+                </div>
+                <button type="submit" class="login-button">Login</button>
+                <p class="register-text">Don't have an account? <a href="register.html">Register</a></p>
+            </form>
+        </div>
+    </div>
 
     <!-- User Menu Modal -->
-    <div id="userMenuModal" class="modal">
+    <div class="modal user-menu-modal" id="userMenuModal">
         <div class="modal-content user-menu-modal-content">
             <span class="close-button">&times;</span>
             <h2>User Menu</h2>
@@ -303,5 +303,35 @@
     <script src="particles.js"></script>
     <script src="login-fixed.js"></script>
     <script src="user-menu.js"></script>
+    <script>
+        // Override user menu behavior for services - always show user menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenuModal = document.getElementById('userMenuModal');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (userMenuBtn && userMenuModal) {
+                const newBtn = userMenuBtn.cloneNode(true);
+                userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    userMenuModal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const loginModal = document.getElementById('loginModal');
+                    if (loginModal) {
+                        loginModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

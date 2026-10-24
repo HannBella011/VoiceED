@@ -172,33 +172,6 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div class="input-group">
-                    <input type="text" id="username" placeholder="Username" required>
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="password" placeholder="Password" required>
-                    <i class="fas fa-lock"></i>
-                </div>
-                <div class="options">
-                    <label>
-                        <input type="checkbox"> Remember me
-                    </label>
-                    <a href="forgot-password.html">Forgot Password?</a>
-                </div>
-                <button type="submit" class="login-button">Login</button>
-                <p class="register-text">Don't have an account? <a href="register.html">Register</a></p>
-            </form>
-        </div>
-    </div>
-
-    
     
     <!-- Footer -->
     <footer class="footer">
@@ -275,14 +248,62 @@
     <script src="login-fixed.js"></script>
     <script src="user-menu.js"></script>
     <script>
-        // Get Started button functionality
+        // Get Started button functionality - show login modal
         document.getElementById('getStartedBtn').addEventListener('click', function() {
-            window.location.href = 'dashboard.html';
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal) {
+                loginModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        });
+
+        // Override user menu behavior for index - always show user menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenuModal = document.getElementById('userMenuModal');
+            
+            if (userMenuBtn && userMenuModal) {
+                // Remove existing event listeners by cloning
+                const newBtn = userMenuBtn.cloneNode(true);
+                userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    userMenuModal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
         });
     </script>
     
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="options">
+                    <label>
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="forgot-password.html">Forgot Password?</a>
+                </div>
+                <button type="submit" class="login-button">Login</button>
+                <p class="register-text">Don't have an account? <a href="register.html">Register</a></p>
+            </form>
+        </div>
+    </div>
+
     <!-- User Menu Modal -->
-    <div id="userMenuModal" class="modal">
+    <div class="modal user-menu-modal" id="userMenuModal">
         <div class="modal-content user-menu-modal-content">
             <span class="close-button">&times;</span>
             <h2>User Menu</h2>

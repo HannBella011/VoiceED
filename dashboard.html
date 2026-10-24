@@ -288,7 +288,7 @@
     </div>
 
     <!-- User Menu Modal -->
-    <div id="userMenuModal" class="modal">
+    <div class="modal user-menu-modal" id="userMenuModal">
         <div class="modal-content user-menu-modal-content">
             <span class="close-button">&times;</span>
             <h2>User Menu</h2>
@@ -311,25 +311,6 @@
                     <span>Logout</span>
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginUsername">Username</label>
-                    <input type="text" id="loginUsername" placeholder="Enter your username" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="submit-btn">Login</button>
-            </form>
         </div>
     </div>
 
@@ -408,5 +389,24 @@
     <script src="dashboard.js"></script>
     <script src="login-fixed.js"></script>
     <script src="user-menu.js"></script>
+    <script>
+        // Override user menu behavior for dashboard - always show user menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenuModal = document.getElementById('userMenuModal');
+            
+            if (userMenuBtn && userMenuModal) {
+                // Remove existing event listeners by cloning
+                const newBtn = userMenuBtn.cloneNode(true);
+                userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    userMenuModal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
