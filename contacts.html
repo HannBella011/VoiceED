@@ -191,9 +191,9 @@
                     <h4>Founders & Campus Directors</h4>
                     <div class="founders-grid">
                         <div class="founder-card">
-                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <img src="jez.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
                             <p class="founder-name">Junie Jebreel M. Botawan II</p>
-                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                            <p class="founder-title">Software QA and Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
                         </div>
                         <div class="founder-card">
                             <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
@@ -221,7 +221,7 @@
                             <p class="fellow-title">Millennium Fellow</p>
                         </div>
                         <div class="fellow-card">
-                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <img src="jiggen.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
                             <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
                             <p class="fellow-title">Millennium Fellow</p>
                         </div>
@@ -339,8 +339,32 @@
     </div>
 
     <script src="particles.js"></script>
-<script src="login-fixed.js"></script>
-<script src="user-menu.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+    <script>
+        // Contact form functionality
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            // Simple validation
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Show success message
+            alert('Thank you for your message, ' + name + '! We will get back to you soon.');
+            
+            // Reset form
+            this.reset();
+        });
+    </script>
 
 </body>
 </html>

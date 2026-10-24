@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('shareBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        // Future: window.location.href = 'shared.html';
+        window.location.href = 'ShareED.html';
     });
 
     // Quick action buttons
@@ -182,6 +182,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('supportBtn').addEventListener('click', function() {
         window.location.href = 'contacts.html';
     });
+
+    // View All button
+    const viewAllBtn = document.querySelector('.view-all');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Activity history feature coming soon!');
+        });
+    }
 
     // Update dashboard data function
     function updateDashboardData(user) {

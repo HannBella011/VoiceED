@@ -53,7 +53,7 @@
 
             <div class="dashboard-grid">
                 <!-- Quick Stats -->
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="window.location.href='ReportED.html'" style="cursor: pointer;">
                     <div class="card-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
@@ -61,7 +61,7 @@
                     <p class="stat-label">A safe, anonymous space where students submit crime reports, raise safety concerns, and ensure their voices are heard.</p>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="window.location.href='wellnessED.html'" style="cursor: pointer;">
                     <div class="card-icon">
                         <i class="fas fa-heart"></i>
                     </div>
@@ -69,7 +69,7 @@
                     <p class="stat-label">Practical tips on mental health, stress management, and motivation to help students balance academics and personal wellbeing.</p>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="window.location.href='inspireED.html'" style="cursor: pointer;">
                     <div class="card-icon">
                         <i class="fas fa-lightbulb"></i>
                     </div>
@@ -77,7 +77,7 @@
                     <p class="stat-label">Motivational stories, student achievements, and encouraging quotes designed to inspire persistence and hope among learners.</p>
                 </div>
 
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="window.location.href='ShareED.html'" style="cursor: pointer;">
                     <div class="card-icon">
                         <i class="fas fa-share-alt"></i>
                     </div>
@@ -223,9 +223,9 @@
                     <h4>Founders & Campus Directors</h4>
                     <div class="founders-grid">
                         <div class="founder-card">
-                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <img src="jez.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
                             <p class="founder-name">Junie Jebreel M. Botawan II</p>
-                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                            <p class="founder-title">Software QA and Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
                         </div>
                         <div class="founder-card">
                             <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
@@ -253,7 +253,7 @@
                             <p class="fellow-title">Millennium Fellow</p>
                         </div>
                         <div class="fellow-card">
-                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <img src="jiggen.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
                             <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
                             <p class="fellow-title">Millennium Fellow</p>
                         </div>
@@ -274,6 +274,12 @@
     <script src="particles.js"></script>
     <script src="login-fixed.js"></script>
     <script src="user-menu.js"></script>
+    <script>
+        // Get Started button functionality
+        document.getElementById('getStartedBtn').addEventListener('click', function() {
+            window.location.href = 'dashboard.html';
+        });
+    </script>
     
     <!-- User Menu Modal -->
     <div id="userMenuModal" class="modal">

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareED | Collaborative Learning Space</title>
+    <link rel="stylesheet" href="index-style.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="user-menu.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="particles.js" defer></script>
+    <script src="mobile-menu.js" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <img src="logo for blue.png" alt="VoiceED Logo" width="90" height="90">
+                    </div>
+                    <div class="brand-text">
+                        <h1>VoiceED</h1>
+                        <p class="tagline">Where Every Student's Voice Matters</p>
+                    </div>
+                </div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav class="navbar" id="navbar">
+                    <ul class="nav-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="ReportED.html">ReportED</a></li>
+                        <li><a href="wellnessED.html" id="wellnessBtn">WellnessED</a></li>
+                        <li><a href="inspireED.html" id="inspireBtn">InspireED</a></li>
+                        <li><a href="ShareED.html" id="shareBtn" class="nav-active">ShareED</a></li>
+                        <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
+                        <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="wellness-main">
+        <div class="container">
+            <div class="wellness-hero">
+                <h2>ShareED</h2>
+                <p>A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.</p>
+            </div>
+
+            <!-- Resource Search & Quick Access Area -->
+            <div class="search-quick-access-section">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Resource Search & Quick Access</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">Learn together, grow together—access community-contributed study materials and reviewer sheets.</p>
+                        
+                        <!-- Search Bar -->
+                        <div class="search-bar-container">
+                            <input type="text" id="resourceSearch" class="search-input" placeholder="Search by keyword, topic, or course code...">
+                            <button class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <!-- Quick Filters -->
+                        <div class="filter-container">
+                            <div class="filter-group">
+                                <label for="subjectFilter">Subject/Course</label>
+                                <select id="subjectFilter" class="filter-select">
+                                    <option value="">All Subjects</option>
+                                    <option value="cs">Computer Science</option>
+                                    <option value="math">Mathematics</option>
+                                    <option value="humanities">Humanities</option>
+                                    <option value="ge">General Education</option>
+                                    <option value="engineering">Engineering</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="resourceTypeFilter">Resource Type</label>
+                                <select id="resourceTypeFilter" class="filter-select">
+                                    <option value="">All Types</option>
+                                    <option value="lecture">Lecture Notes</option>
+                                    <option value="reviewer">Reviewer Sheet</option>
+                                    <option value="exam">Exam Prep</option>
+                                    <option value="summary">Summary</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="fileFormatFilter">File Format</label>
+                                <select id="fileFormatFilter" class="filter-select">
+                                    <option value="">All Formats</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="docx">DOCX</option>
+                                    <option value="image">Images</option>
+                                    <option value="link">Links</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Resources Carousel -->
+                        <div class="resources-carousel">
+                            <div class="resources-grid" id="resourcesGrid">
+                                <!-- Resource 1 -->
+                                <div class="resource-card">
+                                    <div class="resource-preview">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h5 class="resource-title">CCC121 Midterm Reviewer - Data Structures</h5>
+                                        <p class="resource-uploader">Uploaded by: Anonymous Student</p>
+                                        <div class="resource-meta">
+                                            <span class="resource-size">2.4 MB</span>
+                                            <span class="resource-downloads"><i class="fas fa-download"></i> 156</span>
+                                            <span class="resource-rating"><i class="fas fa-star"></i> 4.8</span>
+                                        </div>
+                                        <div class="resource-actions">
+                                            <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                            <button class="preview-btn"><i class="fas fa-eye"></i> Preview</button>
+                                            <button class="upvote-btn"><i class="fas fa-thumbs-up"></i> 45</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Resource 2 -->
+                                <div class="resource-card">
+                                    <div class="resource-preview">
+                                        <i class="fas fa-file-word"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h5 class="resource-title">Programming Fundamentals Lecture Notes</h5>
+                                        <p class="resource-uploader">Uploaded by: John Doe</p>
+                                        <div class="resource-meta">
+                                            <span class="resource-size">1.8 MB</span>
+                                            <span class="resource-downloads"><i class="fas fa-download"></i> 89</span>
+                                            <span class="resource-rating"><i class="fas fa-star"></i> 4.5</span>
+                                        </div>
+                                        <div class="resource-actions">
+                                            <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                            <button class="preview-btn"><i class="fas fa-eye"></i> Preview</button>
+                                            <button class="upvote-btn"><i class="fas fa-thumbs-up"></i> 32</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Resource 3 -->
+                                <div class="resource-card">
+                                    <div class="resource-preview">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h5 class="resource-title">Calculus II Final Exam Reviewer</h5>
+                                        <p class="resource-uploader">Uploaded by: Anonymous Student</p>
+                                        <div class="resource-meta">
+                                            <span class="resource-size">3.1 MB</span>
+                                            <span class="resource-downloads"><i class="fas fa-download"></i> 234</span>
+                                            <span class="resource-rating"><i class="fas fa-star"></i> 4.9</span>
+                                        </div>
+                                        <div class="resource-actions">
+                                            <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                            <button class="preview-btn"><i class="fas fa-eye"></i> Preview</button>
+                                            <button class="upvote-btn"><i class="fas fa-thumbs-up"></i> 78</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Resource 4 -->
+                                <div class="resource-card">
+                                    <div class="resource-preview">
+                                        <i class="fas fa-file-image"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h5 class="resource-title">Literature Analysis Summary</h5>
+                                        <p class="resource-uploader">Uploaded by: Jane Smith</p>
+                                        <div class="resource-meta">
+                                            <span class="resource-size">1.2 MB</span>
+                                            <span class="resource-downloads"><i class="fas fa-download"></i> 67</span>
+                                            <span class="resource-rating"><i class="fas fa-star"></i> 4.3</span>
+                                        </div>
+                                        <div class="resource-actions">
+                                            <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                            <button class="preview-btn"><i class="fas fa-eye"></i> Preview</button>
+                                            <button class="upvote-btn"><i class="fas fa-thumbs-up"></i> 21</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Resource 5 -->
+                                <div class="resource-card">
+                                    <div class="resource-preview">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h5 class="resource-title">GE101 Study Guide - Critical Thinking</h5>
+                                        <p class="resource-uploader">Uploaded by: Anonymous Student</p>
+                                        <div class="resource-meta">
+                                            <span class="resource-size">2.0 MB</span>
+                                            <span class="resource-downloads"><i class="fas fa-download"></i> 145</span>
+                                            <span class="resource-rating"><i class="fas fa-star"></i> 4.7</span>
+                                        </div>
+                                        <div class="resource-actions">
+                                            <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                            <button class="preview-btn"><i class="fas fa-eye"></i> Preview</button>
+                                            <button class="upvote-btn"><i class="fas fa-thumbs-up"></i> 56</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Resource 6 -->
+                                <div class="resource-card">
+                                    <div class="resource-preview">
+                                        <i class="fas fa-file-powerpoint"></i>
+                                    </div>
+                                    <div class="resource-info">
+                                        <h5 class="resource-title">Physics Mechanics Presentation</h5>
+                                        <p class="resource-uploader">Uploaded by: Mike Johnson</p>
+                                        <div class="resource-meta">
+                                            <span class="resource-size">4.5 MB</span>
+                                            <span class="resource-downloads"><i class="fas fa-download"></i> 189</span>
+                                            <span class="resource-rating"><i class="fas fa-star"></i> 4.6</span>
+                                        </div>
+                                        <div class="resource-actions">
+                                            <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                                            <button class="preview-btn"><i class="fas fa-eye"></i> Preview</button>
+                                            <button class="upvote-btn"><i class="fas fa-thumbs-up"></i> 67</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Navigation Buttons -->
+                            <div class="carousel-navigation">
+                                <button class="carousel-btn prev-btn" id="prevBtn">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </button>
+                                <button class="carousel-btn next-btn" id="nextBtn">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload System -->
+            <div class="upload-section">
+                <div class="wellness-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h3>Upload Study Material</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" class="upload-form">
+                            <!-- Resource Details -->
+                            <div class="form-group">
+                                <label for="resourceTitle">Title</label>
+                                <input type="text" id="resourceTitle" class="upload-input" placeholder="e.g., CCC121 Midterm Reviewer - Data Structures" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="subjectCode">Subject / Course Code</label>
+                                <input type="text" id="subjectCode" class="upload-input" placeholder="e.g., CCC121" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="resourceCategory">Resource Category</label>
+                                <select id="resourceCategory" class="upload-input" required>
+                                    <option value="">Select category...</option>
+                                    <option value="lecture">Lecture Notes</option>
+                                    <option value="reviewer">Reviewer Sheet</option>
+                                    <option value="quiz">Practice Quiz</option>
+                                    <option value="reference">Reference Book</option>
+                                </select>
+                            </div>
+
+                            <!-- File Input -->
+                            <div class="form-group">
+                                <label for="fileUpload">File Upload</label>
+                                <div class="file-upload-area" id="uploadDropZone">
+                                    <input type="file" id="fileUpload" class="file-input" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
+                                    <div class="file-upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Drag and drop files here or click to browse</p>
+                                        <span class="file-types">Supports: PDF, DOC, DOCX, PPT, PPTX, Images</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="selectedUploadFiles" class="selected-files"></div>
+
+                            <!-- Anonymity Toggle -->
+                            <div class="form-group anonymity-group">
+                                <label class="anonymity-toggle">
+                                    <input type="checkbox" id="uploadAnonymous" name="uploadAnonymous">
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-text">Upload as Anonymous Student</span>
+                                </label>
+                                <p class="anonymity-note">If checked, your identity will be hidden from other students.</p>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-submit">
+                                <button type="submit" class="submit-btn">
+                                    <i class="fas fa-upload"></i>
+                                    Upload Resource
+                                </button>
+                            </div>
+
+                            <!-- Data Policy Statement -->
+                            <p class="data-handling-statement">
+                                <i class="fas fa-shield-alt"></i>
+                                Academic integrity and community safety come first. All uploaded files are scanned for safety, and shared materials must respect academic guidelines. Identity privacy is preserved whenever anonymous sharing is selected.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-top-row">
+                    <div class="footer-section">
+                        <h3>VoiceED Description</h3>
+                        <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="services.html">Services</a></li>
+                            <li><a href="contacts.html">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Founders & Campus Directors</h4>
+                    <div class="founders-grid">
+                        <div class="founder-card">
+                            <img src="jez.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <p class="founder-name">Junie Jebreel M. Botawan II</p>
+                            <p class="founder-title">Software QA and Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
+                            <p class="founder-name">Hannah Bella C. Atay</p>
+                            <p class="founder-title">Founder, Lead Developer and Millennium Fellowship Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                        </div>
+                        <div class="founder-card">
+                            <img src="pfp.jpg" alt="John Erwin F. Cadiz" class="founder-image">
+                            <p class="founder-name">John Erwin F. Cadiz</p>
+                            <p class="founder-title">Co-Founder and Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section credentials-section">
+                    <h4>Millennium Fellows</h4>
+                    <div class="fellows-grid">
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Hannah A. Hontiveros" class="fellow-image">
+                            <p class="fellow-name">Hannah A. Hontiveros</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Jason James E. Azcona" class="fellow-image">
+                            <p class="fellow-name">Jason James E. Azcona</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="jiggen.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                        <div class="fellow-card">
+                            <img src="pfp.jpg" alt="Joshua Louise R. Villanueva" class="fellow-image">
+                            <p class="fellow-name">Joshua Louise R. Villanueva</p>
+                            <p class="fellow-title">Millennium Fellow</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 VoiceED. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <span class="close">&times;</span>
+            <h2>Resource Preview</h2>
+            <div class="preview-container">
+                <iframe id="previewFrame" src=""></iframe>
+            </div>
+            <div class="preview-actions">
+                <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                <button class="bookmark-btn"><i class="fas fa-bookmark"></i> Save to Study Locker</button>
+                <button class="share-btn"><i class="fas fa-share"></i> Share Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>Select Color</h3>
+                    <div class="color-options">
+                        <label>
+                            <input type="radio" name="color" value="blue" checked>
+                            <span class="color-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e); border: 2px solid #00d4ff;"></span>
+                            <span>Blue</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="purple">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #1a0033, #330066); border: 2px solid #9933ff;"></span>
+                            <span>Purple</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="red">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330000, #660000); border: 2px solid #ff3333;"></span>
+                            <span>Red</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="green">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #003300, #006600); border: 2px solid #33ff33;"></span>
+                            <span>Green</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="orange">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #332200, #664400); border: 2px solid #ff9933;"></span>
+                            <span>Orange</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="color" value="pink">
+                            <span class="color-preview" style="background: linear-gradient(135deg, #330033, #660066); border: 2px solid #ff66cc;"></span>
+                            <span>Pink</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Menu Modal -->
+    <div class="modal user-menu-modal" id="userMenuModal">
+        <div class="modal-content user-menu-modal-content">
+            <span class="close-button">&times;</span>
+            <h2>User Menu</h2>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="menuUsername">Admin</h3>
+                    <p id="menuEmail">Admin@voiceed.com</p>
+                </div>
+            </div>
+            <div class="menu-actions">
+                <button class="user-menu-button" id="profileBtn">
+                    <i class="fas fa-user"></i>
+                    <span>View Profile</span>
+                </button>
+                <button class="user-menu-button" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navbar').classList.toggle('active');
+        });
+
+        // Preview modal
+        const previewModal = document.getElementById('previewModal');
+        const closeBtn = previewModal.querySelector('.close');
+
+        document.querySelectorAll('.preview-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                previewModal.style.display = 'block';
+                // In a real implementation, this would load the actual file
+                document.getElementById('previewFrame').src = 'about:blank';
+            });
+        });
+
+        closeBtn.addEventListener('click', function() {
+            previewModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target === previewModal) {
+                previewModal.style.display = 'none';
+            }
+        });
+
+        // Upload form handling
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Resource uploaded successfully!');
+            this.reset();
+            document.getElementById('selectedUploadFiles').innerHTML = '';
+        });
+
+        // File upload handling
+        const uploadDropZone = document.getElementById('uploadDropZone');
+        const fileUpload = document.getElementById('fileUpload');
+        const selectedUploadFiles = document.getElementById('selectedUploadFiles');
+
+        uploadDropZone.addEventListener('click', () => fileUpload.click());
+
+        fileUpload.addEventListener('change', function() {
+            displaySelectedFiles(this.files, selectedUploadFiles);
+        });
+
+        uploadDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadDropZone.classList.add('drag-over');
+        });
+
+        uploadDropZone.addEventListener('dragleave', () => {
+            uploadDropZone.classList.remove('drag-over');
+        });
+
+        uploadDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadDropZone.classList.remove('drag-over');
+            fileUpload.files = e.dataTransfer.files;
+            displaySelectedFiles(e.dataTransfer.files, selectedUploadFiles);
+        });
+
+        function displaySelectedFiles(files, container) {
+            container.innerHTML = '';
+            Array.from(files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'selected-file-item';
+                fileItem.innerHTML = `
+                    <i class="fas fa-file"></i>
+                    <span>${file.name}</span>
+                    <span class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                `;
+                container.appendChild(fileItem);
+            });
+        }
+
+        // Search functionality
+        document.getElementById('resourceSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const resourceCards = document.querySelectorAll('.resource-card');
+            
+            resourceCards.forEach(card => {
+                const title = card.querySelector('.resource-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Upvote functionality
+        document.querySelectorAll('.upvote-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const count = parseInt(this.textContent.trim());
+                this.innerHTML = `<i class="fas fa-thumbs-up"></i> ${count + 1}`;
+                this.classList.add('upvoted');
+            });
+        });
+
+        // Carousel navigation
+        const resourcesGrid = document.getElementById('resourcesGrid');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resourceCards = document.querySelectorAll('.resource-card');
+        const itemsPerPage = 6;
+        let currentPage = 0;
+        const totalPages = Math.ceil(resourceCards.length / itemsPerPage);
+
+        function showPage(page) {
+            const start = page * itemsPerPage;
+            const end = start + itemsPerPage;
+            
+            resourceCards.forEach((card, index) => {
+                if (index >= start && index < end) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            prevBtn.disabled = page === 0;
+            nextBtn.disabled = page === totalPages - 1;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        // Initialize carousel
+        showPage(0);
+
+        // Override user menu behavior for ShareED - always show user menu
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuModal = document.getElementById('userMenuModal');
+        
+        if (userMenuBtn && userMenuModal) {
+            // Remove existing event listeners by cloning
+            const newBtn = userMenuBtn.cloneNode(true);
+            userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                userMenuModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            });
+        }
+    </script>
+
+    <script src="particles.js"></script>
+    <script src="login-fixed.js"></script>
+    <script src="user-menu.js"></script>
+</body>
+</html>

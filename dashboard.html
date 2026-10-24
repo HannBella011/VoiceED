@@ -35,7 +35,7 @@
                         <li><a href="ReportED.html">ReportED</a></li>
                         <li><a href="wellnessED.html" id="wellnessBtn">WellnessED</a></li>
                         <li><a href="inspireED.html" id="inspireBtn">InspireED</a></li>
-                        <li><a href="#" id="shareBtn">ShareED</a></li>
+                        <li><a href="ShareED.html" id="shareBtn">ShareED</a></li>
                         <li><a href="#" id="settingsBtn" class="settings-nav-btn">Settings</a></li>
                         <li><a href="#" id="userMenuBtn" class="login-nav-btn"><i class="fas fa-user"></i></a></li>
                     </ul>
@@ -104,11 +104,13 @@
                 <div class="main-content">
                     <!-- Welcome Section -->
                     <div class="welcome-section">
-                        <h1>Welcome back, <span id="dashboardUsername">_____</span>!</h1>
-                        <p>Thanks for signing in—VoiceED is ready to be your hub for safety, wellness, and collaboration, where every student's voice matters.</p>
-                        <div class="quote-box">
-                            <p><em>"Education is not the filling of a pail, but the lighting of a fire."</em></p>
-                            <span>- William Butler Yeats</span>
+                        <div class="welcome-content">
+                            <h1>Welcome back, <span id="dashboardUsername">_____</span>!</h1>
+                            <p>Thanks for signing in—VoiceED is ready to be your hub for safety, wellness, and collaboration, where every student's voice matters.</p>
+                            <div class="quote-box">
+                                <p><em>"Education is not the filling of a pail, but the lighting of a fire."</em></p>
+                                <span>- William Butler Yeats</span>
+                            </div>
                         </div>
                     </div>
 
@@ -312,6 +314,25 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -335,9 +356,9 @@
                     <h4>Founders & Campus Directors</h4>
                     <div class="founders-grid">
                         <div class="founder-card">
-                            <img src="pfp.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
+                            <img src="jez.jpg" alt="Junie Jebreel M. Botawan II" class="founder-image">
                             <p class="founder-name">Junie Jebreel M. Botawan II</p>
-                            <p class="founder-title">Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
+                            <p class="founder-title">Software QA and Campus Director of Mindanao State University - Iligan Institute of Technology Cohort</p>
                         </div>
                         <div class="founder-card">
                             <img src="hann.jpg.jpg" alt="Hannah Bella C. Atay" class="founder-image">
@@ -365,7 +386,7 @@
                             <p class="fellow-title">Millennium Fellow</p>
                         </div>
                         <div class="fellow-card">
-                            <img src="pfp.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
+                            <img src="jiggen.jpg" alt="Jiggen Kerr T. Aguilar" class="fellow-image">
                             <p class="fellow-name">Jiggen Kerr T. Aguilar</p>
                             <p class="fellow-title">Millennium Fellow</p>
                         </div>
