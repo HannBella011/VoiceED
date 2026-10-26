@@ -338,30 +338,35 @@
 <script src="login-fixed.js"></script>
 <script src="user-menu.js"></script>
     <script>
-        // Override user menu behavior for about - always show user menu
+        // Override login button behavior for about
         document.addEventListener('DOMContentLoaded', function() {
-            const userMenuBtn = document.getElementById('userMenuBtn');
-            const userMenuModal = document.getElementById('userMenuModal');
             const loginBtn = document.getElementById('loginBtn');
-            
-            if (userMenuBtn && userMenuModal) {
-                const newBtn = userMenuBtn.cloneNode(true);
-                userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
-                
-                newBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    userMenuModal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                });
-            }
+            const userMenuModal = document.getElementById('userMenuModal');
+            const loginModal = document.getElementById('loginModal');
             
             if (loginBtn) {
-                loginBtn.addEventListener('click', function(e) {
+                // Remove existing event listeners by cloning
+                const newLoginBtn = loginBtn.cloneNode(true);
+                loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
+                
+                newLoginBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const loginModal = document.getElementById('loginModal');
-                    if (loginModal) {
-                        loginModal.style.display = 'block';
-                        document.body.style.overflow = 'hidden';
+                    
+                    // Check if user is logged in
+                    const currentUser = JSON.parse(localStorage.getItem('shielded_current_user'));
+                    
+                    if (currentUser) {
+                        // User is logged in - show user menu modal
+                        if (userMenuModal) {
+                            userMenuModal.classList.add('show');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    } else {
+                        // User is not logged in - show login modal
+                        if (loginModal) {
+                            loginModal.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                        }
                     }
                 });
             }

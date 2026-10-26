@@ -257,20 +257,36 @@
             }
         });
 
-        // Override user menu behavior for index - always show user menu
+        // Override login button behavior for index
         document.addEventListener('DOMContentLoaded', function() {
-            const userMenuBtn = document.getElementById('userMenuBtn');
+            const loginBtn = document.getElementById('loginBtn');
             const userMenuModal = document.getElementById('userMenuModal');
+            const loginModal = document.getElementById('loginModal');
             
-            if (userMenuBtn && userMenuModal) {
+            if (loginBtn) {
                 // Remove existing event listeners by cloning
-                const newBtn = userMenuBtn.cloneNode(true);
-                userMenuBtn.parentNode.replaceChild(newBtn, userMenuBtn);
+                const newLoginBtn = loginBtn.cloneNode(true);
+                loginBtn.parentNode.replaceChild(newLoginBtn, loginBtn);
                 
-                newBtn.addEventListener('click', function(e) {
+                newLoginBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    userMenuModal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
+                    
+                    // Check if user is logged in
+                    const currentUser = JSON.parse(localStorage.getItem('shielded_current_user'));
+                    
+                    if (currentUser) {
+                        // User is logged in - show user menu modal
+                        if (userMenuModal) {
+                            userMenuModal.classList.add('show');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    } else {
+                        // User is not logged in - show login modal
+                        if (loginModal) {
+                            loginModal.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                        }
+                    }
                 });
             }
         });
