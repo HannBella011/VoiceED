@@ -1,0 +1,39 @@
+/* VoiceED Global Styles
+ * Imports all existing CSS files in dependency order
+ */
+
+/* Base styles */
+@import './style.css';
+@import './index-style.css';
+@import './dashboard.css';
+@import './profile.css';
+@import './user-menu.css';
+
+/* Additional global styles */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground, #ffffff);
+  background: var(--background, #0a0a0a);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}

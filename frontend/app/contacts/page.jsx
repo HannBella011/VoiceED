@@ -1,0 +1,181 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { Navbar, Footer, SettingsModal, LoginModal, UserMenuModal } from '@/components/shared';
+
+export default function Contacts() {
+  const pathname = usePathname();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name');
+    alert(`Thank you for your message, ${name}! We will get back to you soon.`);
+    e.currentTarget.reset();
+  };
+
+  const handleLoginClick = () => {
+    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
+    if (currentUser) {
+      setUserMenuOpen(true);
+    } else {
+      setLoginOpen(true);
+    }
+  };
+
+  const handleSettingsClick = () => {
+    setSettingsOpen(true);
+  };
+
+  return (
+    <>
+      <Navbar currentPage={pathname} variant="public" onLoginClick={handleLoginClick} onSettingsClick={handleSettingsClick} />
+      
+      <main className="services-main">
+        <div className="container">
+          <div className="services-welcome">
+            <h2>Contact Us</h2>
+            <p>Get in touch with VoiceED team for support, partnerships, or any questions about our platform and services.</p>
+          </div>
+
+          <div className="services-container">
+            {/* Emergency Support */}
+            <div className="service-box">
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-phone-alt"></i>
+                </div>
+                <h3>Emergency Support</h3>
+              </div>
+              <div className="service-details">
+                <p>For urgent matters requiring immediate attention, reach out through our emergency channels.</p>
+                <p>Note: We do not provide specific emergency numbers here, as they vary by country and location. Please use your local emergency hotline for immediate assistance.</p>
+
+                {/* Sub-container 1: Specialized Global Hotlines for Students */}
+                <div className="emergency-sub-container">
+                  <div className="emergency-header">
+                    <div className="emergency-icon"><i className="fas fa-globe"></i></div>
+                    <h4>Specialized Global Hotlines for Students</h4>
+                  </div>
+                  <div className="emergency-content">
+                    <ul>
+                      <li><strong>Find a Helpline (International Directory)</strong> – Connects students worldwide to local crisis hotlines for abuse, crime, and emotional support.</li>
+                      <li><strong>TeenHelp Hotlines</strong> – Covers substance use, peer pressure, bullying, and abuse, accessible 24/7.</li>
+                      <li><strong>UNODC Youth Initiative</strong>  – Empowers students globally to report drug-related issues, crime prevention, and peer-led safety programs.</li>
+                      <li><strong>UNODC Global Programs</strong> – Supports youth in crime prevention, anti-drug campaigns, and safe community building.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Sub-container 2: Student-Specific Safety Channels */}
+                <div className="emergency-sub-container">
+                  <div className="emergency-header">
+                    <div className="emergency-icon"><i className="fas fa-shield-alt"></i></div>
+                    <h4>Student-Specific Safety Channels</h4>
+                  </div>
+                  <div className="emergency-content">
+                    <ul>
+                      <li><strong>Campus Security Hotlines</strong> – Most universities maintain dedicated student safety hotlines for reporting drugs, crime, or harassment.</li>
+                      <li><strong>Anonymous Reporting Tools</strong> – Platforms like VoiceED allow students to report issues without fear of exposure.</li>
+                      <li><strong>Youth NGOs & Peer Networks</strong>– Many student organizations partner with local police and UNODC to run awareness campaigns and provide confidential peer support.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Horizontal container for last two sub-containers */}
+                <div className="emergency-horizontal-container">
+                  {/* Sub-container 3: Risks & Action Steps */}
+                  <div className="emergency-sub-container">
+                    <div className="emergency-header">
+                      <div className="emergency-icon"><i className="fas fa-exclamation-triangle"></i></div>
+                      <h4>Risks & Action Steps</h4>
+                    </div>
+                    <div className="emergency-content">
+                      <ul>
+                        <li><strong>Immediate Danger:</strong> Call local emergency services (911/999)</li>
+                        <li><strong>Mental Health Crisis:</strong> Contact crisis hotlines immediately</li>
+                        <li><strong>Cyberbullying:</strong> Document evidence, report, seek support</li>
+                        <li><strong>Physical Threat:</strong> Move to safe location, contact authorities</li>
+                        <li><strong>Substance Abuse:</strong> Seek medical help, call recovery hotlines</li>
+                        <li><strong>Academic Pressure:</strong> Reach out to counselors, use stress resources</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Sub-container 4: Actionable Advice for Students */}
+                  <div className="emergency-sub-container">
+                    <div className="emergency-header">
+                      <div className="emergency-icon"><i className="fas fa-lightbulb"></i></div>
+                      <h4>Actionable Advice for Students</h4>
+                    </div>
+                    <div className="emergency-content">
+                      <ul>
+                        <li><strong>1. Memorize your local emergency number</strong></li>
+                        <li><strong>2. Use Find a Helpline for international crisis support when abroad</strong></li>
+                        <li><strong>3. Engage with UNODC Youth Initiative for drug prevention and crime safety programs</strong></li>
+                        <li><strong>4. Leverage campus security & anonymous reporting tools for immediate student-focused protection</strong></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Us */}
+              <div className="emergency-sub-container">
+                <div className="emergency-header">
+                  <div className="emergency-icon"><i className="fas fa-envelope"></i></div>
+                  <h4>Message Us</h4>
+                </div>
+                <div className="emergency-content">
+                  <p>Send us a message and we'll get back to you as soon as possible. Whether you're a student, educator, or potential partner, we're here to help.</p>
+                  <form className="contact-form" id="contactForm" onSubmit={handleContactSubmit}>
+                    <div className="form-group">
+                      <label htmlFor="name">Full Name</label>
+                      <input type="text" id="name" name="name" placeholder="Enter your full name" required={true} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="email">Email Address</label>
+                      <input type="email" id="email" name="email" placeholder="Enter your email address" required={true} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="subject">Subject</label>
+                      <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required={true} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="message">Message</label>
+                      <textarea id="message" name="message" placeholder="Tell us more about your inquiry..." rows={5} required={true}></textarea>
+                    </div>
+                    <button type="submit" className="cta-button">Send Message</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+
+      {/* Modals */}
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <LoginModal
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSwitchToRegister={() => window.location.href = '/register'}
+        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
+      />
+      <UserMenuModal
+        isOpen={userMenuOpen}
+        onClose={() => setUserMenuOpen(false)}
+        onProfileClick={() => window.location.href = '/profile'}
+        onLogoutClick={() => {
+          localStorage.removeItem('shielded_current_user');
+        }}
+      />
+    </>
+  );
+}
