@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        # Allow empty strings to be treated as None for optional fields
 
 
 settings = Settings()

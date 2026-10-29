@@ -1,5 +1,5 @@
 # VoiceED Backend - Services Package
-# Placeholder for business logic services
+# Business logic services
 
 """
 Services module for VoiceED backend.
@@ -15,203 +15,122 @@ This module contains business logic separated from routes:
 - File storage service (local, S3, Firebase)
 """
 
+from datetime import datetime, timedelta
+from typing import Optional
+from passlib.context import CryptContext
+from jose import jwt, JWTError
+from app.config import settings
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.models import User
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
 # Authentication service
 class AuthService:
     """Handle authentication logic."""
-    
+
     def hash_password(self, password: str) -> str:
         """Hash a password."""
-        # TODO: Implement with passlib
-        raise NotImplementedError
-    
+        return pwd_context.hash(password)
+
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash."""
-        # TODO: Implement with passlib
-        raise NotImplementedError
-    
-    def create_access_token(self, data: dict) -> str:
+        return pwd_context.verify(plain_password, hashed_password)
+
+    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
         """Create JWT access token."""
-        # TODO: Implement with python-jose
-        raise NotImplementedError
-    
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        return encoded_jwt
+
     def create_refresh_token(self, data: dict) -> str:
         """Create JWT refresh token."""
-        # TODO: Implement with python-jose
-        raise NotImplementedError
-    
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        return encoded_jwt
+
     def decode_token(self, token: str) -> dict:
         """Decode and validate JWT token."""
-        # TODO: Implement with python-jose
-        raise NotImplementedError
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            return payload
+        except JWTError:
+            raise ValueError("Invalid token")
+
+    async def authenticate_user(self, db: AsyncSession, username: str, password: str) -> Optional[User]:
+        """Authenticate a user with username and password."""
+        result = await db.execute(select(User).where(User.username == username))
+        user = result.scalar_one_or_none()
+        if not user:
+            return None
+        if not self.verify_password(password, user.hashed_password):
+            return None
+        return user
 
 
 # User service
 class UserService:
     """Handle user-related business logic."""
-    
-    async def get_by_id(self, user_id: int):
-        raise NotImplementedError
-    
-    async def get_by_email(self, email: str):
-        raise NotImplementedError
-    
-    async def get_by_username(self, username: str):
-        raise NotImplementedError
-    
-    async def create(self, user_data: dict):
-        raise NotImplementedError
-    
-    async def update(self, user_id: int, data: dict):
-        raise NotImplementedError
-    
-    async def delete(self, user_id: int):
-        raise NotImplementedError
-    
-    async def change_password(self, user_id: int, current_password: str, new_password: str):
-        raise NotImplementedError
-    
-    async def upload_avatar(self, user_id: int, file):
-        raise NotImplementedError
 
+    async def get_by_id(self, db: AsyncSession, user_id: int) -> Optional[User]:
+        result = await db.execute(select(User).where(User.id == user_id))
+        return result.scalar_one_or_none()
 
-# Report service
-class ReportService:
-    """Handle report-related business logic."""
-    
-    async def create(self, report_data: dict, user_id: int):
-        raise NotImplementedError
-    
-    async def get_by_id(self, report_id: int):
-        raise NotImplementedError
-    
-    async def list(self, filters: dict = None, pagination: dict = None):
-        raise NotImplementedError
-    
-    async def update(self, report_id: int, data: dict):
-        raise NotImplementedError
-    
-    async def delete(self, report_id: int):
-        raise NotImplementedError
-    
-    async def change_status(self, report_id: int, status: str):
-        raise NotImplementedError
-    
-    async def get_user_reports(self, user_id: int, filters: dict = None, pagination: dict = None):
-        raise NotImplementedError
+    async def get_by_email(self, db: AsyncSession, email: str) -> Optional[User]:
+        result = await db.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()
 
+    async def get_by_username(self, db: AsyncSession, username: str) -> Optional[User]:
+        result = await db.execute(select(User).where(User.username == username))
+        return result.scalar_one_or_none()
 
-# Wellness service
-class WellnessService:
-    """Handle wellness-related business logic."""
-    
-    async def get_tips(self, category: str = None):
-        raise NotImplementedError
-    
-    async def get_resources(self):
-        raise NotImplementedError
-    
-    async def create_journal_entry(self, entry_data: dict, user_id: int):
-        raise NotImplementedError
-    
-    async def get_journal_entries(self, user_id: int, pagination: dict = None):
-        raise NotImplementedError
-    
-    async def update_journal_entry(self, entry_id: int, data: dict):
-        raise NotImplementedError
-    
-    async def delete_journal_entry(self, entry_id: int):
-        raise NotImplementedError
+    async def create(self, db: AsyncSession, user_data: dict) -> User:
+        user = User(**user_data)
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        return user
 
+    async def update(self, db: AsyncSession, user_id: int, data: dict) -> Optional[User]:
+        user = await self.get_by_id(db, user_id)
+        if not user:
+            return None
+        for key, value in data.items():
+            setattr(user, key, value)
+        user.updated_at = datetime.utcnow()
+        await db.commit()
+        await db.refresh(user)
+        return user
 
-# Inspire service
-class InspireService:
-    """Handle inspire-related business logic."""
-    
-    async def get_stories(self, pagination: dict = None):
-        raise NotImplementedError
-    
-    async def get_story(self, story_id: int):
-        raise NotImplementedError
-    
-    async def create_story(self, story_data: dict, user_id: int):
-        raise NotImplementedError
-    
-    async def update_story(self, story_id: int, data: dict):
-        raise NotImplementedError
-    
-    async def delete_story(self, story_id: int):
-        raise NotImplementedError
-    
-    async def get_quotes(self):
-        raise NotImplementedError
-    
-    async def create_quote(self, quote_data: dict):
-        raise NotImplementedError
-    
-    async def get_daily_quote(self):
-        raise NotImplementedError
+    async def delete(self, db: AsyncSession, user_id: int) -> bool:
+        user = await self.get_by_id(db, user_id)
+        if not user:
+            return False
+        await db.delete(user)
+        await db.commit()
+        return True
 
-
-# Share service
-class ShareService:
-    """Handle share-related business logic."""
-    
-    async def get_materials(self, subject: str = None, pagination: dict = None):
-        raise NotImplementedError
-    
-    async def get_material(self, material_id: int):
-        raise NotImplementedError
-    
-    async def upload_material(self, material_data: dict, user_id: int, file):
-        raise NotImplementedError
-    
-    async def delete_material(self, material_id: int, user_id: int):
-        raise NotImplementedError
-    
-    async def increment_download_count(self, material_id: int):
-        raise NotImplementedError
-    
-    async def get_subjects(self):
-        raise NotImplementedError
-    
-    async def get_file_types(self):
-        raise NotImplementedError
-
-
-# Email service
-class EmailService:
-    """Handle email notifications."""
-    
-    async def send_verification_email(self, email: str, token: str):
-        raise NotImplementedError
-    
-    async def send_password_reset_email(self, email: str, token: str):
-        raise NotImplementedError
-    
-    async def send_notification_email(self, email: str, subject: str, body: str):
-        raise NotImplementedError
-
-
-# File storage service
-class FileStorageService:
-    """Handle file uploads and storage."""
-    
-    async def upload(self, file, path: str) -> str:
-        raise NotImplementedError
-    
-    async def delete(self, path: str):
-        raise NotImplementedError
-    
-    async def get_url(self, path: str) -> str:
-        raise NotImplementedError
+    async def change_password(self, db: AsyncSession, user_id: int, current_password: str, new_password: str) -> bool:
+            user = await self.get_by_id(db, user_id)
+            if not user:
+                return False
+            if not auth_service.verify_password(current_password, user.hashed_password):
+                return False
+            user.hashed_password = auth_service.hash_password(new_password)
+            await db.commit()
+            return True
 
 
 # Service instances (singletons)
 auth_service = AuthService()
 user_service = UserService()
-report_service = ReportService()
-wellness_service = WellnessService()
-inspire_service = InspireService()
-share_service = ShareService()
-email_service = EmailService()
-file_storage_service = FileStorageService()

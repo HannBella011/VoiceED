@@ -3,34 +3,67 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, LoginModal } from '@/components/shared';
+import { useAuthContext } from '@/context/AuthContext';
 
 export default function Register() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register } = useAuthContext();
 
   const handleLoginClick = () => {
-    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
-    if (currentUser) {
-      window.location.href = '/profile';
-    } else {
-      setLoginOpen(true);
-    }
+    setLoginOpen(true);
   };
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get('username') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+    const gender = formData.get('gender') as string;
+    const birthMonth = formData.get('birthMonth') as string;
+    const birthDay = formData.get('birthDay') as string;
+    const birthYear = formData.get('birthYear') as string;
+    const termsAccepted = formData.get('termsAccepted') === 'on';
+
+    try {
+      await register({
+        username,
+        email,
+        password,
+        confirmPassword,
+        gender: gender || undefined,
+        birthday: birthMonth && birthDay && birthYear ? { month: birthMonth, day: birthDay, year: birthYear } : undefined,
+        termsAccepted,
+      });
+      window.location.href = '/dashboard';
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="public"
         onLoginClick={handleLoginClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="main-content">
         <div className="container">
           <div className="register-container">
@@ -42,12 +75,14 @@ export default function Register() {
                 <h2>SIGN UP AND MAKE YOUR VOICE HEARD!</h2>
               </div>
 
-              <form id="registerForm" className="signup-form">
+              <form id="registerForm" className="signup-form" onSubmit={handleRegister}>
+                {error && <div className="error-message" style={{ color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+                
                 {/* Birthday Field */}
                 <div className="form-field">
                   <label>Birthday</label>
                   <div className="birthday-row">
-                    <select id="birthMonth" required={true}>
+                    <select id="birthMonth" name="birthMonth" required={true}>
                       <option value="">Month</option>
                       <option value="1">January</option>
                       <option value="2">February</option>
@@ -62,7 +97,7 @@ export default function Register() {
                       <option value="11">November</option>
                       <option value="12">December</option>
                     </select>
-                    <select id="birthDay" required={true}>
+                    <select id="birthDay" name="birthDay" required={true}>
                       <option value="">Day</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
@@ -96,7 +131,7 @@ export default function Register() {
                       <option value="30">30</option>
                       <option value="31">31</option>
                     </select>
-                    <select id="birthYear" required={true}>
+                    <select id="birthYear" name="birthYear" required={true}>
                       <option value="">Year</option>
                       <option value="2025">2025</option>
                       <option value="2024">2024</option>
@@ -131,16 +166,28 @@ export default function Register() {
                 {/* Username Field */}
                 <div className="form-field">
                   <label htmlFor="username">Username</label>
-                  <input type="text" id="username" placeholder="Choose a unique username (3-20 characters)" required={true} />
+                  <input type="text" id="username" name="username" placeholder="Choose a unique username (3-20 characters)" required={true} />
                   <small style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "0.85rem", marginTop: "0.25rem", display: "block" }}>
                     Use 3-20 characters, letters and numbers only. No real names or personal info.
                   </small>
                 </div>
 
+                {/* Email Field */}
+                <div className="form-field">
+                  <label htmlFor="email">Email</label>
+                  <input type="email" id="email" name="email" placeholder="Enter your email address" required={true} />
+                </div>
+
                 {/* Password Field */}
                 <div className="form-field">
                   <label htmlFor="password">Password</label>
-                  <input type="password" id="password" placeholder="At least 8 characters" required={true} minLength="8" />
+                  <input type="password" id="password" name="password" placeholder="At least 6 characters" required={true} minLength="6" />
+                </div>
+
+                {/* Confirm Password Field */}
+                <div className="form-field">
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required={true} minLength="6" />
                 </div>
 
                 {/* Gender Field */}
@@ -162,11 +209,17 @@ export default function Register() {
                   </div>
                 </div>
 
-                <div className="legal-text">
-                  <p>By signing up, you agree to the Terms of Service and Privacy Policy</p>
+                {/* Terms */}
+                <div className="form-field">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="termsAccepted" required={true} />
+                    <span>I agree to the Terms of Service and Privacy Policy</span>
+                  </label>
                 </div>
 
-                <button type="submit" className="signup-btn">Sign Up</button>
+                <button type="submit" className="signup-btn" disabled={isSubmitting}>
+                  {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+                </button>
               </form>
             </div>
           </div>
