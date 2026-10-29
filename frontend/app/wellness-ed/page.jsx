@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal, WellnessActivityCard } from '@/components/shared';
+import { ProtectedRoute } from '@/lib/routeProtection';
 
-export default function WellnessEd() {
+function WellnessEdContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -64,13 +65,13 @@ export default function WellnessEd() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="wellness"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="wellness-main">
         <div className="container">
           <div className="wellness-hero">
@@ -106,5 +107,13 @@ export default function WellnessEd() {
         }}
       />
     </>
+  );
+}
+
+export default function WellnessEd() {
+  return (
+    <ProtectedRoute fallback={null}>
+      <WellnessEdContent />
+    </ProtectedRoute>
   );
 }

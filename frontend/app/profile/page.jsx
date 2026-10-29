@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { ProtectedRoute } from '@/lib/routeProtection';
 
-export default function Profile() {
+function ProfileContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -19,13 +20,13 @@ export default function Profile() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="wellness"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="profile-main">
         <div className="container">
           <div className="profile-header">
@@ -138,5 +139,13 @@ export default function Profile() {
         }}
       />
     </>
+  );
+}
+
+export default function Profile() {
+  return (
+    <ProtectedRoute fallback={null}>
+      <ProfileContent />
+    </ProtectedRoute>
   );
 }

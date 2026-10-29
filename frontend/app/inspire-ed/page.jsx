@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { ProtectedRoute } from '@/lib/routeProtection';
 
-export default function InspireEd() {
+function InspireEdContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -19,13 +20,13 @@ export default function InspireEd() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="wellness"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="wellness-main">
         <div className="container">
           {/* Hero Section */}
@@ -225,5 +226,13 @@ export default function InspireEd() {
         }}
       />
     </>
+  );
+}
+
+export default function InspireEd() {
+  return (
+    <ProtectedRoute fallback={null}>
+      <InspireEdContent />
+    </ProtectedRoute>
   );
 }

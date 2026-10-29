@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { ProtectedRoute } from '@/lib/routeProtection';
 
-export default function MoodTracker() {
+function MoodTrackerContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -19,13 +20,13 @@ export default function MoodTracker() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="wellness"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="wellness-main">
         <div className="container">
           <div className="wellness-hero">
@@ -93,5 +94,13 @@ export default function MoodTracker() {
         }}
       />
     </>
+  );
+}
+
+export default function MoodTracker() {
+  return (
+    <ProtectedRoute fallback={null}>
+      <MoodTrackerContent />
+    </ProtectedRoute>
   );
 }

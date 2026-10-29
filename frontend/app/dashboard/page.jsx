@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { ProtectedRoute } from '@/lib/routeProtection';
 
-export default function Dashboard() {
+function DashboardContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -19,13 +20,13 @@ export default function Dashboard() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="dashboard"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="dashboard-main">
         <div className="dashboard-container">
           {/* Main Dashboard Layout */}
@@ -228,5 +229,13 @@ export default function Dashboard() {
         }}
       />
     </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <ProtectedRoute fallback={null}>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }

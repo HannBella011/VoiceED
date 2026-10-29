@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { ProtectedRoute } from '@/lib/routeProtection';
 
-export default function Meditation() {
+function MeditationContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -19,13 +20,13 @@ export default function Meditation() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="wellness"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="wellness-main">
         <div className="container">
           <div className="wellness-hero">
@@ -95,5 +96,13 @@ export default function Meditation() {
         }}
       />
     </>
+  );
+}
+
+export default function Meditation() {
+  return (
+    <ProtectedRoute fallback={null}>
+      <MeditationContent />
+    </ProtectedRoute>
   );
 }

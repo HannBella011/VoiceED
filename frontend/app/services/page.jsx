@@ -3,12 +3,14 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, LoginModal, UserMenuModal, ServiceCard } from '@/components/shared';
+import { useProtectedNavigation } from '@/lib/routeProtection';
 
 export default function Services() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { navigateToService } = useProtectedNavigation();
 
   const handleLoginClick = () => {
     const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
@@ -93,7 +95,7 @@ export default function Services() {
                 title={service.title}
                 description={service.description}
                 features={service.features}
-                href={service.href}
+                onClick={() => navigateToService(service.href)}
               />
             ))}
           </div>

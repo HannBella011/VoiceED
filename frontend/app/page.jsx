@@ -4,9 +4,10 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Navbar, Footer, SettingsModal, LoginModal, UserMenuModal, Card } from '@/components/shared';
 import { useParticles } from '@/hooks/useParticles';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { useSettings } from '@/hooks/useSettings';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useProtectedNavigation } from '@/lib/routeProtection';
 
 export default function Home() {
   const router = useRouter();
@@ -14,10 +15,11 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { navigateToService } = useProtectedNavigation();
 
   // Initialize hooks
   useParticles();
-  const { currentUser, isLoggedIn, loginStats, logout } = useAuth();
+  const { currentUser, isLoggedIn, loginStats, logout } = useAuthContext();
   const { loadSettings, saveSettings } = useSettings();
   const { notifications, show, hide } = useNotifications();
 
@@ -31,31 +33,31 @@ export default function Home() {
       icon: <i className="fas fa-shield-alt"></i>,
       title: 'ReportED',
       description: 'A safe, anonymous space where students submit crime reports, raise safety concerns, and ensure their voices are heard.',
-      onClick: () => router.push('/report-ed'),
+      onClick: () => navigateToService('/report-ed'),
     },
     {
       icon: <i className="fas fa-heart"></i>,
       title: 'WellnessED',
       description: 'Practical tips on mental health, stress management, and motivation to help students balance academics and personal wellbeing.',
-      onClick: () => router.push('/wellness-ed'),
+      onClick: () => navigateToService('/wellness-ed'),
     },
     {
       icon: <i className="fas fa-lightbulb"></i>,
       title: 'InspireED',
       description: 'Motivational stories, student achievements, and encouraging quotes designed to inspire persistence and hope among learners.',
-      onClick: () => router.push('/inspire-ed'),
+      onClick: () => navigateToService('/inspire-ed'),
     },
     {
       icon: <i className="fas fa-share-alt"></i>,
       title: 'ShareED',
       description: 'A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.',
-      onClick: () => router.push('/share-ed'),
+      onClick: () => navigateToService('/share-ed'),
     },
   ];
 
   const handleGetStarted = useCallback(() => {
-    router.push('/dashboard');
-  }, [router]);
+    navigateToService('/dashboard');
+  }, [navigateToService]);
 
   const handleLoginClick = useCallback(() => {
     if (isLoggedIn && currentUser) {
@@ -76,13 +78,13 @@ export default function Home() {
 
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="public"
         onLoginClick={handleLoginClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="dashboard-main">
         <div className="container">
           <div className="dashboard-welcome">
@@ -161,7 +163,7 @@ export default function Home() {
       <UserMenuModal
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => router.push('/profile')}
+        onProfileClick={() => navigateToService('/profile')}
         onLogoutClick={handleLogout}
       />
 
