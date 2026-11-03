@@ -40,50 +40,28 @@ body {
     padding: 0 20px;
 }
 
-/* Header Styles - Two-State Navbar */
-/* State 1: Initial - Large, in normal flow */
+/* Header Styles */
 .header {
     background: rgba(10, 14, 39, 0.95);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow-glow);
-    position: relative; /* State 1: in normal flow */
-    top: auto;
-    width: 100%;
-    z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* State 2: Scrolled - Compact, fixed overlay */
-.header.header--scrolled {
     position: fixed;
     top: 0;
-    left: 0;
-    background: rgba(10, 14, 39, 0.98);
-    box-shadow: 0 4px 30px rgba(0, 212, 255, 0.3);
-    padding: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 0; /* State 1: generous padding */
-    transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header.header--scrolled .header-content {
-    padding: 0.5rem 0; /* State 2: compact padding */
+    padding: 0.5rem 0;
 }
 
 .logo-section {
     display: flex;
     align-items: center;
     gap: 1rem;
-    transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header.header--scrolled .logo-section {
-    gap: 0.75rem; /* State 2: tighter gap */
 }
 
 .logo {
@@ -93,12 +71,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header.header--scrolled .logo {
-    width: 50px; /* State 2: smaller logo */
-    height: 50px;
 }
 
 .logo img {
@@ -124,11 +96,6 @@ body {
     color: var(--text-primary);
     margin: 0;
     text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-    transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header.header--scrolled .brand-text h1 {
-    font-size: 1.25rem; /* State 2: smaller text */
 }
 
 .tagline {
@@ -136,15 +103,6 @@ body {
     color: var(--text-secondary);
     margin: 0;
     font-style: italic;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header.header--scrolled .tagline {
-    opacity: 0;
-    font-size: 0.75rem;
-    pointer-events: none;
-    width: 0;
-    overflow: hidden;
 }
 
 /* Navigation */
@@ -152,11 +110,6 @@ body {
     display: flex;
     list-style: none;
     gap: 2rem;
-    transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header.header--scrolled .navbar ul {
-    gap: 1rem; /* State 2: tighter navigation */
 }
 
 .navbar a {
@@ -175,50 +128,17 @@ body {
     text-shadow: 0 0 5px var(--accent-cyan);
 }
 
-/* Buttons in navbar */
-.settings-nav-btn,
-.login-nav-btn {
-    transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-.header.header--scrolled .settings-nav-btn,
-.header.header--scrolled .login-nav-btn {
-    padding: 6px 16px !important;
-    font-size: 0.85rem !important;
-}
-
-/* Hero Section - Adjusted for State 1 */
+/* Hero Section */
 .hero {
     background: var(--background-gradient);
-    padding: 0 0 200px;
+    padding: 180px 0 200px;
     text-align: center;
-    margin-top: 0; /* State 1: no margin-top, hero starts after navbar in flow */
+    margin-top: 80px;
     position: relative;
     overflow: hidden;
     min-height: 100vh;
 }
-
-/* Body padding when navbar is fixed (scrolled state) */
-body.navbar-scrolled {
-    padding-top: 70px; /* Height of compact fixed navbar */
-}
-
-@media (max-width: 768px) {
-    body.navbar-scrolled {
-        padding-top: 60px; /* Slightly smaller on mobile */
-    }
-}
-
-/* Dashboard Main - Adjusted for two-state navbar */
-/* Initial state (navbar in flow): no extra padding */
-/* Scrolled state (navbar fixed): body.navbar-scrolled provides padding */
-.dashboard-main {
-    padding: 0 0 80px; /* No top padding initially - navbar is in flow */
-    min-height: 100vh;
-    transition: padding-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* When navbar is scrolled/fixed, body padding handles the offset */
 
 .hero::before {
     content: '';
@@ -775,12 +695,9 @@ body.navbar-scrolled {
 
 /* Dashboard Styles */
 .dashboard-main {
-    padding: 0 0 80px; /* No top padding initially - navbar is in normal flow */
+    padding: 120px 0 80px;
     min-height: 100vh;
-    transition: padding-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* When navbar becomes fixed (scrolled), body.navbar-scrolled provides the offset */
 
 .dashboard-welcome {
     text-align: center;
@@ -1064,16 +981,13 @@ body.navbar-scrolled {
 
 /* Registration Page Styles */
 .register-main {
-    padding: 0 0 80px; /* No top padding initially - navbar is in normal flow */
+    padding: 120px 0 80px;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
-    transition: padding-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* When navbar becomes fixed (scrolled), body.navbar-scrolled provides the offset */
 
 .register-container {
     width: 100%;
@@ -1937,6 +1851,10 @@ main .main-content .container .register-container .register-card .signup-btn {
     color: var(--accent-cyan);
 }
 
+.mobile-menu-btn.active i {
+    transform: rotate(90deg);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .mobile-menu-btn {
@@ -1970,28 +1888,28 @@ main .main-content .container .register-container .register-card .signup-btn {
         font-size: 0.9rem;
     }
     
-    /* Mobile menu - slide down from top */
     .navbar {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(10, 10, 31, 0.98);
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-glow);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-glow);
+        box-shadow: var(--shadow-glow);
+        width: 90%;
+        max-width: 400px;
         backdrop-filter: blur(10px);
         opacity: 0;
         visibility: hidden;
-        transform: translateY(-10px);
         transition: all 0.3s ease;
-        z-index: 1000;
+        z-index: 2001;
     }
     
-    .navbar.show {
+    .navbar.active {
         opacity: 1;
         visibility: visible;
-        transform: translateY(0);
     }
     
     .navbar ul {

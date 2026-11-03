@@ -1,26 +1,20 @@
+// useNotifications - VoiceED
+// Hook for managing notifications/toasts
+
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
 
-interface Notification {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info';
-  title?: string;
-  bodyMessage?: string;
-  useMessageAsTitle?: boolean;
-}
-
 export function useNotifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState([]);
   const idCounter = useRef(0);
 
-  const show = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success', useMessageAsTitle = false) => {
+  const show = useCallback((message, type = 'success', useMessageAsTitle = false) => {
     const id = ++idCounter.current;
     const title = useMessageAsTitle ? message : (type === 'success' ? 'Success!' : type === 'error' ? 'Error' : 'Information');
     const bodyMessage = useMessageAsTitle ? (type === 'success' ? 'Logged out successfully' : message) : message;
     
-    const notification: Notification = {
+    const notification = {
       id,
       message,
       type,
@@ -37,7 +31,7 @@ export function useNotifications() {
     }, 5000);
   }, []);
 
-  const hide = useCallback((id: number) => {
+  const hide = useCallback((id) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 

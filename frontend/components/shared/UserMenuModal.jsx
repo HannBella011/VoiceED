@@ -1,25 +1,31 @@
+// UserMenuModal - VoiceED
+// User dropdown menu modal matching base implementation
+
 'use client';
 
-import { useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
 
-export function UserMenuModal({ isOpen, onClose, onProfileClick, onLogoutClick, username = 'Admin', email = 'Admin@voiceed.com' }) {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+export function UserMenuModal({ 
+  isOpen, 
+  onClose, 
+  onProfileClick, 
+  onLogoutClick,
+  username = 'User',
+  email = 'user@voiceed.com'
+}) {
+  const { logout } = useAuthContext();
+
+  const handleLogout = () => {
+    logout();
+    onLogoutClick();
+  };
 
   if (!isOpen) return null;
 
   return (
-    <div className={`modal user-menu-modal ${isOpen ? 'show' : ''}`} id="userMenuModal">
-      <div className="modal-content user-menu-modal-content">
-        <span className="close-button" onClick={onClose}>×</span>
+    <div className="modal user-menu-modal" id="userMenuModal" onClick={onClose}>
+      <div className="modal-content user-menu-modal-content" onClick={(e) => e.stopPropagation()}>
+        <span className="close-button" onClick={onClose}>&times;</span>
         <h2>User Menu</h2>
         <div className="user-info">
           <div className="user-avatar">
@@ -31,11 +37,11 @@ export function UserMenuModal({ isOpen, onClose, onProfileClick, onLogoutClick, 
           </div>
         </div>
         <div className="menu-actions">
-          <button className="user-menu-button" id="profileBtn" onClick={() => { onProfileClick?.(); onClose(); }}>
+          <button className="user-menu-button" id="profileBtn" onClick={() => { onProfileClick(); onClose(); }}>
             <i className="fas fa-user"></i>
             <span>View Profile</span>
           </button>
-          <button className="user-menu-button" id="logoutBtn" onClick={() => { onLogoutClick?.(); onClose(); }}>
+          <button className="user-menu-button" id="logoutBtn" onClick={handleLogout}>
             <i className="fas fa-sign-out-alt"></i>
             <span>Logout</span>
           </button>

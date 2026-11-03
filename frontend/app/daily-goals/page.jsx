@@ -34,69 +34,64 @@ function DailyGoalsContent() {
             <p>Set and track daily wellness goals to build healthy habits</p>
           </div>
 
-          <div className="wellness-grid">
-            <div className="wellness-card goals-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-bullseye"></i>
+          <section className="goals-section">
+            <div className="section-header">
+              <h3>Today's Goals</h3>
+            </div>
+            <div className="goals-grid">
+              <div className="goal-card">
+                <div className="goal-icon">
+                  <i className="fas fa-moon"></i>
                 </div>
-                <h3>Today's Goals</h3>
+                <div className="goal-content">
+                  <h4>7-8 hours sleep</h4>
+                </div>
               </div>
-              <div className="card-body">
-                <div className="goals-list" id="goalsList">
-                  <label className="goal-item default-goal">
-                    <input type="checkbox" className="goal-checkbox" data-goal="sleep" />
-                    <span className="goal-text">7-8 hours sleep</span>
-                  </label>
-                  <label className="goal-item default-goal">
-                    <input type="checkbox" className="goal-checkbox" data-goal="water" />
-                    <span className="goal-text">8 glasses water</span>
-                  </label>
-                  <label className="goal-item default-goal">
-                    <input type="checkbox" className="goal-checkbox" data-goal="exercise" />
-                    <span className="goal-text">30 min exercise</span>
-                  </label>
-                  <label className="goal-item default-goal">
-                    <input type="checkbox" className="goal-checkbox" data-goal="breaks" />
-                    <span className="goal-text">Study breaks</span>
-                  </label>
+              <div className="goal-card">
+                <div className="goal-icon">
+                  <i className="fas fa-tint"></i>
                 </div>
-                <div className="add-goal-section">
-                  <div className="add-goal-input-group">
-                    <input type="text" id="customGoalInput" className="custom-goal-input" placeholder="Add your custom goal..." />
-                    <button className="add-goal-btn" id="addGoalBtn"><i className="fas fa-plus"></i></button>
-                  </div>
+                <div className="goal-content">
+                  <h4>8 glasses water</h4>
                 </div>
-                <div className="goals-progress">
-                  <div className="progress-track">
-                    <div className="progress-bar-fill" id="goalsProgress"></div>
-                  </div>
-                  <p className="progress-label"><span id="goalsCount">0</span>/<span id="totalGoals">4</span> completed</p>
+              </div>
+              <div className="goal-card">
+                <div className="goal-icon">
+                  <i className="fas fa-running"></i>
+                </div>
+                <div className="goal-content">
+                  <h4>30 min exercise</h4>
+                </div>
+              </div>
+              <div className="goal-card">
+                <div className="goal-icon">
+                  <i className="fas fa-book"></i>
+                </div>
+                <div className="goal-content">
+                  <h4>Study breaks</h4>
                 </div>
               </div>
             </div>
-
-            <div className="wellness-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-lightbulb"></i>
-                </div>
-                <h3>Tips for Success</h3>
-              </div>
-              <div className="card-body">
-                <ul className="breathing-steps">
-                  <li>Start small - choose 2-3 goals to begin</li>
-                  <li>Be consistent - track your progress daily</li>
-                  <li>Celebrate wins - acknowledge your achievements</li>
-                  <li>Adjust as needed - modify goals to fit your lifestyle</li>
-                </ul>
-              </div>
+            <div className="goals-progress">
+              <span>0/4 completed</span>
             </div>
-          </div>
+          </section>
 
-          <div className="back-button-container">
-            <a href="/wellness-ed" className="back-btn"><i className="fas fa-arrow-left"></i> Back to WellnessED</a>
-          </div>
+          <section className="tips-section">
+            <div className="section-header">
+              <h3>Tips for Success</h3>
+            </div>
+            <div className="tips-list">
+              <p>Start small - choose 2-3 goals to begin</p>
+              <p>Be consistent - track your progress daily</p>
+              <p>Celebrate wins - acknowledge your achievements</p>
+              <p>Adjust as needed - modify goals to fit your lifestyle</p>
+            </div>
+          </section>
+
+          <a href="/wellness-ed" className="btn btn--secondary">
+            <i className="fas fa-arrow-left"></i> Back to WellnessED
+          </a>
         </div>
       </main>
 

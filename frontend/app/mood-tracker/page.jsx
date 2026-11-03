@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
@@ -9,6 +9,7 @@ function MoodTrackerContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [moods, setMoods] = useState([]);
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -17,6 +18,33 @@ function MoodTrackerContent() {
   const handleSettingsClick = () => {
     setSettingsOpen(true);
   };
+
+  const loadMoods = () => {
+    const saved = localStorage.getItem('wellness_moods');
+    if (saved) {
+      try {
+        setMoods(JSON.parse(saved));
+      } catch (e) {
+        setMoods([]);
+      }
+    }
+  };
+
+  const handleMoodSelect = (mood, emoji) => {
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMoods = [{ mood, emoji, timestamp }, ...moods].slice(0, 10);
+    setMoods(newMoods);
+    localStorage.setItem('wellness_moods', JSON.stringify(newMoods));
+  };
+
+  const clearMoods = () => {
+    setMoods([]);
+    localStorage.setItem('wellness_moods', JSON.stringify([]));
+  };
+
+  useEffect(() => {
+    loadMoods();
+  }, []);
 
   return (
     <>
@@ -45,16 +73,16 @@ function MoodTrackerContent() {
               <div className="card-body">
                 <p className="card-subtitle">Select your current mood</p>
                 <div className="mood-buttons">
-                  <button className="mood-btn" data-mood="excited" data-emoji="🤩">🤩</button>
-                  <button className="mood-btn" data-mood="happy" data-emoji="😊">😊</button>
-                  <button className="mood-btn" data-mood="good" data-emoji="🙂">🙂</button>
-                  <button className="mood-btn" data-mood="calm" data-emoji="😌">😌</button>
-                  <button className="mood-btn" data-mood="okay" data-emoji="😐">😐</button>
-                  <button className="mood-btn" data-mood="tired" data-emoji="😴">😴</button>
-                  <button className="mood-btn" data-mood="worried" data-emoji="😟">😟</button>
-                  <button className="mood-btn" data-mood="sad" data-emoji="😔">😔</button>
-                  <button className="mood-btn" data-mood="angry" data-emoji="😠">😠</button>
-                  <button className="mood-btn" data-mood="terrible" data-emoji="😢">😢</button>
+                  <button className="mood-btn" data-mood="excited" data-emoji="🤩" onClick={() => handleMoodSelect('excited', '🤩')}>🤩</button>
+                  <button className="mood-btn" data-mood="happy" data-emoji="😊" onClick={() => handleMoodSelect('happy', '😊')}>😊</button>
+                  <button className="mood-btn" data-mood="good" data-emoji="🙂" onClick={() => handleMoodSelect('good', '🙂')}>🙂</button>
+                  <button className="mood-btn" data-mood="calm" data-emoji="😌" onClick={() => handleMoodSelect('calm', '😌')}>😌</button>
+                  <button className="mood-btn" data-mood="okay" data-emoji="😐" onClick={() => handleMoodSelect('okay', '😐')}>😐</button>
+                  <button className="mood-btn" data-mood="tired" data-emoji="😴" onClick={() => handleMoodSelect('tired', '😴')}>😴</button>
+                  <button className="mood-btn" data-mood="worried" data-emoji="😟" onClick={() => handleMoodSelect('worried', '😟')}>😟</button>
+                  <button className="mood-btn" data-mood="sad" data-emoji="😔" onClick={() => handleMoodSelect('sad', '😔')}>😔</button>
+                  <button className="mood-btn" data-mood="angry" data-emoji="😠" onClick={() => handleMoodSelect('angry', '😠')}>😠</button>
+                  <button className="mood-btn" data-mood="terrible" data-emoji="😢" onClick={() => handleMoodSelect('terrible', '😢')}>😢</button>
                 </div>
               </div>
             </div>
@@ -68,9 +96,20 @@ function MoodTrackerContent() {
               </div>
               <div className="card-body">
                 <div className="mood-log" id="moodLog">
-                  <p className="log-empty">Track your mood to see history</p>
+                  {moods.length === 0 ? (
+                    <p className="log-empty">Track your mood to see history</p>
+                  ) : (
+                    moods.map((m, index) => (
+                      <div key={index} className="mood-entry">
+                        <span className="mood-entry-emoji">{m.emoji}</span>
+                        <span className="mood-entry-time">{m.timestamp}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
-                <button className="wellness-btn outline-btn" id="clearMoods">Clear History</button>
+                <button className="wellness-btn outline-btn" id="clearMoods" onClick={clearMoods}>
+                  Clear History
+                </button>
               </div>
             </div>
           </div>

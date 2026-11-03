@@ -1,18 +1,17 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, LoginModal, UserMenuModal } from '@/components/shared';
+import { Navbar, Footer } from '@/components/shared';
+import { useModals } from '@/components/shared/GlobalModals';
+import { useAuthContext } from '@/context/AuthContext';
 
-export default function About() {
+export default function AboutPage() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen, userMenuOpen, setUserMenuOpen } = useModals();
+  const { currentUser, isLoggedIn } = useAuthContext();
 
   const handleLoginClick = () => {
-    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
-    if (currentUser) {
+    if (isLoggedIn && currentUser) {
       setUserMenuOpen(true);
     } else {
       setLoginOpen(true);
@@ -25,8 +24,13 @@ export default function About() {
 
   return (
     <>
-      <Navbar currentPage={pathname} variant="public" />
-      
+      <Navbar
+        currentPage={pathname}
+        variant="public"
+        onLoginClick={handleLoginClick}
+        onSettingsClick={handleSettingsClick}
+      />
+
       <main className="services-main">
         <div className="container">
           <div className="services-welcome">
@@ -121,7 +125,7 @@ export default function About() {
               </div>
             </div>
 
-            {/* SDG connection Section */}
+            {/* SDG Connection Section */}
             <div className="about-section">
               <div className="about-section-header">
                 <div className="about-header-content">
@@ -144,28 +148,12 @@ export default function About() {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </main>
 
       <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => window.location.href = '/register'}
-        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
-      />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
-        }}
-      />
     </>
   );
 }

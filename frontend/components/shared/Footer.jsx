@@ -1,24 +1,28 @@
+// Footer - VoiceED
+// Site footer component
+
 'use client';
 
-export function Footer() {
+import React from 'react';
+import Link from 'next/link';
+
+export function Footer({ className = '' }) {
   return (
-    <footer className="footer">
+    <footer className={'footer ' + className}>
       <div className="container">
         <div className="footer-content">
           <div className="footer-top-row">
             <div className="footer-section">
               <h3>VoiceED Description</h3>
-              <p>
-                VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.
-              </p>
+              <p>VoiceED is a student‑driven platform that empowers learners to be heard, supported, and inspired. It promotes safety, wellness, and collaboration in schools and communities through features that let students report concerns, access mental health and motivation resources, share study materials, and find inspiration from peers. Its goal is simple: to make education inclusive and supportive by combining technology with compassion—creating a space where every voice matters and learning becomes a shared journey of growth.</p>
             </div>
             <div className="footer-section">
               <h4>Quick Links</h4>
               <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/about">About</a></li>
-                <li><a href="/services">Services</a></li>
-                <li><a href="/contacts">Contact</a></li>
+                <li><Link href="/">Home</Link></li>
+                <li><Link href="/about">About</Link></li>
+                <li><Link href="/services">Services</Link></li>
+                <li><Link href="/contacts">Contact</Link></li>
               </ul>
             </div>
           </div>
@@ -69,7 +73,7 @@ export function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2026 VoiceED. All rights reserved.</p>
+          <p>&copy; 2026 VoiceED. All rights reserved.</p>
         </div>
       </div>
     </footer>

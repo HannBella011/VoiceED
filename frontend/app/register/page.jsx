@@ -2,65 +2,121 @@
 
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, LoginModal } from '@/components/shared';
-import { useAuthContext } from '@/context/AuthContext';
+import { Navbar, Footer } from '@/components/shared';
+import { useModals } from '@/components/shared/GlobalModals';
 
-export default function Register() {
+export default function RegisterPage() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register } = useAuthContext();
-
-  const handleLoginClick = () => {
-    setLoginOpen(true);
-  };
+  const { settingsOpen, setSettingsOpen } = useModals();
+  const [formData, setFormData] = useState({
+    birthMonth: '',
+    birthDay: '',
+    birthYear: '',
+    username: '',
+    password: '',
+    gender: ''
+  });
+  const [showNotification, setShowNotification] = useState({ visible: false, message: '', type: 'success' });
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsSubmitting(true);
-
-    const formData = new FormData(e.currentTarget);
-    const username = formData.get('username') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
-    const gender = formData.get('gender') as string;
-    const birthMonth = formData.get('birthMonth') as string;
-    const birthDay = formData.get('birthDay') as string;
-    const birthYear = formData.get('birthYear') as string;
-    const termsAccepted = formData.get('termsAccepted') === 'on';
-
-    try {
-      await register({
-        username,
-        email,
-        password,
-        confirmPassword,
-        gender: gender || undefined,
-        birthday: birthMonth && birthDay && birthYear ? { month: birthMonth, day: birthDay, year: birthYear } : undefined,
-        termsAccepted,
-      });
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const { birthMonth, birthDay, birthYear, username, password, gender } = formData;
+
+    if (!birthMonth || !birthDay || !birthYear) {
+      showNotify('Please select your complete birthday', 'error');
+      return;
+    }
+
+    if (!username || username.length < 3 || username.length > 20) {
+      showNotify('Username must be between 3-20 characters', 'error');
+      return;
+    }
+
+    if (!password || password.length < 8) {
+      showNotify('Password must be at least 8 characters', 'error');
+      return;
+    }
+
+    // Check if username already exists
+    const users = JSON.parse(localStorage.getItem('shielded_users') || '[]');
+    if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+      showNotify('Username already exists. Please choose another one.', 'error');
+      return;
+    }
+
+    // Create new user
+    const newUser = {
+      id: Date.now().toString(),
+      username: username,
+      password: password, // In production, this should be properly hashed
+      birthday: birthMonth + '/' + birthDay + '/' + birthYear,
+      gender: gender,
+      createdAt: new Date().toISOString()
+    };
+
+    // Save user to localStorage
+    users.push(newUser);
+    localStorage.setItem('shielded_users', JSON.stringify(users));
+
+    // Show success notification
+    showNotify('Account created successfully! Welcome to VoiceED, ' + username + '! Please login to continue.', 'success');
+
+    // Reset form
+    setFormData({
+      birthMonth: '',
+      birthDay: '',
+      birthYear: '',
+      username: '',
+      password: '',
+      gender: ''
+    });
+
+    // Redirect to login after 3 seconds
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 3000);
+  };
+
+  const showNotify = (message, type) => {
+    setShowNotification({ visible: true, message, type });
+    setTimeout(() => {
+      setShowNotification({ visible: false, message: '', type: 'success' });
+    }, 5000);
+  };
+
+  const months = [
+    { value: '1', label: 'January' }, { value: '2', label: 'February' },
+    { value: '3', label: 'March' }, { value: '4', label: 'April' },
+    { value: '5', label: 'May' }, { value: '6', label: 'June' },
+    { value: '7', label: 'July' }, { value: '8', label: 'August' },
+    { value: '9', label: 'September' }, { value: '10', label: 'October' },
+    { value: '11', label: 'November' }, { value: '12', label: 'December' }
+  ];
+
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const years = Array.from({ length: 26 }, (_, i) => 2025 - i);
+
+  const genderOptions = [
+    { value: 'female', icon: '♀' },
+    { value: 'male', icon: '♂' },
+    { value: 'lgbtq+', icon: '⚧' }
+  ];
 
   return (
     <>
       <Navbar
         currentPage={pathname}
         variant="public"
-        onLoginClick={handleLoginClick}
+        onLoginClick={() => window.location.href = '/login'}
         onSettingsClick={handleSettingsClick}
       />
 
@@ -75,90 +131,43 @@ export default function Register() {
                 <h2>SIGN UP AND MAKE YOUR VOICE HEARD!</h2>
               </div>
 
-              <form id="registerForm" className="signup-form" onSubmit={handleRegister}>
-                {error && <div className="error-message" style={{ color: '#ff6b6b', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-                
+              <form id="registerForm" className="signup-form" onSubmit={handleSubmit}>
                 {/* Birthday Field */}
                 <div className="form-field">
                   <label>Birthday</label>
                   <div className="birthday-row">
-                    <select id="birthMonth" name="birthMonth" required={true}>
+                    <select
+                      id="birthMonth"
+                      value={formData.birthMonth}
+                      onChange={(e) => handleChange('birthMonth', e.target.value)}
+                      required
+                    >
                       <option value="">Month</option>
-                      <option value="1">January</option>
-                      <option value="2">February</option>
-                      <option value="3">March</option>
-                      <option value="4">April</option>
-                      <option value="5">May</option>
-                      <option value="6">June</option>
-                      <option value="7">July</option>
-                      <option value="8">August</option>
-                      <option value="9">September</option>
-                      <option value="10">October</option>
-                      <option value="11">November</option>
-                      <option value="12">December</option>
+                      {months.map(m => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
                     </select>
-                    <select id="birthDay" name="birthDay" required={true}>
+                    <select
+                      id="birthDay"
+                      value={formData.birthDay}
+                      onChange={(e) => handleChange('birthDay', e.target.value)}
+                      required
+                    >
                       <option value="">Day</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                      <option value="6">6</option>
-                      <option value="7">7</option>
-                      <option value="8">8</option>
-                      <option value="9">9</option>
-                      <option value="10">10</option>
-                      <option value="11">11</option>
-                      <option value="12">12</option>
-                      <option value="13">13</option>
-                      <option value="14">14</option>
-                      <option value="15">15</option>
-                      <option value="16">16</option>
-                      <option value="17">17</option>
-                      <option value="18">18</option>
-                      <option value="19">19</option>
-                      <option value="20">20</option>
-                      <option value="21">21</option>
-                      <option value="22">22</option>
-                      <option value="23">23</option>
-                      <option value="24">24</option>
-                      <option value="25">25</option>
-                      <option value="26">26</option>
-                      <option value="27">27</option>
-                      <option value="28">28</option>
-                      <option value="29">29</option>
-                      <option value="30">30</option>
-                      <option value="31">31</option>
+                      {days.map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
                     </select>
-                    <select id="birthYear" name="birthYear" required={true}>
+                    <select
+                      id="birthYear"
+                      value={formData.birthYear}
+                      onChange={(e) => handleChange('birthYear', e.target.value)}
+                      required
+                    >
                       <option value="">Year</option>
-                      <option value="2025">2025</option>
-                      <option value="2024">2024</option>
-                      <option value="2023">2023</option>
-                      <option value="2022">2022</option>
-                      <option value="2021">2021</option>
-                      <option value="2020">2020</option>
-                      <option value="2019">2019</option>
-                      <option value="2018">2018</option>
-                      <option value="2017">2017</option>
-                      <option value="2016">2016</option>
-                      <option value="2015">2015</option>
-                      <option value="2014">2014</option>
-                      <option value="2013">2013</option>
-                      <option value="2012">2012</option>
-                      <option value="2011">2011</option>
-                      <option value="2010">2010</option>
-                      <option value="2009">2009</option>
-                      <option value="2008">2008</option>
-                      <option value="2007">2007</option>
-                      <option value="2006">2006</option>
-                      <option value="2005">2005</option>
-                      <option value="2004">2004</option>
-                      <option value="2003">2003</option>
-                      <option value="2002">2002</option>
-                      <option value="2001">2001</option>
-                      <option value="2000">2000</option>
+                      {years.map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -166,76 +175,89 @@ export default function Register() {
                 {/* Username Field */}
                 <div className="form-field">
                   <label htmlFor="username">Username</label>
-                  <input type="text" id="username" name="username" placeholder="Choose a unique username (3-20 characters)" required={true} />
-                  <small style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "0.85rem", marginTop: "0.25rem", display: "block" }}>
+                  <input
+                    type="text"
+                    id="username"
+                    placeholder="Choose a unique username (3-20 characters)"
+                    value={formData.username}
+                    onChange={(e) => handleChange('username', e.target.value)}
+                    required
+                  />
+                  <small style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
                     Use 3-20 characters, letters and numbers only. No real names or personal info.
                   </small>
-                </div>
-
-                {/* Email Field */}
-                <div className="form-field">
-                  <label htmlFor="email">Email</label>
-                  <input type="email" id="email" name="email" placeholder="Enter your email address" required={true} />
                 </div>
 
                 {/* Password Field */}
                 <div className="form-field">
                   <label htmlFor="password">Password</label>
-                  <input type="password" id="password" name="password" placeholder="At least 6 characters" required={true} minLength="6" />
-                </div>
-
-                {/* Confirm Password Field */}
-                <div className="form-field">
-                  <label htmlFor="confirmPassword">Confirm Password</label>
-                  <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required={true} minLength="6" />
+                  <input
+                    type="password"
+                    id="password"
+                    placeholder="At least 8 characters"
+                    value={formData.password}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    required
+                    minLength={8}
+                  />
                 </div>
 
                 {/* Gender Field */}
                 <div className="form-field">
                   <label>Gender (optional)</label>
                   <div className="gender-row">
-                    <label className="gender-btn">
-                      <input type="radio" name="gender" value="female" />
-                      <span className="gender-icon">♀</span>
-                    </label>
-                    <label className="gender-btn">
-                      <input type="radio" name="gender" value="male" />
-                      <span className="gender-icon">♂</span>
-                    </label>
-                    <label className="gender-btn">
-                      <input type="radio" name="gender" value="lgbtq+" />
-                      <span className="gender-icon">⚧</span>
-                    </label>
+                    {genderOptions.map(opt => (
+                      <label key={opt.value} className="gender-btn">
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={opt.value}
+                          checked={formData.gender === opt.value}
+                          onChange={() => handleChange('gender', opt.value)}
+                        />
+                        <span className="gender-icon">{opt.icon}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
 
-                {/* Terms */}
-                <div className="form-field">
-                  <label className="checkbox-label">
-                    <input type="checkbox" name="termsAccepted" required={true} />
-                    <span>I agree to the Terms of Service and Privacy Policy</span>
-                  </label>
+                <div className="legal-text">
+                  <p>By signing up, you agree to the Terms of Service and Privacy Policy</p>
                 </div>
 
-                <button type="submit" className="signup-btn" disabled={isSubmitting}>
-                  {isSubmitting ? 'Creating Account...' : 'Sign Up'}
-                </button>
+                <button type="submit" className="signup-btn">Sign Up</button>
               </form>
             </div>
           </div>
         </div>
       </main>
 
-      <Footer />
+      {/* Notification Toast */}
+      {showNotification.visible && (
+        <div className={'notification notification-' + showNotification.type + ' show'}>
+          <div className="notification-toast">
+            <div className="notification-header">
+              <div className="notification-icon-wrapper">
+                <div className="toast-icon">
+                  <i className={'fas ' + (showNotification.type === 'success' ? 'fa-check-circle' : 'fa-info-circle')}></i>
+                </div>
+              </div>
+              <div className="notification-title-section">
+                <div className="toast-title">{showNotification.type === 'success' ? 'Success!' : 'Information'}</div>
+              </div>
+              <div className="toast-close" onClick={() => setShowNotification({ visible: false, message: '', type: 'success' })}>
+                <i className="fas fa-times"></i>
+              </div>
+            </div>
+            <div className="notification-body">
+              <div className="toast-message">{showNotification.message}</div>
+            </div>
+            <div className="notification-progress"></div>
+          </div>
+        </div>
+      )}
 
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => window.location.href = '/register'}
-        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
-      />
+      <Footer />
     </>
   );
 }

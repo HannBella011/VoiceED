@@ -1,6 +1,6 @@
 # VoiceED Backend - Database Models
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Enum, ForeignKey, Index
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -11,13 +11,17 @@ class UserRole(str, enum.Enum):
     STUDENT = "student"
     ADMIN = "admin"
     MODERATOR = "moderator"
+    SUPER_ADMIN = "super_admin"
 
 
 class ReportStatus(str, enum.Enum):
-    PENDING = "pending"
+    SUBMITTED = "submitted"
     UNDER_REVIEW = "under_review"
+    ASSIGNED = "assigned"
+    IN_PROGRESS = "in_progress"
+    AWAITING_ADDITIONAL_INFO = "awaiting_additional_info"
     RESOLVED = "resolved"
-    REJECTED = "rejected"
+    CLOSED = "closed"
 
 
 class ReportCategory(str, enum.Enum):
@@ -59,36 +63,118 @@ class User(Base):
     journal_entries = relationship("JournalEntry", back_populates="user", cascade="all, delete-orphan")
     stories = relationship("InspireStory", back_populates="user", cascade="all, delete-orphan")
     materials = relationship("SharedMaterial", back_populates="user", cascade="all, delete-orphan")
+    assigned_reports = relationship("Report", back_populates="assignee", foreign_keys="Report.assignee_id")
 
     def __repr__(self):
-        return f"<User(id={self.id}, username={self.username}, email={self.email})>"
+        return f"<User(id={self.id}, username={self.username}, email={self.email}, role={self.role})>"
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
+
+    @property
+    def is_super_admin(self) -> bool:
+        return self.role == UserRole.SUPER_ADMIN
 
 
 class Report(Base):
     __tablename__ = "reports"
 
     id = Column(Integer, primary_key=True, index=True)
+    tracking_code = Column(String(20), unique=True, index=True, nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=False)
     category = Column(Enum(ReportCategory), nullable=False)
-    status = Column(Enum(ReportStatus), default=ReportStatus.PENDING, nullable=False)
+    status = Column(Enum(ReportStatus), default=ReportStatus.SUBMITTED, nullable=False)
     is_anonymous = Column(Boolean, default=False, nullable=False)
     location = Column(String(255), nullable=True)
+    incident_date = Column(DateTime(timezone=True), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    assignee_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reporter_email = Column(String(255), nullable=True)  # For anonymous reports with email
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+    closed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user = relationship("User", back_populates="reports")
+    user = relationship("User", back_populates="reports", foreign_keys=[user_id])
+    assignee = relationship("User", back_populates="assigned_reports", foreign_keys=[assignee_id])
+    attachments = relationship("ReportAttachment", back_populates="report", cascade="all, delete-orphan")
+    timeline_entries = relationship("ReportTimeline", back_populates="report", cascade="all, delete-orphan", order_by="ReportTimeline.created_at")
 
     # Indexes
     __table_args__ = (
         Index("ix_reports_status_category", "status", "category"),
         Index("ix_reports_user_created", "user_id", "created_at"),
+        Index("ix_reports_tracking_code", "tracking_code"),
+        Index("ix_reports_assignee_status", "assignee_id", "status"),
     )
 
     def __repr__(self):
-        return f"<Report(id={self.id}, title={self.title}, status={self.status})>"
+        return f"<Report(id={self.id}, tracking_code={self.tracking_code}, title={self.title}, status={self.status})>"
+
+
+class ReportAttachment(Base):
+    __tablename__ = "report_attachments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, ForeignKey("reports.id", ondelete="CASCADE"), nullable=False)
+    filename = Column(String(255), nullable=False)
+    stored_filename = Column(String(255), nullable=False)  # UUID-based stored name
+    file_path = Column(String(500), nullable=False)
+    file_size = Column(Integer, nullable=False)
+    mime_type = Column(String(100), nullable=False)
+    extension = Column(String(20), nullable=False)
+    uploaded_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Who uploaded (admin or user)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    # Relationships
+    report = relationship("Report", back_populates="attachments")
+    uploaded_by = relationship("User")
+
+    def __repr__(self):
+        return f"<ReportAttachment(id={self.id}, report_id={self.report_id}, filename={self.filename})>"
+
+
+class ReportTimeline(Base):
+    __tablename__ = "report_timeline"
+
+    id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer, ForeignKey("reports.id", ondelete="CASCADE"), nullable=False)
+    status = Column(Enum(ReportStatus), nullable=False)
+    remarks = Column(Text, nullable=True)  # Admin remarks (max 250 words)
+    created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Admin who made the update
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    # Relationships
+    report = relationship("Report", back_populates="timeline_entries")
+    created_by = relationship("User")
+
+    # Attachments for this timeline entry (via association table)
+    # Using a separate association table for many-to-many between timeline and attachments
+    # For simplicity, we'll add attachment_ids as JSON or use a separate model
+    # Actually, let's use a separate association model
+
+    def __repr__(self):
+        return f"<ReportTimeline(id={self.id}, report_id={self.report_id}, status={self.status})>"
+
+
+class ReportTimelineAttachment(Base):
+    """Association table for timeline entries and attachments"""
+    __tablename__ = "report_timeline_attachments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timeline_id = Column(Integer, ForeignKey("report_timeline.id", ondelete="CASCADE"), nullable=False)
+    attachment_id = Column(Integer, ForeignKey("report_attachments.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("timeline_id", "attachment_id", name="uq_timeline_attachment"),
+    )
+
+    def __repr__(self):
+        return f"<ReportTimelineAttachment(timeline_id={self.timeline_id}, attachment_id={self.attachment_id})>"
 
 
 class JournalEntry(Base):

@@ -1,20 +1,27 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, LoginModal, UserMenuModal, ServiceCard } from '@/components/shared';
-import { useProtectedNavigation } from '@/lib/routeProtection';
+import { useState, useEffect } from 'react';
+import { Navbar, Footer } from '@/components/shared';
+import { useModals } from '@/components/shared/GlobalModals';
+import { useAuthContext } from '@/context/AuthContext';
 
 export default function Services() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { navigateToService } = useProtectedNavigation();
+  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen, userMenuOpen, setUserMenuOpen } = useModals();
+  const { currentUser, isLoggedIn } = useAuthContext();
+
+  const handleProfileClick = () => {
+    window.location.href = '/profile';
+    setUserMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    setUserMenuOpen(false);
+  };
 
   const handleLoginClick = () => {
-    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
-    if (currentUser) {
+    if (isLoggedIn && currentUser) {
       setUserMenuOpen(true);
     } else {
       setLoginOpen(true);
@@ -25,61 +32,15 @@ export default function Services() {
     setSettingsOpen(true);
   };
 
-  const services = [
-    {
-      icon: <i className="fas fa-shield-alt"></i>,
-      title: 'ReportED - Anonymous Reporting System',
-      description: 'A secure space where students can submit crime reports or raise safety concerns in their school or community, anonymously or openly.',
-      features: [
-        'Confidential submission process',
-        'Option for anonymity or identified reporting',
-        'Forwarding to proper authorities',
-        'Track report status securely',
-      ],
-      href: '/report-ed',
-    },
-    {
-      icon: <i className="fas fa-heart"></i>,
-      title: 'WellnessED - Student Wellness Hub',
-      description: 'Dedicated to mental health, stress management, and motivation, offering practical tips and resources to balance academics and personal wellbeing.',
-      features: [
-        'Stress‑relief guides and exercises',
-        'Motivation and productivity tips',
-        'Regularly updated wellness content',
-        'Mobile‑friendly access',
-      ],
-      href: '/wellness-ed',
-    },
-    {
-      icon: <i className="fas fa-lightbulb"></i>,
-      title: 'InspireED - Motivation and Achievements',
-      description: 'A section highlighting motivational stories, student achievements, and encouraging quotes to inspire persistence, hope, and community pride.',
-      features: [
-        'Student success stories',
-        'Inspirational quotes and messages',
-        'Peer encouragement highlights',
-        'Showcase of academic and personal milestones',
-      ],
-      href: '/inspire-ed',
-    },
-    {
-      icon: <i className="fas fa-share-alt"></i>,
-      title: 'ShareED - Collaborative Learning Space',
-      description: 'A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.',
-      features: [
-        'Easy upload/download system',
-        'Subject‑organized reviewer sheets',
-        'Peer‑to‑peer sharing',
-        'Collaborative learning resources',
-      ],
-      href: '/share-ed',
-    },
-  ];
-
   return (
     <>
-      <Navbar currentPage={pathname} variant="public" />
-      
+      <Navbar
+        currentPage={pathname}
+        variant="public"
+        onLoginClick={handleLoginClick}
+        onSettingsClick={handleSettingsClick}
+      />
+
       <main className="services-main">
         <div className="container">
           <div className="services-welcome">
@@ -88,38 +49,86 @@ export default function Services() {
           </div>
 
           <div className="services-container">
-            {services.map((service, index) => (
-              <ServiceCard
-                key={index}
-                icon={service.icon}
-                title={service.title}
-                description={service.description}
-                features={service.features}
-                onClick={() => navigateToService(service.href)}
-              />
-            ))}
+            {/* Service 1: Anonymous Reporting - match base HTML: div with onClick, not <a> */}
+            <div className="service-box" onClick={() => window.location.href = '/report'} style={{ cursor: 'pointer' }}>
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-shield-alt"></i>
+                </div>
+                <h3>ReportED - Anonymous Reporting System</h3>
+              </div>
+              <div className="service-details">
+                <p>A secure space where students can submit crime reports or raise safety concerns in their school or community, anonymously or openly.</p>
+                <div className="service-features">
+                  <div className="feature-item">Confidential submission process</div>
+                  <div className="feature-item">Option for anonymity or identified reporting</div>
+                  <div className="feature-item">Forwarding to proper authorities</div>
+                  <div className="feature-item">Track report status securely</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Service 2: WellnessED */}
+            <div className="service-box" onClick={() => window.location.href = '/wellness-ed'} style={{ cursor: 'pointer' }}>
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-heart"></i>
+                </div>
+                <h3>WellnessED - Student Wellness Hub</h3>
+              </div>
+              <div className="service-details">
+                <p>Dedicated to mental health, stress management, and motivation, offering practical tips and resources to balance academics and personal wellbeing.</p>
+                <div className="service-features">
+                  <div className="feature-item">Stress‑relief guides and exercises</div>
+                  <div className="feature-item">Motivation and productivity tips</div>
+                  <div className="feature-item">Regularly updated wellness content</div>
+                  <div className="feature-item">Mobile‑friendly access</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Service 3: InspireED */}
+            <div className="service-box" onClick={() => window.location.href = '/inspire-ed'} style={{ cursor: 'pointer' }}>
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-lightbulb"></i>
+                </div>
+                <h3>InspireED - Motivation and Achievements</h3>
+              </div>
+              <div className="service-details">
+                <p>A section highlighting motivational stories, student achievements, and encouraging quotes to inspire persistence, hope, and community pride.</p>
+                <div className="service-features">
+                  <div className="feature-item">Student success stories</div>
+                  <div className="feature-item">Inspirational quotes and messages</div>
+                  <div className="feature-item">Peer encouragement highlights</div>
+                  <div className="feature-item">Showcase of academic and personal milestones</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Service 4: ShareED */}
+            <div className="service-box" onClick={() => window.location.href = '/share-ed'} style={{ cursor: 'pointer' }}>
+              <div className="service-header">
+                <div className="service-icon">
+                  <i className="fas fa-share-alt"></i>
+                </div>
+                <h3>ShareED - Collaborative Learning Space</h3>
+              </div>
+              <div className="service-details">
+                <p>A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.</p>
+                <div className="service-features">
+                  <div className="feature-item">Easy upload/download system</div>
+                  <div className="feature-item">Subject‑organized reviewer sheets</div>
+                  <div className="feature-item">Peer‑to‑peer sharing</div>
+                  <div className="feature-item">Collaborative learning resources</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
 
       <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => window.location.href = '/register'}
-        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
-      />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
-        }}
-      />
     </>
   );
 }

@@ -1,3 +1,6 @@
+// Card - VoiceED
+// Flexible card component
+
 'use client';
 
 import React from 'react';

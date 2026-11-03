@@ -5,17 +5,14 @@
     color: var(--accent-cyan) !important;
 }
 .dashboard-main {
-    padding: 0 0 3rem 0; /* No top padding initially - navbar is in normal flow */
+    padding: 6rem 0 3rem 0;
     min-height: calc(100vh - 200px);
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
                 url('/bg.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    transition: padding-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* When navbar becomes fixed (scrolled), body.navbar-scrolled provides the offset */
 
 /* Theme-based background changes */
 body.pink-theme .dashboard-main {
@@ -1325,115 +1322,115 @@ body.orange-theme .notification-header {
     }
     
     .mobile-menu-btn {
-            display: block;
-        }
+        display: block;
+    }
     
-        .header-content {
-            flex-direction: row;
-            gap: 0.5rem;
-            padding: 0.5rem 0;
-            align-items: center;
-        }
+    .header-content {
+        flex-direction: row;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        align-items: center;
+    }
     
-        .logo-section {
-            flex-direction: row;
-            align-items: center;
-            gap: 0.5rem;
-            flex: 1;
-        }
+    .logo-section {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+    }
     
-        .logo img {
-            width: 80px;
-            height: 80px;
-        }
+    .logo img {
+        width: 80px;
+        height: 80px;
+    }
     
-        .brand-text h1 {
-            font-size: 1.8rem;
-        }
+    .brand-text h1 {
+        font-size: 1.8rem;
+    }
     
-        .brand-text p {
-            font-size: 0.9rem;
-        }
+    .brand-text p {
+        font-size: 0.9rem;
+    }
     
-        /* Mobile menu - slide down from top */
-        .navbar {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.98);
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-glow);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
+    .navbar {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-glow);
+        box-shadow: var(--shadow-glow);
+        width: 90%;
+        max-width: 400px;
+        backdrop-filter: blur(10px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 2001;
+    }
     
-        .navbar.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+    .navbar.active {
+        opacity: 1;
+        visibility: visible;
+    }
     
-        .navbar ul {
-            flex-direction: column;
-            gap: 0.5rem;
-            text-align: center;
-            flex-wrap: nowrap;
-            justify-content: center;
-        }
+    .navbar ul {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+        flex-wrap: nowrap;
+        justify-content: center;
+    }
     
-        .nav-links li {
-            font-size: 1.2rem;
-            padding: 0.8rem 0;
-            width: 100%;
-        }
+    .nav-links li {
+        font-size: 1.2rem;
+        padding: 0.8rem 0;
+        width: 100%;
+    }
     
-        .nav-links a {
-            display: block;
-            padding: 0.8rem;
-            width: 100%;
-            border-radius: 8px;
-            transition: background 0.3s ease;
-        }
+    .nav-links a {
+        display: block;
+        padding: 0.8rem;
+        width: 100%;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+    }
     
-        .nav-links a:hover {
-            background: rgba(0, 212, 255, 0.1);
-        }
+    .nav-links a:hover {
+        background: rgba(0, 212, 255, 0.1);
+    }
     
-        /* Settings button visible on mobile */
-        .settings-nav-btn {
-            display: block !important;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-            color: var(--primary-dark) !important;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
+    /* Settings button visible on mobile */
+    .settings-nav-btn {
+        display: block !important;
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+        color: var(--primary-dark) !important;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
     
-        .settings-nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-        }
+    .settings-nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    }
     
-        .login-nav-btn {
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-            color: var(--primary-dark) !important;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
+    .login-nav-btn {
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+        color: var(--primary-dark) !important;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
     
-        .login-nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-        }
+    .login-nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    }
     
     .welcome-section {
         padding: 1rem;

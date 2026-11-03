@@ -1,17 +1,13 @@
-import type { Metadata } from 'next'
 import '../styles/globals.css'
 import { AuthProvider } from '@/context/AuthContext'
+import { ModalProvider } from '@/components/shared/GlobalModals'
 
-export const metadata: Metadata = {
-  title: 'VoiceED - Where Every Student\'s Voice Matters',
+export const metadata = {
+  title: "VoiceED - Where Every Student's Voice Matters",
   description: 'A student-driven platform that empowers learners to be heard, supported, and inspired.',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
@@ -24,9 +20,11 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         />
       </head>
-      <body>
+      <body className="blue-theme">
         <AuthProvider>
-          {children}
+          <ModalProvider>
+            {children}
+          </ModalProvider>
         </AuthProvider>
       </body>
     </html>

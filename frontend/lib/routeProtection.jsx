@@ -1,19 +1,13 @@
+// routeProtection - VoiceED
+// Client-side route protection utilities
+
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}
-
-/**
- * Client-side route protection component.
- * Redirects unauthenticated users to login page with return URL.
- */
-export function ProtectedRoute({ children, fallback = null }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, fallback = null }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isLoggedIn, isLoading } = useAuthContext();
@@ -83,7 +77,7 @@ export function useLoginRedirect() {
 /**
  * Get the stored return URL (for display or conditional logic)
  */
-export function getReturnUrl(): string | null {
+export function getReturnUrl() {
   if (typeof window === 'undefined') return null;
   return sessionStorage.getItem('shielded_return_url');
 }
@@ -91,7 +85,7 @@ export function getReturnUrl(): string | null {
 /**
  * Clear the stored return URL
  */
-export function clearReturnUrl(): void {
+export function clearReturnUrl() {
   if (typeof window !== 'undefined') {
     sessionStorage.removeItem('shielded_return_url');
   }
@@ -104,7 +98,7 @@ export function useProtectedNavigation() {
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
 
-  const navigateToService = useCallback((href: string) => {
+  const navigateToService = useCallback((href) => {
     if (isLoggedIn) {
       router.push(href);
     } else {

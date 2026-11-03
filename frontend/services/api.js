@@ -4,28 +4,23 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 class ApiClient {
-  private baseUrl: string;
-  private token: string | null = null;
-
-  constructor(baseUrl: string = API_BASE_URL) {
+  constructor(baseUrl = API_BASE_URL) {
     this.baseUrl = baseUrl;
+    this.token = null;
   }
 
-  setToken(token: string | null) {
+  setToken(token) {
     this.token = token;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const headers: HeadersInit = {
+  async request(endpoint, options = {}) {
+    const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
 
     if (this.token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${this.token}`;
+      headers['Authorization'] = `Bearer ${this.token}`;
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -39,21 +34,21 @@ class ApiClient {
     }
 
     if (response.status === 204) {
-      return {} as T;
+      return {};
     }
 
     return response.json();
   }
 
   // Auth
-  async login(username: string, password: string) {
-    return this.request<{ access_token: string; token_type: string }>('/auth/login', {
+  async login(username, password) {
+    return this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
   }
 
-  async register(data: { username: string; email: string; password: string; full_name?: string }) {
+  async register(data) {
     return this.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -64,7 +59,7 @@ class ApiClient {
     return this.request('/auth/logout', { method: 'POST' });
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email) {
     return this.request('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
@@ -76,26 +71,26 @@ class ApiClient {
     return this.request('/users/me');
   }
 
-  async updateCurrentUser(data: Partial<{ email: string; full_name: string; avatar_url: string }>) {
+  async updateCurrentUser(data) {
     return this.request('/users/me', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  async getUser(userId: string) {
+  async getUser(userId) {
     return this.request(`/users/${userId}`);
   }
 
   // Reports
-  async createReport(data: { title: string; description: string; category: string; is_anonymous?: boolean; location?: string }) {
+  async createReport(data) {
     return this.request('/reports', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async getReports(params?: { page?: number; limit?: number; status?: string }) {
+  async getReports(params) {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -105,23 +100,23 @@ class ApiClient {
     return this.request(`/reports?${searchParams.toString()}`);
   }
 
-  async getReport(reportId: string) {
+  async getReport(reportId) {
     return this.request(`/reports/${reportId}`);
   }
 
-  async updateReport(reportId: string, data: Partial<{ title: string; description: string; status: string; category: string }>) {
+  async updateReport(reportId, data) {
     return this.request(`/reports/${reportId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  async deleteReport(reportId: string) {
+  async deleteReport(reportId) {
     return this.request(`/reports/${reportId}`, { method: 'DELETE' });
   }
 
   // Wellness
-  async getWellnessTips(category?: string) {
+  async getWellnessTips(category) {
     const params = category ? `?category=${category}` : '';
     return this.request(`/wellness/tips${params}`);
   }
@@ -130,14 +125,14 @@ class ApiClient {
     return this.request('/wellness/resources');
   }
 
-  async createJournalEntry(data: { title: string; content: string; mood?: string }) {
+  async createJournalEntry(data) {
     return this.request('/wellness/journal', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async getJournalEntries(params?: { page?: number; limit?: number }) {
+  async getJournalEntries(params) {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -148,7 +143,7 @@ class ApiClient {
   }
 
   // Inspire
-  async getInspireStories(params?: { page?: number; limit?: number }) {
+  async getInspireStories(params) {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -162,7 +157,7 @@ class ApiClient {
     return this.request('/inspire/quotes');
   }
 
-  async createInspireStory(data: { title: string; content: string; author_name?: string; is_anonymous?: boolean }) {
+  async createInspireStory(data) {
     return this.request('/inspire/stories', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -170,7 +165,7 @@ class ApiClient {
   }
 
   // Share
-  async getSharedMaterials(params?: { subject?: string; page?: number; limit?: number }) {
+  async getSharedMaterials(params) {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -180,18 +175,18 @@ class ApiClient {
     return this.request(`/share/materials?${searchParams.toString()}`);
   }
 
-  async getMaterial(materialId: string) {
+  async getMaterial(materialId) {
     return this.request(`/share/materials/${materialId}`);
   }
 
-  async uploadMaterial(data: { title: string; description?: string; subject: string; file_url: string; file_type: string }) {
+  async uploadMaterial(data) {
     return this.request('/share/materials', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async deleteMaterial(materialId: string) {
+  async deleteMaterial(materialId) {
     return this.request(`/share/materials/${materialId}`, { method: 'DELETE' });
   }
 }

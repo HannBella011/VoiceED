@@ -296,6 +296,10 @@ body.pink-theme .profile-main {
     color: var(--accent-cyan);
 }
 
+.mobile-menu-btn.active i {
+    transform: rotate(90deg);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .mobile-menu-btn {
@@ -329,28 +333,28 @@ body.pink-theme .profile-main {
         font-size: 0.9rem;
     }
     
-    /* Mobile menu - slide down from top */
     .navbar {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(10, 10, 31, 0.98);
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-glow);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-glow);
+        box-shadow: var(--shadow-glow);
+        width: 90%;
+        max-width: 400px;
         backdrop-filter: blur(10px);
         opacity: 0;
         visibility: hidden;
-        transform: translateY(-10px);
         transition: all 0.3s ease;
-        z-index: 1000;
+        z-index: 2001;
     }
     
-    .navbar.show {
+    .navbar.active {
         opacity: 1;
         visibility: visible;
-        transform: translateY(0);
     }
     
     .navbar ul {

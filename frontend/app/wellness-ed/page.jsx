@@ -2,10 +2,10 @@
 
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, UserMenuModal, WellnessActivityCard } from '@/components/shared';
+import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
-function WellnessEdContent() {
+function WellnessEDContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -20,47 +20,47 @@ function WellnessEdContent() {
 
   const activities = [
     {
-      icon: <i className="fas fa-wind"></i>,
+      icon: 'fas fa-wind',
       title: 'Breathing Exercise',
       description: 'Practice guided breathing exercises to reduce stress and improve focus.',
-      buttonText: 'Start Exercise',
       href: '/breathing',
+      btnText: 'Start Exercise'
     },
     {
-      icon: <i className="fas fa-heart"></i>,
+      icon: 'fas fa-heart',
       title: 'Mood Tracker',
       description: 'Track your daily mood and emotional patterns for better self-awareness.',
-      buttonText: 'Track Mood',
       href: '/mood-tracker',
+      btnText: 'Track Mood'
     },
     {
-      icon: <i className="fas fa-bullseye"></i>,
+      icon: 'fas fa-bullseye',
       title: 'Daily Goals',
       description: 'Set and track daily wellness goals to build healthy habits.',
-      buttonText: 'Set Goals',
       href: '/daily-goals',
+      btnText: 'Set Goals'
     },
     {
-      icon: <i className="fas fa-hourglass-half"></i>,
+      icon: 'fas fa-hourglass-half',
       title: 'Focus Timer',
       description: 'Use the Pomodoro technique to boost productivity and manage study time.',
-      buttonText: 'Start Timer',
       href: '/focus-timer',
+      btnText: 'Start Timer'
     },
     {
-      icon: <i className="fas fa-spa"></i>,
+      icon: 'fas fa-spa',
       title: 'Meditation',
       description: 'Guided meditation sessions for relaxation and mental clarity.',
-      buttonText: 'Start Meditation',
       href: '/meditation',
+      btnText: 'Start Meditation'
     },
     {
-      icon: <i className="fas fa-book-open"></i>,
+      icon: 'fas fa-book-open',
       title: 'Wellness Journal',
       description: 'Write and reflect on your thoughts, feelings, and daily experiences.',
-      buttonText: 'Write Journal',
       href: '/wellness-journal',
-    },
+      btnText: 'Write Journal'
+    }
   ];
 
   return (
@@ -81,14 +81,20 @@ function WellnessEdContent() {
 
           <div className="wellness-grid">
             {activities.map((activity, index) => (
-              <WellnessActivityCard
-                key={index}
-                icon={activity.icon}
-                title={activity.title}
-                description={activity.description}
-                buttonText={activity.buttonText}
-                href={activity.href}
-              />
+              <a key={index} href={activity.href} className="wellness-card activity-card">
+                <div className="card-header">
+                  <div className="card-icon">
+                    <i className={activity.icon}></i>
+                  </div>
+                  <h3>{activity.title}</h3>
+                </div>
+                <div className="card-body">
+                  <p className="card-description">{activity.description}</p>
+                  <button className="card-btn">
+                    {activity.btnText} <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              </a>
             ))}
           </div>
         </div>
@@ -110,10 +116,10 @@ function WellnessEdContent() {
   );
 }
 
-export default function WellnessEd() {
+export default function WellnessED() {
   return (
     <ProtectedRoute fallback={null}>
-      <WellnessEdContent />
+      <WellnessEDContent />
     </ProtectedRoute>
   );
 }

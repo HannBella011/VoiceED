@@ -1,3 +1,6 @@
+// Button - VoiceED
+// Polymorphic button component
+
 'use client';
 
 import React from 'react';
@@ -9,6 +12,8 @@ export function Button({
   children,
   className = '',
   disabled,
+  type = 'button',
+  onClick,
   ...props
 }) {
   const baseClasses = 'btn';
@@ -25,6 +30,8 @@ export function Button({
     <button
       className={combinedClassName}
       disabled={disabled || isLoading}
+      type={type}
+      onClick={onClick}
       {...props}
     >
       {isLoading && <span className="btn-spinner" aria-hidden="true" />}

@@ -1,26 +1,19 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, LoginModal, UserMenuModal } from '@/components/shared';
+import { useState, useEffect } from 'react';
+import { Navbar, Footer } from '@/components/shared';
+import { useModals } from '@/components/shared/GlobalModals';
+import { useAuthContext } from '@/context/AuthContext';
 
-export default function Contacts() {
+// Force Turbopack recompile - v2
+export default function ContactsPage() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get('name');
-    alert(`Thank you for your message, ${name}! We will get back to you soon.`);
-    e.currentTarget.reset();
-  };
+  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen, userMenuOpen, setUserMenuOpen } = useModals();
+  const { currentUser, isLoggedIn } = useAuthContext();
 
   const handleLoginClick = () => {
-    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
-    if (currentUser) {
+    if (isLoggedIn && currentUser) {
       setUserMenuOpen(true);
     } else {
       setLoginOpen(true);
@@ -31,10 +24,21 @@ export default function Contacts() {
     setSettingsOpen(true);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert('Thank you for your message! We will get back to you soon.');
+    e.target.reset();
+  };
+
   return (
     <>
-      <Navbar currentPage={pathname} variant="public" onLoginClick={handleLoginClick} onSettingsClick={handleSettingsClick} />
-      
+      <Navbar
+        currentPage={pathname}
+        variant="public"
+        onLoginClick={handleLoginClick}
+        onSettingsClick={handleSettingsClick}
+      />
+
       <main className="services-main">
         <div className="container">
           <div className="services-welcome">
@@ -122,35 +126,35 @@ export default function Contacts() {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Message Us */}
-              <div className="emergency-sub-container">
-                <div className="emergency-header">
-                  <div className="emergency-icon"><i className="fas fa-envelope"></i></div>
-                  <h4>Message Us</h4>
-                </div>
-                <div className="emergency-content">
-                  <p>Send us a message and we'll get back to you as soon as possible. Whether you're a student, educator, or potential partner, we're here to help.</p>
-                  <form className="contact-form" id="contactForm" onSubmit={handleContactSubmit}>
-                    <div className="form-group">
-                      <label htmlFor="name">Full Name</label>
-                      <input type="text" id="name" name="name" placeholder="Enter your full name" required={true} />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="email">Email Address</label>
-                      <input type="email" id="email" name="email" placeholder="Enter your email address" required={true} />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="subject">Subject</label>
-                      <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required={true} />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="message">Message</label>
-                      <textarea id="message" name="message" placeholder="Tell us more about your inquiry..." rows={5} required={true}></textarea>
-                    </div>
-                    <button type="submit" className="cta-button">Send Message</button>
-                  </form>
+                {/* Message Us */}
+                <div className="emergency-sub-container">
+                  <div className="emergency-header">
+                    <div className="emergency-icon"><i className="fas fa-envelope"></i></div>
+                    <h4>Message Us</h4>
+                  </div>
+                  <div className="emergency-content">
+                    <p>Send us a message and we'll get back to you as soon as possible. Whether you're a student, educator, or potential partner, we're here to help.</p>
+                    <form className="contact-form" id="contactForm" onSubmit={handleSubmit}>
+                      <div className="form-group">
+                        <label htmlFor="name">Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email address" required />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Tell us more about your inquiry..." rows="5" required></textarea>
+                      </div>
+                      <button type="submit" className="cta-button">Send Message</button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
@@ -159,23 +163,6 @@ export default function Contacts() {
       </main>
 
       <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => window.location.href = '/register'}
-        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
-      />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
-        }}
-      />
     </>
   );
 }

@@ -34,51 +34,51 @@ function BreathingContent() {
             <p>Practice guided breathing to reduce stress and improve focus</p>
           </div>
 
-          <div className="wellness-grid">
-            <div className="wellness-card breathing-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-wind"></i>
-                </div>
-                <h3>4-7-8 Breathing Technique</h3>
-              </div>
-              <div className="card-body">
-                <div className="breathing-circle-wrapper">
-                  <div className="breathing-circle" id="breathingCircle">
-                    <span className="breathing-text" id="breathingText">Start</span>
-                  </div>
-                </div>
-                <div className="breathing-info">
-                  <p className="breathing-phase" id="breathingPhase">Ready to begin</p>
-                  <p className="breathing-count" id="breathingCount">0 cycles</p>
-                </div>
-                <button className="wellness-btn primary-btn" id="startBreathing">Start Exercise</button>
-                <button className="wellness-btn secondary-btn" id="stopBreathing" style={{ display: "none" }}>Stop</button>
+          <div className="breathing-container">
+            <div className="breathing-circle">
+              <div className="breathing-text">
+                <span className="breathing-instruction">Ready to begin</span>
+                <span className="breathing-count">0 cycles</span>
               </div>
             </div>
-
-            <div className="wellness-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-info-circle"></i>
-                </div>
-                <h3>How It Works</h3>
+            <div className="breathing-controls">
+              <button className="btn btn--primary breathing-btn" id="startBreathing">
+                Start Exercise
+              </button>
+              <button className="btn btn--secondary breathing-btn" id="stopBreathing" disabled>
+                Stop
+              </button>
+            </div>
+            <div className="breathing-phases">
+              <div className="phase">
+                <span className="phase-label">Inhale</span>
+                <span className="phase-time">4s</span>
               </div>
-              <div className="card-body">
-                <p className="card-description">The 4-7-8 breathing technique is a simple yet powerful method to calm your nervous system:</p>
-                <ul className="breathing-steps">
-                  <li><strong>Inhale</strong> for 4 seconds through your nose</li>
-                  <li><strong>Hold</strong> your breath for 7 seconds</li>
-                  <li><strong>Exhale</strong> for 8 seconds through your mouth</li>
-                </ul>
-                <p className="card-description">Repeat for 4-8 cycles to feel relaxed and focused.</p>
+              <div className="phase">
+                <span className="phase-label">Hold</span>
+                <span className="phase-time">7s</span>
+              </div>
+              <div className="phase">
+                <span className="phase-label">Exhale</span>
+                <span className="phase-time">8s</span>
               </div>
             </div>
           </div>
 
-          <div className="back-button-container">
-            <a href="/wellness-ed" className="back-btn"><i className="fas fa-arrow-left"></i> Back to WellnessED</a>
+          <div className="breathing-info">
+            <h3>How It Works</h3>
+            <p>The 4-7-8 breathing technique is a simple yet powerful method to calm your nervous system:</p>
+            <ul>
+              <li>Inhale for 4 seconds through your nose</li>
+              <li>Hold your breath for 7 seconds</li>
+              <li>Exhale for 8 seconds through your mouth</li>
+            </ul>
+            <p>{'Repeat for 4-8 cycles to feel relaxed and focused.'}</p>
           </div>
+
+          <a href="/wellness-ed" className="btn btn--secondary">
+            <i className="fas fa-arrow-left"></i> Back to WellnessED
+          </a>
         </div>
       </main>
 

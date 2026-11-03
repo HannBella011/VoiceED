@@ -1,9 +1,19 @@
+// WellnessActivityCard - VoiceED
+// Wellness activity card component
+
 'use client';
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
-export function WellnessActivityCard({ icon, title, description, buttonText, href, variant = 'activity' }) {
+export function WellnessActivityCard({ 
+  icon, 
+  title, 
+  description, 
+  buttonText, 
+  href, 
+  variant = 'activity' 
+}) {
   const router = useRouter();
 
   const handleClick = (e) => {

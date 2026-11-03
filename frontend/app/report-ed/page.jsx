@@ -5,10 +5,21 @@ import { useState } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
-function ReportEdContent() {
+function ReportEDContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [rightNow, setRightNow] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    category: '',
+    date: '',
+    location: '',
+    description: ''
+  });
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -18,11 +29,102 @@ function ReportEdContent() {
     setSettingsOpen(true);
   };
 
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAnonymousChange = (checked) => {
+    setIsAnonymous(checked);
+    if (checked) {
+      setFormData(prev => ({ ...prev, name: '', email: '' }));
+    }
+  };
+
+  const handleRightNowChange = (checked) => {
+    setRightNow(checked);
+    if (checked) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      setFormData(prev => ({ ...prev, date: `${year}-${month}-${day}T${hours}:${minutes}` }));
+    } else {
+      setFormData(prev => ({ ...prev, date: '' }));
+    }
+  };
+
+  const handleFilesChange = (files) => {
+    const newFiles = Array.from(files);
+    setSelectedFiles(prev => {
+      const existingNames = new Set(prev.map(f => f.name));
+      const uniqueFiles = newFiles.filter(f => !existingNames.has(f.name));
+      return [...prev, ...uniqueFiles];
+    });
+  };
+
+  const removeFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const reportData = {
+      anonymous: isAnonymous,
+      name: formData.name,
+      email: formData.email,
+      category: formData.category,
+      date: formData.date,
+      location: formData.location,
+      description: formData.description,
+      timestamp: new Date().toISOString()
+    };
+
+    // Store in localStorage
+    let reports = JSON.parse(localStorage.getItem('voiceed_reports') || '[]');
+    reports.unshift(reportData);
+    localStorage.setItem('voiceed_reports', JSON.stringify(reports));
+
+    alert('Thank you for your report. Your submission has been received securely. The VoiceED team will review it promptly.');
+
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      category: '',
+      date: '',
+      location: '',
+      description: ''
+    });
+    setIsAnonymous(false);
+    setRightNow(false);
+    setSelectedFiles([]);
+  };
+
+  const handleMapSearch = (e) => {
+    e.preventDefault();
+    const searchTerm = e.target.searchTerm.value.trim();
+    if (searchTerm) {
+      const encodedSearch = encodeURIComponent(searchTerm + ' near me');
+      window.open(`https://www.google.com/maps/search/${encodedSearch}`, '_blank');
+    } else {
+      alert('Please enter a location or organization to search for.');
+    }
+  };
+
   return (
     <>
       <Navbar
         currentPage={pathname}
-        variant="wellness"
+        variant="dashboard"
         onUserMenuClick={handleUserMenuClick}
         onSettingsClick={handleSettingsClick}
       />
@@ -46,16 +148,16 @@ function ReportEdContent() {
               <div className="card-body">
                 <p className="card-description">"If you or someone else is in immediate danger, please contact emergency services directly."</p>
                 <div className="emergency-links">
-                  <a href="tel:911" className="emergency-btn">
+                  <button className="emergency-btn" onClick={() => window.location.href = 'tel:911'}>
                     <i className="fas fa-phone"></i>
                     <span>Emergency Services</span>
                     <span className="emergency-number">911</span>
-                  </a>
-                  <a href="tel:1553" className="emergency-btn">
+                  </button>
+                  <button className="emergency-btn" onClick={() => window.location.href = 'tel:1553'}>
                     <i className="fas fa-heartbeat"></i>
                     <span>Mental Health Crisis</span>
                     <span className="emergency-number">1553</span>
-                  </a>
+                  </button>
                   <a href="https://www.google.com/maps/search/hospitals+near+me" target="_blank" className="emergency-btn">
                     <i className="fas fa-hospital"></i>
                     <span>Find Hospital</span>
@@ -119,19 +221,25 @@ function ReportEdContent() {
                     src="https://www.google.com/maps?q=Iligan+City+police+station&output=embed"
                     width="100%"
                     height="400"
-                    style={{ border: 0, borderRadius: 12 }}
-                    allowfullscreen=""
+                    style={{ border: 0, borderRadius: '12px' }}
+                    allowFullScreen=""
                     loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-                  </iframe>
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
                 </div>
-                <div className="map-search">
-                  <input type="text" id="mapSearch" className="report-input" placeholder="Search for police station, DSWD, or help center..." />
-                  <button className="search-map-btn" id="searchMapBtn">
+                <form className="map-search" onSubmit={handleMapSearch}>
+                  <input
+                    type="text"
+                    name="searchTerm"
+                    id="mapSearch"
+                    className="report-input"
+                    placeholder="Search for police station, DSWD, or help center..."
+                  />
+                  <button type="submit" className="search-map-btn" id="searchMapBtn">
                     <i className="fas fa-search"></i>
                     Search
                   </button>
-                </div>
+                </form>
                 <div className="help-resources">
                   <h4>Emergency Hotlines & Support Organizations</h4>
                   <div className="resource-links-grid">
@@ -221,11 +329,17 @@ function ReportEdContent() {
                 <h3>Submit a Report</h3>
               </div>
               <div className="card-body">
-                <form id="reportForm" className="report-form">
+                <form id="reportForm" className="report-form" onSubmit={handleSubmit}>
                   {/* Anonymity Toggle */}
                   <div className="form-group anonymity-group">
                     <label className="anonymity-toggle">
-                      <input type="checkbox" id="anonymousToggle" name="anonymous" />
+                      <input
+                        type="checkbox"
+                        id="anonymousToggle"
+                        name="anonymous"
+                        checked={isAnonymous}
+                        onChange={(e) => handleAnonymousChange(e.target.checked)}
+                      />
                       <span className="toggle-slider"></span>
                       <span className="toggle-text">Keep my identity anonymous</span>
                     </label>
@@ -233,20 +347,44 @@ function ReportEdContent() {
                   </div>
 
                   {/* Name and Email (hidden if anonymous) */}
-                  <div className="form-group identity-group" id="identityGroup">
-                    <label htmlFor="reporterName">Your Name</label>
-                    <input type="text" id="reporterName" className="report-input" placeholder="Enter your name" />
-                  </div>
+                  {!isAnonymous && (
+                    <>
+                      <div className="form-group identity-group" id="identityGroup">
+                        <label htmlFor="reporterName">Your Name</label>
+                        <input
+                          type="text"
+                          id="reporterName"
+                          className="report-input"
+                          placeholder="Enter your name"
+                          value={formData.name}
+                          onChange={(e) => handleChange('name', e.target.value)}
+                        />
+                      </div>
 
-                  <div className="form-group identity-group" id="emailGroup">
-                    <label htmlFor="reporterEmail">Your Email</label>
-                    <input type="email" id="reporterEmail" className="report-input" placeholder="Enter your email" />
-                  </div>
+                      <div className="form-group identity-group" id="emailGroup">
+                        <label htmlFor="reporterEmail">Your Email</label>
+                        <input
+                          type="email"
+                          id="reporterEmail"
+                          className="report-input"
+                          placeholder="Enter your email"
+                          value={formData.email}
+                          onChange={(e) => handleChange('email', e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )}
 
                   {/* Incident Category */}
                   <div className="form-group">
                     <label htmlFor="incidentCategory">Incident Category</label>
-                    <select id="incidentCategory" className="report-input" required={true}>
+                    <select
+                      id="incidentCategory"
+                      className="report-input"
+                      value={formData.category}
+                      onChange={(e) => handleChange('category', e.target.value)}
+                      required
+                    >
                       <option value="">Select category...</option>
                       <option value="academic">Academic Concern</option>
                       <option value="harassment">Harassment or Bullying</option>
@@ -261,9 +399,21 @@ function ReportEdContent() {
                   {/* Date & Time */}
                   <div className="form-group">
                     <label htmlFor="incidentDate">Date & Time of Incident</label>
-                    <input type="datetime-local" id="incidentDate" className="report-input" />
+                    <input
+                      type="datetime-local"
+                      id="incidentDate"
+                      className="report-input"
+                      value={formData.date}
+                      onChange={(e) => handleChange('date', e.target.value)}
+                      disabled={rightNow}
+                    />
                     <label className="checkbox-label">
-                      <input type="checkbox" id="rightNowToggle" />
+                      <input
+                        type="checkbox"
+                        id="rightNowToggle"
+                        checked={rightNow}
+                        onChange={(e) => handleRightNowChange(e.target.checked)}
+                      />
                       <span>Right Now (current time)</span>
                     </label>
                   </div>
@@ -271,20 +421,58 @@ function ReportEdContent() {
                   {/* Location */}
                   <div className="form-group">
                     <label htmlFor="incidentLocation">Location</label>
-                    <input type="text" id="incidentLocation" className="report-input" placeholder="Where did this happen?" required={true} />
+                    <input
+                      type="text"
+                      id="incidentLocation"
+                      className="report-input"
+                      placeholder="Where did this happen?"
+                      value={formData.location}
+                      onChange={(e) => handleChange('location', e.target.value)}
+                      required
+                    />
                   </div>
 
                   {/* Description */}
                   <div className="form-group">
                     <label htmlFor="incidentDescription">Description</label>
-                    <textarea id="incidentDescription" className="report-input report-textarea" rows={6} placeholder="Please describe what happened in detail..." required={true}></textarea>
+                    <textarea
+                      id="incidentDescription"
+                      className="report-input report-textarea"
+                      rows={6}
+                      placeholder="Please describe what happened in detail..."
+                      value={formData.description}
+                      onChange={(e) => handleChange('description', e.target.value)}
+                      required
+                    ></textarea>
                   </div>
 
                   {/* Evidence Upload */}
                   <div className="form-group">
                     <label htmlFor="evidenceUpload">Evidence (Optional)</label>
-                    <div className="file-upload-area" id="dropZone">
-                      <input type="file" id="evidenceUpload" className="file-input" multiple={true} accept="image/*,video/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx" />
+                    <div
+                      className="file-upload-area"
+                      id="dropZone"
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (e.dataTransfer.files.length > 0) {
+                          handleFilesChange(e.dataTransfer.files);
+                        }
+                      }}
+                    >
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        id="evidenceUpload"
+                        className="file-input"
+                        multiple
+                        accept="image/*,video/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx"
+                        onChange={(e) => e.target.files && handleFilesChange(e.target.files)}
+                        style={{ display: 'none' }}
+                      />
                       <div className="file-upload-label">
                         <i className="fas fa-cloud-upload-alt"></i>
                         <p>Drag and drop files here or click to browse</p>
@@ -292,7 +480,21 @@ function ReportEdContent() {
                       </div>
                     </div>
                   </div>
-                  <div id="selectedFiles" className="selected-files"></div>
+                  <div id="selectedFiles" className="selected-files">
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} className="selected-file">
+                        <i className="fas fa-file"></i>
+                        <span>{file.name}</span>
+                        <span className="file-size">({formatFileSize(file.size)})</span>
+                        <button
+                          className="remove-file"
+                          onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
 
                   {/* Submit Button */}
                   <div className="form-submit">
@@ -329,10 +531,10 @@ function ReportEdContent() {
   );
 }
 
-export default function ReportEd() {
+export default function ReportED() {
   return (
     <ProtectedRoute fallback={null}>
-      <ReportEdContent />
+      <ReportEDContent />
     </ProtectedRoute>
   );
 }

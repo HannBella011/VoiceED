@@ -34,51 +34,37 @@ function FocusTimerContent() {
             <p>Use the Pomodoro technique to boost productivity and manage study time</p>
           </div>
 
-          <div className="wellness-grid">
-            <div className="wellness-card timer-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-hourglass-half"></i>
-                </div>
-                <h3>Pomodoro Timer</h3>
+          <section className="timer-section">
+            <div className="timer-card">
+              <h3>Pomodoro Timer</h3>
+              <div className="timer-display">25:00</div>
+              <div className="timer-presets">
+                <button className="preset-btn active">25</button>
+                <button className="preset-btn">45</button>
+                <button className="preset-btn">60</button>
               </div>
-              <div className="card-body">
-                <div className="timer-display" id="timerDisplay">25:00</div>
-                <div className="timer-presets">
-                  <button className="preset-btn" data-time="25">25</button>
-                  <button className="preset-btn" data-time="45">45</button>
-                  <button className="preset-btn" data-time="60">60</button>
-                </div>
-                <div className="timer-controls">
-                  <button className="wellness-btn primary-btn" id="startTimer">Start</button>
-                  <button className="wellness-btn secondary-btn" id="pauseTimer" style={{ display: "none" }}>Pause</button>
-                  <button className="wellness-btn outline-btn" id="resetTimer">Reset</button>
-                </div>
+              <div className="timer-controls">
+                <button className="btn btn--primary timer-btn">Start</button>
+                <button className="btn btn--secondary timer-btn">Pause</button>
+                <button className="btn btn--ghost timer-btn">Reset</button>
               </div>
             </div>
+          </section>
 
-            <div className="wellness-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-info-circle"></i>
-                </div>
-                <h3>About Pomodoro</h3>
-              </div>
-              <div className="card-body">
-                <p className="card-description">The Pomodoro Technique is a time management method:</p>
-                <ul className="breathing-steps">
-                  <li>Work on a task for 25 minutes</li>
-                  <li>Take a short 5-minute break</li>
-                  <li>After 4 pomodoros, take a longer 15-30 minute break</li>
-                  <li>Repeat the cycle as needed</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <section className="info-section">
+            <h3>About Pomodoro</h3>
+            <p>The Pomodoro Technique is a time management method:</p>
+            <ul>
+              <li>Work on a task for 25 minutes</li>
+              <li>Take a short 5-minute break</li>
+              <li>After 4 pomodoros, take a longer 15-30 minute break</li>
+              <li>Repeat the cycle as needed</li>
+            </ul>
+          </section>
 
-          <div className="back-button-container">
-            <a href="/wellness-ed" className="back-btn"><i className="fas fa-arrow-left"></i> Back to WellnessED</a>
-          </div>
+          <a href="/wellness-ed" className="btn btn--secondary">
+            <i className="fas fa-arrow-left"></i> Back to WellnessED
+          </a>
         </div>
       </main>
 

@@ -1,9 +1,21 @@
+// ServiceCard - VoiceED
+// Service feature card component
+
 'use client';
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
-export function ServiceCard({ icon, title, description, features, onClick, href }) {
+export function ServiceCard({ 
+  icon, 
+  title, 
+  description, 
+  features, 
+  onClick, 
+  href,
+  className = '',
+  style
+}) {
   const router = useRouter();
 
   const handleClick = (e) => {
@@ -19,9 +31,9 @@ export function ServiceCard({ icon, title, description, features, onClick, href 
 
   return (
     <div
-      className={`service-box ${isClickable ? 'service-box-clickable' : ''}`}
+      className={`service-box ${isClickable ? 'service-box-clickable' : ''} ${className}`}
       onClick={handleClick}
-      style={isClickable ? { cursor: 'pointer' } : undefined}
+      style={isClickable ? { cursor: 'pointer', ...style } : style}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
       onKeyDown={(e) => isClickable && (e.key === 'Enter' || e.key === ' ') && handleClick(e)}

@@ -1,27 +1,16 @@
+// useAuth - VoiceED
+// Authentication hook for managing user state
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  gender?: string;
-  birthday?: string;
-  createdAt?: string;
-}
-
-interface LoginStats {
-  [username: string]: number;
-  lastLogin?: string;
-}
-
 export function useAuth() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginStats, setLoginStats] = useState<LoginStats>({});
+  const [loginStats, setLoginStats] = useState({ counts: {}, lastLogin: undefined });
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -35,13 +24,20 @@ export function useAuth() {
     }
     
     if (savedStats) {
-      setLoginStats(JSON.parse(savedStats));
+      const parsed = JSON.parse(savedStats);
+      // Handle both old and new format
+      if (parsed.counts) {
+        setLoginStats(parsed);
+      } else {
+        // Old format migration
+        setLoginStats({ counts: parsed, lastLogin: undefined });
+      }
     }
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
+  const login = useCallback(async (username, password) => {
     const users = JSON.parse(localStorage.getItem('shielded_users') || '[]');
-    const user = users.find((u: User) => u.username.toLowerCase() === username.toLowerCase());
+    const user = users.find((u) => u.username.toLowerCase() === username.toLowerCase());
     
     if (!user) {
       throw new Error('Username not found. Please check your username or register for an account.');
@@ -55,6 +51,8 @@ export function useAuth() {
     const currentUser = {
       id: user.id,
       username: user.username,
+      email: user.email,
+      role: user.role,
       gender: user.gender,
       birthday: user.birthday,
       loginTime: new Date().toISOString(),
@@ -63,9 +61,11 @@ export function useAuth() {
     localStorage.setItem('shielded_current_user', JSON.stringify(currentUser));
     
     // Update login stats
-    const newLoginStats = { ...loginStats };
-    newLoginStats[username] = (newLoginStats[username] || 0) + 1;
-    newLoginStats.lastLogin = new Date().toISOString();
+    const newLoginStats = { 
+      counts: { ...loginStats.counts }, 
+      lastLogin: new Date().toISOString() 
+    };
+    newLoginStats.counts[username] = (newLoginStats.counts[username] || 0) + 1;
     localStorage.setItem('shielded_login_stats', JSON.stringify(newLoginStats));
     setLoginStats(newLoginStats);
     
@@ -75,15 +75,7 @@ export function useAuth() {
     return currentUser;
   }, [loginStats]);
 
-  const register = useCallback(async (userData: {
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    gender?: string;
-    birthday?: { month: string; day: string; year: string };
-    termsAccepted: boolean;
-  }) => {
+  const register = useCallback(async (userData) => {
     // Validation
     if (!userData.username || !userData.email || !userData.password || !userData.confirmPassword) {
       throw new Error('Please fill in all fields');
@@ -105,12 +97,12 @@ export function useAuth() {
     const users = JSON.parse(localStorage.getItem('shielded_users') || '[]');
     
     // Check if email already exists
-    if (users.find((u: User) => u.email === userData.email)) {
+    if (users.find((u) => u.email === userData.email)) {
       throw new Error('An account with this email already exists');
     }
     
-    // Create new user
-    const newUser: User = {
+    // Create new user (password stored separately for demo)
+    const newUser = {
       id: Date.now().toString(),
       username: userData.username,
       email: userData.email,
@@ -118,6 +110,7 @@ export function useAuth() {
       gender: userData.gender,
       birthday: userData.birthday ? `${userData.birthday.month}/${userData.birthday.day}/${userData.birthday.year}` : undefined,
       createdAt: new Date().toISOString(),
+      role: 'student',
     };
     
     users.push(newUser);
@@ -127,6 +120,8 @@ export function useAuth() {
     const currentUser = {
       id: newUser.id,
       username: newUser.username,
+      email: newUser.email,
+      role: newUser.role,
       gender: newUser.gender,
       birthday: newUser.birthday,
       loginTime: new Date().toISOString(),
@@ -146,7 +141,7 @@ export function useAuth() {
     router.push('/');
   }, [router]);
 
-  const updateProfile = useCallback((updates: Partial<User>) => {
+  const updateProfile = useCallback((updates) => {
     if (currentUser) {
       const updatedUser = { ...currentUser, ...updates };
       setCurrentUser(updatedUser);

@@ -1,3 +1,6 @@
+// Hero - VoiceED
+// Hero section component
+
 'use client';
 
 import React from 'react';
@@ -20,7 +23,7 @@ export function Hero({
       <div className="container">
         <div className="hero-content">
           {subtitle && <p className="hero-subtitle">{subtitle}</p>}
-          <h1 className="hero-title">{title}</h1>
+          {title && <h1 className="hero-title">{title}</h1>}
           {description && <p className="hero-description">{description}</p>}
           {(ctaText && (ctaHref || ctaOnClick)) && (
             <a

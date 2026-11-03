@@ -1,11 +1,19 @@
+// LoginModal - VoiceED
+// Login form modal component matching base implementation
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useLoginRedirect } from '@/lib/routeProtection';
 
-export function LoginModal({ isOpen, onClose, onSwitchToRegister, onSwitchToForgotPassword }) {
-  const { login, isLoggedIn } = useAuthContext();
+export function LoginModal({ 
+  isOpen, 
+  onClose, 
+  onSwitchToRegister, 
+  onSwitchToForgotPassword 
+}) {
+  const { login } = useAuthContext();
   const { redirectAfterLogin } = useLoginRedirect();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -15,7 +23,6 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onSwitchToForg
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      // Reset form when modal opens
       setUsername('');
       setPassword('');
       setError('');
@@ -27,7 +34,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onSwitchToForg
     };
   }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password');
@@ -51,9 +58,9 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onSwitchToForg
   if (!isOpen) return null;
 
   return (
-    <div id="loginModal" className={`modal ${isOpen ? 'show' : ''}`}>
+    <div id="loginModal" className={'modal ' + (isOpen ? 'show' : '')}>
       <div className="modal-content">
-        <span className="close-button" onClick={onClose}>×</span>
+        <span className="close-button" onClick={onClose}>&times;</span>
         <h2>Login</h2>
         <form id="loginForm" onSubmit={handleSubmit}>
           {error && <div className="error-message" role="alert">{error}</div>}
@@ -62,7 +69,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onSwitchToForg
               type="text"
               id="username"
               placeholder="Username"
-              required={true}
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isSubmitting}
@@ -75,7 +82,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onSwitchToForg
               type="password"
               id="password"
               placeholder="Password"
-              required={true}
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}

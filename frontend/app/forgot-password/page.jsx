@@ -2,35 +2,68 @@
 
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, LoginModal } from '@/components/shared';
+import { Navbar, Footer } from '@/components/shared';
+import { useModals } from '@/components/shared/GlobalModals';
 
 export default function ForgotPassword() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen } = useModals();
+  const [username, setUsername] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthYear, setBirthYear] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [displayPassword, setDisplayPassword] = useState('');
 
   const handleLoginClick = () => {
-    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
-    if (currentUser) {
-      window.location.href = '/profile';
-    } else {
-      setLoginOpen(true);
-    }
+    setLoginOpen(true);
   };
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // In a real app, this would call an API to verify the user and get their password
+    // For now, we'll simulate with a mock password
+    const mockPassword = 'VoiceED' + Math.random().toString(36).substring(7);
+    setDisplayPassword(mockPassword);
+    setShowPasswordModal(true);
+  };
+
+  const closePasswordModal = () => {
+    setShowPasswordModal(false);
+    setDisplayPassword('');
+  };
+
+  const months = [
+    { value: '1', label: 'January' },
+    { value: '2', label: 'February' },
+    { value: '3', label: 'March' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'May' },
+    { value: '6', label: 'June' },
+    { value: '7', label: 'July' },
+    { value: '8', label: 'August' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const years = Array.from({ length: 26 }, (_, i) => 2025 - i);
+
   return (
     <>
-      <Navbar 
-        currentPage={pathname} 
+      <Navbar
+        currentPage={pathname}
         variant="public"
         onLoginClick={handleLoginClick}
         onSettingsClick={handleSettingsClick}
       />
-      
+
       <main className="main-content">
         <div className="container">
           <div className="register-container">
@@ -43,92 +76,54 @@ export default function ForgotPassword() {
                 <p>Enter your username to reset your password</p>
               </div>
 
-              <form id="forgotPasswordForm" className="signup-form">
+              <form id="forgotPasswordForm" className="signup-form" onSubmit={handleSubmit}>
                 <div className="form-field">
                   <label htmlFor="username">Username</label>
-                  <input type="text" id="username" placeholder="Enter your username" required={true} />
+                  <input
+                    type="text"
+                    id="username"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
                 </div>
 
                 <div className="form-field">
                   <label>Birthday</label>
                   <div className="birthday-row">
-                    <select id="birthMonth" required={true}>
+                    <select
+                      id="birthMonth"
+                      value={birthMonth}
+                      onChange={(e) => setBirthMonth(e.target.value)}
+                      required
+                    >
                       <option value="">Month</option>
-                      <option value="1">January</option>
-                      <option value="2">February</option>
-                      <option value="3">March</option>
-                      <option value="4">April</option>
-                      <option value="5">May</option>
-                      <option value="6">June</option>
-                      <option value="7">July</option>
-                      <option value="8">August</option>
-                      <option value="9">September</option>
-                      <option value="10">October</option>
-                      <option value="11">November</option>
-                      <option value="12">December</option>
+                      {months.map(m => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
                     </select>
-                    <select id="birthDay" required={true}>
+                    <select
+                      id="birthDay"
+                      value={birthDay}
+                      onChange={(e) => setBirthDay(e.target.value)}
+                      required
+                    >
                       <option value="">Day</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                      <option value="6">6</option>
-                      <option value="7">7</option>
-                      <option value="8">8</option>
-                      <option value="9">9</option>
-                      <option value="10">10</option>
-                      <option value="11">11</option>
-                      <option value="12">12</option>
-                      <option value="13">13</option>
-                      <option value="14">14</option>
-                      <option value="15">15</option>
-                      <option value="16">16</option>
-                      <option value="17">17</option>
-                      <option value="18">18</option>
-                      <option value="19">19</option>
-                      <option value="20">20</option>
-                      <option value="21">21</option>
-                      <option value="22">22</option>
-                      <option value="23">23</option>
-                      <option value="24">24</option>
-                      <option value="25">25</option>
-                      <option value="26">26</option>
-                      <option value="27">27</option>
-                      <option value="28">28</option>
-                      <option value="29">29</option>
-                      <option value="30">30</option>
-                      <option value="31">31</option>
+                      {days.map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
                     </select>
-                    <select id="birthYear" required={true}>
+                    <select
+                      id="birthYear"
+                      value={birthYear}
+                      onChange={(e) => setBirthYear(e.target.value)}
+                      required
+                    >
                       <option value="">Year</option>
-                      <option value="2025">2025</option>
-                      <option value="2024">2024</option>
-                      <option value="2023">2023</option>
-                      <option value="2022">2022</option>
-                      <option value="2021">2021</option>
-                      <option value="2020">2020</option>
-                      <option value="2019">2019</option>
-                      <option value="2018">2018</option>
-                      <option value="2017">2017</option>
-                      <option value="2016">2016</option>
-                      <option value="2015">2015</option>
-                      <option value="2014">2014</option>
-                      <option value="2013">2013</option>
-                      <option value="2012">2012</option>
-                      <option value="2011">2011</option>
-                      <option value="2010">2010</option>
-                      <option value="2009">2009</option>
-                      <option value="2008">2008</option>
-                      <option value="2007">2007</option>
-                      <option value="2006">2006</option>
-                      <option value="2005">2005</option>
-                      <option value="2004">2004</option>
-                      <option value="2003">2003</option>
-                      <option value="2002">2002</option>
-                      <option value="2001">2001</option>
-                      <option value="2000">2000</option>
+                      {years.map(y => (
+                        <option key={y} value={y}>{y}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -136,7 +131,7 @@ export default function ForgotPassword() {
                 <button type="submit" className="signup-btn">Show Password</button>
 
                 <div className="legal-text">
-                  <p>Remember your password? <a href="/">Back to Login</a></p>
+                  <p>Remember your password? <a href="/login">Back to Login</a></p>
                 </div>
               </form>
             </div>
@@ -144,16 +139,24 @@ export default function ForgotPassword() {
         </div>
       </main>
 
-      <Footer />
+      {/* Password Display Modal */}
+      {showPasswordModal && (
+        <div className="modal-overlay" onClick={closePasswordModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <span className="close-button" onClick={closePasswordModal}>&times;</span>
+            <h2>Your Password</h2>
+            <div className="password-display">
+              <p>Your password is:</p>
+              <div className="password-text" id="displayPassword">{displayPassword}</div>
+            </div>
+            <button className="login-button" onClick={() => { window.location.href = '/login'; closePasswordModal(); }}>
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => window.location.href = '/register'}
-        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
-      />
+      <Footer />
     </>
   );
 }
