@@ -51,10 +51,10 @@ VoiceED aligns its initiatives with the United Nations Sustainable Development G
 
 ## 👥 Development Team & Contributors
 
-### Founders & Campus Directors
+### Founders, Core Developers & Campus Directors
 * **Hannah Bella C. Atay** — Founder, Lead Developer, and Campus Director of MSU-IIT
 * **John Erwin F. Cadiz** — Co-Founder & Lead Developer
-* * **Junie Jebreel M. Botawan II** — Software QA and Campus Director of MSU-IIT
+* **Junie Jebreel M. Botawan II** — Software QA and Campus Director of MSU-IIT
 
 ### Contributors
 * **Hannah A. Hontiveros** — Millenium Fellow
