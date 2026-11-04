@@ -51,23 +51,22 @@ VoiceED aligns its initiatives with the United Nations Sustainable Development G
 
 ## 👥 Development Team & Contributors
 
-### Founders & Core Developers
-* **Hannah Bella Atay** — Founder & Lead Developer
-* **John Erwin Cadiz** — Co-Founder & Lead Developer
+### Founders & Campus Directors
+* **Hannah Bella C. Atay** — Founder, Lead Developer, and Campus Director of MSU-IIT
+* **John Erwin F. Cadiz** — Co-Founder & Lead Developer
+* * **Junie Jebreel M. Botawan II** — Software QA and Campus Director of MSU-IIT
 
 ### Contributors
-* **Contributor Name** — *Role / Area of Contribution (Placeholder)*
-* **Contributor Name** — *Role / Area of Contribution (Placeholder)*
-* **Contributor Name** — *Role / Area of Contribution (Placeholder)*
-* **Contributor Name** — *Role / Area of Contribution (Placeholder)*
-* **Contributor Name** — *Role / Area of Contribution (Placeholder)*
-* **Contributor Name** — *Role / Area of Contribution (Placeholder)*
+* **Hannah A. Hontiveros** — Millenium Fellow
+* **Jason James E. Azcona** — Millenium Fellow
+* **Jiggen Kerr T. Aguilar** — Millenium Fellow
+* **Joshua Louise R. Villanueva** — Millenium Fellow
 
 ---
 
 ## 🚀 Live Demo & Pages
 
-* **Live Deployment:** [VoiceED on GitHub Pages](https://hannbella011.github.io/VoiceED/about.html)
+* **Live Deployment:** [VoiceED on GitHub Pages](https://hannbella011.github.io/VoiceED/)
 * **Platform Sections:**
   * `index.html` — [Home](https://hannbella011.github.io/VoiceED/index.html) & Core Introduction
   * `about.html` — [About](https://hannbella011.github.io/VoiceED/about.html) (Mission, Vision, Values, and SDG Alignment)
