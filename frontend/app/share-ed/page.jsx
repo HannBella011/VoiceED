@@ -1,56 +1,15 @@
 'use client';
-export const dynamic = 'force-dynamic';
 
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
-import { useAuthContext } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { Navbar, Footer } from '@/components/shared';
+import { useAuth } from '@/hooks';
+import { useModals } from '@/components/shared/GlobalModals';
 
 function ShareEdContent() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { isLoggedIn, isLoading } = useAuthContext();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-
-  // Handle auth check
-  useEffect(() => {
-    if (!isLoading && !isLoggedIn) {
-      const returnUrl = pathname + window.location.search;
-      sessionStorage.setItem('shielded_return_url', returnUrl);
-      router.push('/login');
-    }
-  }, [isLoggedIn, isLoading, pathname, router]);
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <>
-        <Navbar
-          currentPage={pathname}
-          variant="dashboard"
-          onUserMenuClick={() => setUserMenuOpen(true)}
-          onSettingsClick={() => setSettingsOpen(true)}
-        />
-        <main className="services-main">
-          <div className="container">
-            <div className="services-loading">
-              <div className="spinner"></div>
-              <p>Loading ShareED...</p>
-            </div>
-          </div>
-        </main>
-        <Footer />
-        <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      </>
-    );
-  }
-
-  // Redirect if not logged in (handled by useEffect)
-  if (!isLoggedIn) {
-    return null;
-  }
+  const { isLoggedIn } = useAuth();
+  const { settingsOpen, setSettingsOpen, userMenuOpen, setUserMenuOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -58,6 +17,14 @@ function ShareEdContent() {
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
+  };
+
+  const handleNavigation = (href) => {
+    if (isLoggedIn) {
+      window.location.href = href;
+    } else {
+      setLoginRequiredOpen(true);
+    }
   };
 
   return (
@@ -82,7 +49,6 @@ function ShareEdContent() {
             </div>
             <p className="section-description">Learn together, grow together—access community-contributed study materials and reviewer sheets.</p>
 
-            {/* Search Bar */}
             <div className="search-bar-container">
               <div className="search-input-wrapper">
                 <i className="fas fa-search search-icon"></i>
@@ -90,7 +56,6 @@ function ShareEdContent() {
               </div>
             </div>
 
-            {/* Quick Filters */}
             <div className="filter-group">
               <div className="filter-row">
                 <div className="filter-item">
@@ -128,7 +93,6 @@ function ShareEdContent() {
               </div>
             </div>
 
-            {/* Resources Carousel */}
             <div className="resources-carousel">
               <div className="resource-card">
                 <div className="resource-thumbnail">
@@ -250,7 +214,6 @@ function ShareEdContent() {
                 </div>
               </div>
 
-              {/* Navigation Buttons */}
               <div className="carousel-nav">
                 <button className="carousel-btn" disabled>
                   <i className="fas fa-chevron-left"></i> Previous
@@ -262,7 +225,6 @@ function ShareEdContent() {
             </div>
           </section>
 
-          {/* Upload System */}
           <section className="upload-section">
             <div className="upload-header">
               <h3>Upload Study Material</h3>
@@ -297,7 +259,6 @@ function ShareEdContent() {
                 </div>
               </div>
 
-              {/* File Input */}
               <div className="form-group">
                 <label>File Upload</label>
                 <div className="file-upload-area">
@@ -310,7 +271,6 @@ function ShareEdContent() {
                 </div>
               </div>
 
-              {/* Anonymity Toggle */}
               <div className="form-group anonymity-group">
                 <label className="anonymity-toggle">
                   <input type="checkbox" id="anonymousUpload" name="anonymous" />
@@ -320,14 +280,12 @@ function ShareEdContent() {
                 <p className="anonymity-note">If checked, your identity will be hidden from other students.</p>
               </div>
 
-              {/* Submit Button */}
               <div className="form-submit">
                 <button type="submit" className="btn btn--primary submit-btn">
                   <i className="fas fa-upload"></i> Upload Resource
                 </button>
               </div>
 
-              {/* Data Policy Statement */}
               <div className="data-policy-statement">
                 <i className="fas fa-shield-alt"></i>
                 <span>
@@ -340,17 +298,6 @@ function ShareEdContent() {
       </main>
 
       <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
-        }}
-      />
     </>
   );
 }

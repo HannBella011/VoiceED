@@ -3,23 +3,26 @@
 
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useContext } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
+import { ModalContext } from '@/components/shared/GlobalModals';
 
 export function ProtectedRoute({ children, fallback = null }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isLoggedIn, isLoading } = useAuthContext();
+  const { loginRequiredOpen, setLoginRequiredOpen } = useContext(ModalContext);
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn) {
       // Store the intended destination for redirect after login
       const returnUrl = pathname + window.location.search;
       sessionStorage.setItem('shielded_return_url', returnUrl);
-      router.push('/login');
+      // Show login required popup instead of direct redirect
+      setLoginRequiredOpen(true);
     }
-  }, [isLoggedIn, isLoading, pathname, router]);
+  }, [isLoggedIn, isLoading, pathname, setLoginRequiredOpen]);
 
   // Show fallback while loading, or nothing if not authenticated
   if (isLoading) {
@@ -41,16 +44,17 @@ export function useRouteProtection() {
   const router = useRouter();
   const pathname = usePathname();
   const { isLoggedIn, isLoading } = useAuthContext();
+  const { setLoginRequiredOpen } = useContext(ModalContext);
 
   const checkAuthAndRedirect = useCallback(() => {
     if (!isLoading && !isLoggedIn) {
       const returnUrl = pathname + window.location.search;
       sessionStorage.setItem('shielded_return_url', returnUrl);
-      router.push('/login');
+      setLoginRequiredOpen(true);
       return false;
     }
     return true;
-  }, [isLoggedIn, isLoading, pathname, router]);
+  }, [isLoggedIn, isLoading, pathname, setLoginRequiredOpen]);
 
   return { checkAuthAndRedirect, isLoading, isLoggedIn };
 }
@@ -97,15 +101,16 @@ export function clearReturnUrl() {
 export function useProtectedNavigation() {
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
+  const { setLoginRequiredOpen } = useContext(ModalContext);
 
   const navigateToService = useCallback((href) => {
     if (isLoggedIn) {
       router.push(href);
     } else {
       sessionStorage.setItem('shielded_return_url', href);
-      router.push('/login');
+      setLoginRequiredOpen(true);
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, setLoginRequiredOpen]);
 
   return { navigateToService };
 }

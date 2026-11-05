@@ -1,27 +1,59 @@
-'use client';
+"use client";
 
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Navbar, Footer } from '@/components/shared';
-import { useAuth } from '@/hooks';
-import { useModals } from '@/components/shared/GlobalModals';
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useAuthContext } from "@/context/AuthContext";
+import Link from "next/link";
 
 export default function LoginPage() {
   const pathname = usePathname();
-  const { settingsOpen, setSettingsOpen } = useModals();
-  const { login } = useAuth();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const { login } = useAuthContext();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const { supabase } = await import("@/lib/supabaseClient");
+      
+      // Preserve intended destination after OAuth
+      const next = sessionStorage.getItem("shielded_return_url") || "/dashboard";
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google login failed. Please try again.");
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     try {
       await login(username, password);
-      window.location.href = '/dashboard';
+
+      const returnUrl = sessionStorage.getItem("shielded_return_url");
+      if (returnUrl) {
+        sessionStorage.removeItem("shielded_return_url");
+        window.location.href = returnUrl;
+      } else {
+        window.location.href = "/dashboard";
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -29,69 +61,100 @@ export default function LoginPage() {
     }
   };
 
-  const handleSettingsClick = () => {
-    setSettingsOpen(true);
-  };
-
   return (
     <>
-      <Navbar
-        currentPage={pathname}
-        variant="public"
-        onLoginClick={() => {}} // No-op on login page
-        onSettingsClick={handleSettingsClick}
-      />
+      <div className="login-page">
+        {/* Centered Login Card Only - No Left Branding */}
+        <div className="login-centered-container">
+          <div className="login-card">
+            <div className="login-card-header">
+              <h2>Welcome Back</h2>
+              <p>Sign in to access your VoiceED account</p>
+            </div>
 
-      <main className="main-content">
-        <div className="container">
-          <div className="register-container">
-            <div className="register-card">
-              <div className="register-header">
-                <div className="register-icon">
-                  <i className="fas fa-sign-in-alt"></i>
-                </div>
-                <h2>WELCOME BACK!</h2>
-                <p>Sign in to access VoiceED services</p>
-              </div>
-              <form onSubmit={handleSubmit} className="register-form">
-                {error && <div className="error-message">{error}</div>}
-                <div className="input-group">
+            {error && <div className="error-message" role="alert">{error}</div>}
+
+            <form id="loginForm" onSubmit={handleSubmit}>
+              <div className="input-group">
+                <label htmlFor="username" className="input-label">Username</label>
+                <div className="input-wrapper">
+                  <i className="fas fa-user input-icon-left" aria-hidden="true"></i>
                   <input
                     type="text"
-                    placeholder="Username"
+                    id="username"
+                    placeholder="Enter your username"
+                    required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    required
+                    disabled={loading}
+                    autoComplete="username"
                   />
-                  <i className="fas fa-user"></i>
                 </div>
-                <div className="input-group">
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="password" className="input-label">Password</label>
+                <div className="input-wrapper">
+                  <i className="fas fa-lock input-icon-left" aria-hidden="true"></i>
                   <input
                     type="password"
-                    placeholder="Password"
+                    id="password"
+                    placeholder="Enter your password"
+                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
+                    disabled={loading}
+                    autoComplete="current-password"
                   />
-                  <i className="fas fa-lock"></i>
                 </div>
-                <div className="options">
-                  <label>
-                    <input type="checkbox" /> Remember me
-                  </label>
-                  <a href="/forgot-password">Forgot Password?</a>
-                </div>
-                <button type="submit" className="register-button" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Login'}
-                </button>
-                <p className="register-text">Don't have an account? <a href="/register">Register</a></p>
-              </form>
-            </div>
+              </div>
+
+              <div className="form-options">
+                <label className="checkbox-label">
+                  <input type="checkbox" /> Remember me
+                </label>
+                <Link href="/forgot-password" className="forgot-link">
+                  Forgot Password?
+                </Link>
+              </div>
+
+              <button type="submit" className="login-button" disabled={loading}>
+                {loading ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                    Logging in...
+                  </>
+                ) : (
+                  "Log In"
+                )}
+              </button>
+
+              <div className="divider">
+                <span>or continue with</span>
+              </div>
+
+              <button
+                type="button"
+                className="google-button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+              >
+                <img
+                  src="/google.svg"
+                  alt="Google"
+                  className="google-icon"
+                  aria-hidden="true"
+                />
+                <span>Continue with Google</span>
+              </button>
+            </form>
+
+            <p className="register-text">
+              Don&apos;t have an account? <Link href="/register">Create one</Link>
+            </p>
           </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </>
   );
 }

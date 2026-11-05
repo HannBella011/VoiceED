@@ -5,14 +5,15 @@
 
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Navbar, Footer, SettingsModal } from '@/components/shared';
+import { Navbar, Footer } from '@/components/shared';
 import { ReportCard } from '@/components/features/report';
 import { ReportTimeline } from '@/components/features/report';
 import { trackReport } from '@/services';
+import { useModals } from '@/components/shared/GlobalModals';
 
 export default function TrackingPage({ params }) {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { settingsOpen, setSettingsOpen } = useModals();
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,7 +53,6 @@ export default function TrackingPage({ params }) {
           </div>
         </main>
         <Footer />
-        <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       </>
     );
   }
@@ -78,7 +78,6 @@ export default function TrackingPage({ params }) {
           </div>
         </main>
         <Footer />
-        <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       </>
     );
   }
@@ -163,7 +162,6 @@ export default function TrackingPage({ params }) {
       </main>
 
       <Footer />
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   );
 }

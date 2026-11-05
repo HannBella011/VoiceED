@@ -3,17 +3,14 @@
 
 /**
  * @typedef {Object} RegisterData
- * @property {string} username
- * @property {string} email
- * @property {string} password
- * @property {string} confirmPassword
- * @property {string} [fullName]
- * @property {string} [gender]
- * @property {Object} [birthday]
- * @property {string} birthday.month
- * @property {string} birthday.day
- * @property {string} birthday.year
- * @property {boolean} termsAccepted
+ * @property {string} fullName - User's full legal name
+ * @property {string} displayName - User's display name (3-20 characters)
+ * @property {string} email - User's email address
+ * @property {string} password - User's password
+ * @property {string} confirmPassword - Password confirmation
+ * @property {string} schoolId - User's school ID number
+ * @property {string} birthday - User's birthday in ISO format (YYYY-MM-DD)
+ * @property {boolean} termsAccepted - Whether user accepted terms
  */
 
 /**
@@ -30,6 +27,7 @@
  * @property {string} [full_name]
  * @property {string} [gender]
  * @property {string} [birthday]
+ * @property {string} [school_id]
  * @property {string} createdAt
  */
 

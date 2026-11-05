@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     DEBUG: bool = False
     
-    # Security
+    # Security (keep for any legacy token validation during transition)
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -21,12 +21,22 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     
-    # Database
+    # Database - Supabase Session Pooler
+    # Format: postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres?pgbouncer=true&connection_limit=1
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/voiceed"
     DATABASE_POOL_SIZE: int = 5
     DATABASE_MAX_OVERFLOW: int = 10
     
-    # Firebase
+    # Supabase Configuration
+    SUPABASE_URL: Optional[str] = None
+    SUPABASE_ANON_KEY: Optional[str] = None
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
+    SUPABASE_JWT_SECRET: Optional[str] = None  # For JWT verification
+    
+    # Supabase Storage
+    SUPABASE_STORAGE_BUCKET: str = "voiceed-uploads"
+    
+    # Firebase (legacy)
     FIREBASE_CREDENTIALS_PATH: Optional[str] = None
     FIREBASE_PROJECT_ID: Optional[str] = None
     
@@ -46,7 +56,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
-        # Allow empty strings to be treated as None for optional fields
+        extra = "allow"  # Allow extra fields in .env
 
 
 settings = Settings()

@@ -2,13 +2,15 @@
 
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
-import { ProtectedRoute } from '@/lib/routeProtection';
+import { Navbar, Footer } from '@/components/shared';
+import { useAuth } from '@/hooks';
+import { useModals } from '@/components/shared/GlobalModals';
 
 function InspireEDContent() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const { settingsOpen, setSettingsOpen, userMenuOpen, setUserMenuOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
+  
   const [activeTab, setActiveTab] = useState('home');
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +19,12 @@ function InspireEDContent() {
     { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", isUserAdded: false },
     { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt", isUserAdded: false },
     { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", isUserAdded: false },
-    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", isUserAdded: false }
+    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", isUserAdded: false },
+    { text: "Your limitation—it's only your imagination.", author: "Unknown", isUserAdded: false },
+    { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown", isUserAdded: false },
+    { text: "Great things never come from comfort zones.", author: "Unknown", isUserAdded: false },
+    { text: "Dream it. Wish it. Do it.", author: "Unknown", isUserAdded: false },
+    { text: "Success doesn't just find you. You have to go out and get it.", author: "Unknown", isUserAdded: false }
   ]);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [heartedQuotes, setHeartedQuotes] = useState(new Set());
@@ -42,7 +49,6 @@ function InspireEDContent() {
         setPosts([]);
       }
     } else {
-      // Default posts
       const defaultPosts = [
         {
           id: 1,
@@ -118,8 +124,6 @@ function InspireEDContent() {
     const newQuote = { text, author, isUserAdded: true };
     setQuotes(prev => [...prev, newQuote]);
     setCurrentQuoteIndex(prev => prev + 1);
-    
-    // Also add to posts
     const newPost = {
       id: Date.now(),
       type: 'quote',
@@ -206,7 +210,7 @@ function InspireEDContent() {
   };
 
   const handleQuoteCopy = () => {
-    const fullQuote = `"${quotes[currentQuoteIndex].text}" - ${quotes[currentQuoteIndex].author}`;
+    const fullQuote = `\${quotes[currentQuoteIndex].text} - \${quotes[currentQuoteIndex].author}`;
     navigator.clipboard.writeText(fullQuote).then(() => {
       alert('Quote copied to clipboard!');
     });
@@ -214,7 +218,7 @@ function InspireEDContent() {
 
   const handleQuoteShare = () => {
     setShareCount(prev => prev + 1);
-    const fullQuote = `"${quotes[currentQuoteIndex].text}" - ${quotes[currentQuoteIndex].author}`;
+    const fullQuote = `\${quotes[currentQuoteIndex].text} - \${quotes[currentQuoteIndex].author}`;
     if (navigator.share) {
       navigator.share({ title: 'Daily Inspiration', text: fullQuote });
     } else {
@@ -233,7 +237,7 @@ function InspireEDContent() {
   ];
 
   const sampleStories = [
-    { id: 1, category: 'academic', title: 'From Struggling Student to Dean\'s Lister', narrative: 'I started my freshman year with failing grades. Through dedication and seeking help from professors, I turned my academic journey around.', keyTakeaways: 'Never be afraid to ask for help. Consistency beats intensity.', year: '2024', author: 'Anonymous' },
+    { id: 1, category: 'academic', title: "From Struggling Student to Dean's Lister", narrative: 'I started my freshman year with failing grades. Through dedication and seeking help from professors, I turned my academic journey around.', keyTakeaways: 'Never be afraid to ask for help. Consistency beats intensity.', year: '2024', author: 'Anonymous' },
     { id: 2, category: 'challenges', title: 'Overcoming Financial Hurdles', narrative: 'Working part-time while studying full-time was challenging, but it taught me time management and resilience.', keyTakeaways: 'Challenges make us stronger. Balance is key.', year: '2023', author: 'Maria Santos' },
     { id: 3, category: 'leadership', title: 'Leading a Community Project', narrative: 'Organized a literacy program for local children. It was challenging but incredibly rewarding.', keyTakeaways: 'Leadership is about service. Community impact matters.', year: '2024', author: 'Juan Dela Cruz' }
   ];
@@ -245,11 +249,19 @@ function InspireEDContent() {
   ];
 
   const sampleMilestones = [
-    { title: 'Dean\'s List', description: 'Achieved Dean\'s List for 3 consecutive semesters', category: 'academic', cheers: 124 },
+    { title: "Dean's List", description: 'Achieved Dean\'s List for 3 consecutive semesters', category: 'academic', cheers: 124 },
     { title: 'Research Grant', description: 'Received undergraduate research grant', category: 'innovation', cheers: 89 },
     { title: 'Hackathon Winner', description: '1st Place in University Hackathon 2024', category: 'innovation', cheers: 156 },
     { title: 'Community Service Award', description: 'Recognized for 100+ hours of community service', category: 'leadership', cheers: 98 }
   ];
+
+  const handleNavigation = (href) => {
+    if (isLoggedIn) {
+      window.location.href = href;
+    } else {
+      setLoginRequiredOpen(true);
+    }
+  };
 
   return (
     <>
@@ -302,7 +314,7 @@ function InspireEDContent() {
                         />
                         <i className="fas fa-search search-icon"></i>
                       </div>
-                      <button className="create-post-btn" onClick={() => setShowCreatePostModal(true)}>
+                      <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
                         <i className="fas fa-plus"></i> Create Post
                       </button>
                     </div>
@@ -369,14 +381,14 @@ function InspireEDContent() {
                 <div className="content-container">
                   <div className="feed-header">
                     <h3>Quotes</h3>
-                    <button className="create-post-btn" onClick={() => setShowAddQuoteModal(true)}>
+                    <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
                       <i className="fas fa-plus"></i> Add Quote
                     </button>
                   </div>
                   <div className="daily-quote-card">
                     <div className="quote-content">
                       <i className="fas fa-quote-left quote-icon"></i>
-                      <p className="quote-text" id="dailyQuote">"{quotes[currentQuoteIndex]?.text || ''}"</p>
+                      <p className="quote-text" id="dailyQuote">"\${quotes[currentQuoteIndex]?.text || ''}"</p>
                       <p className="quote-author" id="quoteAuthor">- {quotes[currentQuoteIndex]?.author || ''}</p>
                     </div>
                     <div className="quote-actions">
@@ -415,7 +427,7 @@ function InspireEDContent() {
                 <div className="content-container">
                   <div className="feed-header">
                     <h3>Stories</h3>
-                    <button className="create-post-btn" onClick={() => setShowShareStoryModal(true)}>
+                    <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
                       <i className="fas fa-pen"></i> Share Your Story
                     </button>
                   </div>
@@ -447,7 +459,7 @@ function InspireEDContent() {
                         <input type="text" className="search-input" id="searchKudos" placeholder="Search name..." />
                         <i className="fas fa-search search-icon"></i>
                       </div>
-                      <button className="create-post-btn" onClick={() => setShowSendKudosModal(true)}>
+                      <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
                         <i className="fas fa-heart"></i> Send Kudos
                       </button>
                     </div>
@@ -472,7 +484,7 @@ function InspireEDContent() {
                 <div className="content-container">
                   <div className="feed-header">
                     <h3>Milestones</h3>
-                    <button className="create-post-btn" onClick={() => setShowAddMilestoneModal(true)}>
+                    <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
                       <i className="fas fa-trophy"></i> Add Milestone
                     </button>
                   </div>
@@ -511,23 +523,10 @@ function InspireEDContent() {
       </main>
 
       <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => { localStorage.removeItem('shielded_current_user'); }}
-      />
     </>
   );
 }
 
 export default function InspireED() {
-  return (
-    <ProtectedRoute fallback={null}>
-      <InspireEDContent />
-    </ProtectedRoute>
-  );
+  return <InspireEDContent />;
 }

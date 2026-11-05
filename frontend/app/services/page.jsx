@@ -3,33 +3,24 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer } from '@/components/shared';
+import { useAuth } from '@/hooks';
 import { useModals } from '@/components/shared/GlobalModals';
-import { useAuthContext } from '@/context/AuthContext';
 
 export default function Services() {
   const pathname = usePathname();
-  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen, userMenuOpen, setUserMenuOpen } = useModals();
-  const { currentUser, isLoggedIn } = useAuthContext();
-
-  const handleProfileClick = () => {
-    window.location.href = '/profile';
-    setUserMenuOpen(false);
-  };
-
-  const handleLogout = () => {
-    setUserMenuOpen(false);
-  };
-
-  const handleLoginClick = () => {
-    if (isLoggedIn && currentUser) {
-      setUserMenuOpen(true);
-    } else {
-      setLoginOpen(true);
-    }
-  };
+  const { isLoggedIn } = useAuth();
+  const { settingsOpen, setSettingsOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
+  };
+
+  const handleNavigation = (href) => {
+    if (isLoggedIn) {
+      window.location.href = href;
+    } else {
+      setLoginRequiredOpen(true);
+    }
   };
 
   return (
@@ -37,7 +28,7 @@ export default function Services() {
       <Navbar
         currentPage={pathname}
         variant="public"
-        onLoginClick={handleLoginClick}
+        onLoginClick={() => {}} // No-op on services page
         onSettingsClick={handleSettingsClick}
       />
 
@@ -45,20 +36,19 @@ export default function Services() {
         <div className="container">
           <div className="services-welcome">
             <h2>Services</h2>
-            <p>Delivers integrated safety and educational services, empowering students to report, learn, connect, and thrive within supportive communities.</p>
+            <p>Delivers integrated safety and educational services, empowering students to report, learn, connect, and thrive within supportive communities.
+          </p>
           </div>
 
           <div className="services-container">
-            {/* Service 1: Anonymous Reporting - match base HTML: div with onClick, not <a> */}
-            <div className="service-box" onClick={() => window.location.href = '/report'} style={{ cursor: 'pointer' }}>
+            <div className="service-box" onClick={() => handleNavigation('/report')}>
               <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-shield-alt"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-shield-alt"></i></div>
                 <h3>ReportED - Anonymous Reporting System</h3>
               </div>
               <div className="service-details">
-                <p>A secure space where students can submit crime reports or raise safety concerns in their school or community, anonymously or openly.</p>
+                <p>A secure space where students can submit crime reports or raise safety concerns in their school or community, anonymously or openly.
+                </p>
                 <div className="service-features">
                   <div className="feature-item">Confidential submission process</div>
                   <div className="feature-item">Option for anonymity or identified reporting</div>
@@ -68,16 +58,14 @@ export default function Services() {
               </div>
             </div>
 
-            {/* Service 2: WellnessED */}
-            <div className="service-box" onClick={() => window.location.href = '/wellness-ed'} style={{ cursor: 'pointer' }}>
+            <div className="service-box" onClick={() => handleNavigation('/wellness-ed')}>
               <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-heart"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-heart"></i></div>
                 <h3>WellnessED - Student Wellness Hub</h3>
               </div>
               <div className="service-details">
-                <p>Dedicated to mental health, stress management, and motivation, offering practical tips and resources to balance academics and personal wellbeing.</p>
+                <p>Dedicated to mental health, stress management, and motivation, offering practical tips and resources to balance academics and personal wellbeing.
+                </p>
                 <div className="service-features">
                   <div className="feature-item">Stress‑relief guides and exercises</div>
                   <div className="feature-item">Motivation and productivity tips</div>
@@ -87,16 +75,14 @@ export default function Services() {
               </div>
             </div>
 
-            {/* Service 3: InspireED */}
-            <div className="service-box" onClick={() => window.location.href = '/inspire-ed'} style={{ cursor: 'pointer' }}>
+            <div className="service-box" onClick={() => handleNavigation('/inspire-ed')}>
               <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-lightbulb"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-lightbulb"></i></div>
                 <h3>InspireED - Motivation and Achievements</h3>
               </div>
               <div className="service-details">
-                <p>A section highlighting motivational stories, student achievements, and encouraging quotes to inspire persistence, hope, and community pride.</p>
+                <p>A section highlighting motivational stories, student achievements, and encouraging quotes to inspire persistence, hope, and community pride.
+                </p>
                 <div className="service-features">
                   <div className="feature-item">Student success stories</div>
                   <div className="feature-item">Inspirational quotes and messages</div>
@@ -106,16 +92,14 @@ export default function Services() {
               </div>
             </div>
 
-            {/* Service 4: ShareED */}
-            <div className="service-box" onClick={() => window.location.href = '/share-ed'} style={{ cursor: 'pointer' }}>
+            <div className="service-box" onClick={() => handleNavigation('/share-ed')}>
               <div className="service-header">
-                <div className="service-icon">
-                  <i className="fas fa-share-alt"></i>
-                </div>
+                <div className="service-icon"><i className="fas fa-share-alt"></i></div>
                 <h3>ShareED - Collaborative Learning Space</h3>
               </div>
               <div className="service-details">
-                <p>A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.</p>
+                <p>A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.
+                </p>
                 <div className="service-features">
                   <div className="feature-item">Easy upload/download system</div>
                   <div className="feature-item">Subject‑organized reviewer sheets</div>

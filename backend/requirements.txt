@@ -1,9 +1,9 @@
 # Core
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-pydantic==2.5.3
+pydantic==2.14.2
 pydantic-settings==2.1.0
-pydantic[email]==2.5.3
+pydantic[email]==2.14.2
 
 # Database
 sqlalchemy==2.0.25
@@ -15,9 +15,16 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
 
+# Supabase (updated to compatible versions)
+supabase==2.34.0
+gotrue==2.12.4
+
 # Firebase
 firebase-admin==6.5.0
 
 # HTTP
-httpx==0.26.0
+httpx==0.28.1
 python-dotenv==1.0.0
+
+# Async file I/O
+aiofiles==23.2.1

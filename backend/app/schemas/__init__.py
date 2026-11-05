@@ -48,15 +48,18 @@ class TokenData(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 
 class RegisterRequest(BaseModel):
-    username: str
     email: EmailStr
     password: str
+    username: Optional[str] = None
     full_name: Optional[str] = None
+    display_name: Optional[str] = None
+    birthday: Optional[str] = None
+    school_id: Optional[str] = None
 
 
 # User schemas
@@ -86,6 +89,7 @@ class UserResponse(UserBase):
     role: UserRole
     gender: Optional[Gender] = None
     birthday: Optional[datetime] = None
+    school_id: Optional[str] = None
     avatar_url: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
@@ -201,7 +205,7 @@ class ReportStatusUpdate(BaseModel):
 
 
 class ReportAssignment(BaseModel):
-    assignee_id: int
+    assignee_id: str
 
 
 class ReportResponse(ReportBase):
@@ -316,7 +320,7 @@ class AdminUserUpdate(BaseModel):
 
 class AdminReportUpdate(BaseModel):
     status: Optional[ReportStatus] = None
-    assignee_id: Optional[int] = None
+    assignee_id: Optional[str] = None
     category: Optional[ReportCategory] = None
 
 
@@ -449,6 +453,14 @@ class SharedMaterialResponse(SharedMaterialBase):
 class PaginationParams(BaseModel):
     page: int = Field(1, ge=1)
     limit: int = Field(20, ge=1, le=100)
+
+
+# Complete Profile schemas (for first-time Google users)
+class CompleteProfileRequest(BaseModel):
+    display_name: str
+    birthday: Optional[str] = None
+    school_id: Optional[str] = None
+    gender: Optional[Gender] = None
 
 
 # Health Check

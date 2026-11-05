@@ -1,35 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
+import uuid
+
 from app.database import get_db
-from app.services import report_service, user_service
+from app.services import report_service, profile_service
 from app.schemas import (
     ReportPublicResponse, TrackingCodeRequest, TrackingCodeResponse,
     AdminStatsResponse, AdminUserUpdate, UserResponse, UserListResponse,
-    PaginationParams, UserRole
+    PaginationParams, UserRole, ReportStatus, ReportCategory
 )
-from app.routes.auth import get_current_user, get_current_active_user
-from app.models import User, UserRole as UserRoleModel
+from app.routes.auth import get_current_active_user, get_current_admin_user, get_current_super_admin_user
+from app.models import Profile, UserRole as UserRoleModel
 
 router = APIRouter()
-
-
-# ============================================================================
-# Dependencies
-# ============================================================================
-
-def require_admin(current_user: User = Depends(get_current_active_user)) -> User:
-    """Require admin or super_admin role."""
-    if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin access required")
-    return current_user
-
-
-def require_super_admin(current_user: User = Depends(get_current_active_user)) -> User:
-    """Require super_admin role."""
-    if not current_user.is_super_admin:
-        raise HTTPException(status_code=403, detail="Super admin access required")
-    return current_user
 
 
 # ============================================================================
@@ -62,14 +46,30 @@ async def admin_list_users(
     role: Optional[UserRole] = Query(None),
     is_active: Optional[bool] = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_super_admin)
+    current_user: Profile = Depends(get_current_super_admin_user)
 ):
     """List all users (super admin only)."""
-    users, total = await user_service.list_users(db, page, limit, role, is_active)
+    users, total = await profile_service.list_profiles(db, page, limit, role, is_active)
     total_pages = (total + limit - 1) // limit
     
     return UserListResponse(
-        items=users,
+        items=[
+            UserResponse(
+                id=str(u.id),
+                username=u.username,
+                email=u.email,
+                full_name=u.full_name,
+                role=u.role,
+                is_active=u.is_active,
+                is_verified=u.is_verified,
+                gender=u.gender,
+                birthday=u.birthday,
+                avatar_url=u.avatar_url,
+                created_at=u.created_at,
+                updated_at=u.updated_at,
+                last_login=u.last_login
+            ) for u in users
+        ],
         total=total,
         page=page,
         limit=limit,
@@ -79,50 +79,78 @@ async def admin_list_users(
 
 @router.get("/admin/users/{user_id}", response_model=UserResponse, tags=["admin"])
 async def admin_get_user(
-    user_id: int,
+    user_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_super_admin)
+    current_user: Profile = Depends(get_current_super_admin_user)
 ):
     """Get a specific user (super admin only)."""
-    user = await user_service.get_by_id(db, user_id)
+    user = await profile_service.get_by_id(db, uuid.UUID(user_id))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return UserResponse(
+        id=str(user.id),
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+        gender=user.gender,
+        birthday=user.birthday,
+        avatar_url=user.avatar_url,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+        last_login=user.last_login
+    )
 
 
 @router.patch("/admin/users/{user_id}", response_model=UserResponse, tags=["admin"])
 async def admin_update_user(
-    user_id: int,
+    user_id: str,
     update: AdminUserUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_super_admin)
+    current_user: Profile = Depends(get_current_super_admin_user)
 ):
     """Update user role or status (super admin only)."""
     update_data = update.model_dump(exclude_unset=True)
     
     # Prevent self-demotion
-    if user_id == current_user.id and "role" in update_data:
+    if str(user_id) == str(current_user.id) and "role" in update_data:
         if update_data["role"] != UserRole.SUPER_ADMIN:
             raise HTTPException(status_code=400, detail="Cannot change your own super admin role")
     
-    user = await user_service.update(db, user_id, update_data)
+    user = await profile_service.update(db, uuid.UUID(user_id), update_data)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return UserResponse(
+        id=str(user.id),
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+        gender=user.gender,
+        birthday=user.birthday,
+        avatar_url=user.avatar_url,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+        last_login=user.last_login
+    )
 
 
 @router.delete("/admin/users/{user_id}", tags=["admin"])
 async def admin_delete_user(
-    user_id: int,
+    user_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_super_admin)
+    current_user: Profile = Depends(get_current_super_admin_user)
 ):
     """Delete a user (super admin only)."""
     # Prevent self-deletion
-    if user_id == current_user.id:
+    if str(user_id) == str(current_user.id):
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
     
-    success = await user_service.delete(db, user_id)
+    success = await profile_service.delete(db, uuid.UUID(user_id))
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -136,7 +164,7 @@ async def admin_delete_user(
 @router.get("/admin/stats", response_model=AdminStatsResponse, tags=["admin"])
 async def admin_get_stats(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Get admin dashboard statistics."""
     return await report_service.get_admin_stats(db)
@@ -153,18 +181,17 @@ async def admin_list_reports_simple(
     status: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     is_anonymous: Optional[bool] = Query(None),
-    assignee_id: Optional[int] = Query(None),
+    assignee_id: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """List all reports for admin dashboard (simplified response)."""
-    from app.schemas import ReportStatus, ReportCategory
-    
     parsed_status = ReportStatus(status) if status else None
     parsed_category = ReportCategory(category) if category else None
+    parsed_assignee_id = uuid.UUID(assignee_id) if assignee_id else None
     
     reports, total = await report_service.list_reports(
-        db, page, limit, parsed_status, parsed_category, is_anonymous, assignee_id
+        db, page, limit, parsed_status, parsed_category, is_anonymous, parsed_assignee_id
     )
     return reports
 
@@ -173,7 +200,7 @@ async def admin_list_reports_simple(
 async def admin_get_report_detail(
     report_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Get a specific report with full details (admin only)."""
     report = await report_service.get_by_id(db, report_id)
@@ -193,11 +220,9 @@ async def admin_add_timeline_entry(
     remarks: Optional[str] = None,
     attachment_ids: Optional[List[int]] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Add a timeline entry to a report (admin only)."""
-    from app.schemas import ReportStatus
-    
     # Validate status
     try:
         report_status = ReportStatus(status)
@@ -222,13 +247,14 @@ async def admin_add_timeline_entry(
 @router.post("/admin/reports/{report_id}/assign", tags=["admin"])
 async def admin_assign_report(
     report_id: int,
-    assignee_id: int,
+    assignee_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Assign a report to an admin/moderator (admin only)."""
     try:
-        report = await report_service.assign_report(db, report_id, assignee_id, current_user)
+        assignee_uuid = uuid.UUID(assignee_id)
+        report = await report_service.assign_report(db, report_id, assignee_uuid, current_user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -244,11 +270,10 @@ async def admin_update_report_status(
     status: str,
     remarks: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Update report status (admin only)."""
-    from app.schemas import ReportStatus
-    
+    # Validate status
     try:
         report_status = ReportStatus(status)
     except ValueError:
@@ -275,22 +300,38 @@ async def admin_update_report_status(
 @router.get("/admin/assignees", response_model=List[UserResponse], tags=["admin"])
 async def get_available_assignees(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Get list of admins/moderators available for report assignment."""
-    users, _ = await user_service.list_users(
+    users, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
         role=UserRoleModel.ADMIN
     )
     # Also include moderators and super_admins
-    moderators, _ = await user_service.list_users(
+    moderators, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
         role=UserRoleModel.MODERATOR
     )
-    super_admins, _ = await user_service.list_users(
+    super_admins, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
         role=UserRoleModel.SUPER_ADMIN
     )
     
     all_assignees = users + moderators + super_admins
-    return all_assignees
+    return [
+        UserResponse(
+            id=str(u.id),
+            username=u.username,
+            email=u.email,
+            full_name=u.full_name,
+            role=u.role,
+            is_active=u.is_active,
+            is_verified=u.is_verified,
+            gender=u.gender,
+            birthday=u.birthday,
+            avatar_url=u.avatar_url,
+            created_at=u.created_at,
+            updated_at=u.updated_at,
+            last_login=u.last_login
+        ) for u in all_assignees
+    ]

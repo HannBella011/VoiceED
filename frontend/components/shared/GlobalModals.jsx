@@ -5,8 +5,8 @@
 
 import { useState, useContext, createContext, useEffect } from 'react';
 import { SettingsModal } from './SettingsModal';
-import { LoginModal } from './LoginModal';
 import { UserMenuModal } from './UserMenuModal';
+import { LoginRequiredPopup } from './LoginRequiredPopup';
 
 // Context for controlling modals from anywhere
 const ModalContext = createContext(null);
@@ -19,18 +19,21 @@ export function useModals() {
   return context;
 }
 
+// Export ModalContext for use in routeProtection
+export { ModalContext };
+
 export function ModalProvider({ children }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false);
 
   // Handle Escape key to close modals
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setSettingsOpen(false);
-        setLoginOpen(false);
         setUserMenuOpen(false);
+        setLoginRequiredOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -40,28 +43,16 @@ export function ModalProvider({ children }) {
   const value = {
     settingsOpen,
     setSettingsOpen,
-    loginOpen,
-    setLoginOpen,
     userMenuOpen,
     setUserMenuOpen,
+    loginRequiredOpen,
+    setLoginRequiredOpen,
   };
 
   return (
     <ModalContext.Provider value={value}>
       {children}
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => {
-          setLoginOpen(false);
-          window.location.href = '/register';
-        }}
-        onSwitchToForgotPassword={() => {
-          setLoginOpen(false);
-          window.location.href = '/forgot-password';
-        }}
-      />
       <UserMenuModal
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
@@ -74,6 +65,15 @@ export function ModalProvider({ children }) {
           localStorage.removeItem('shielded_current_user');
           localStorage.removeItem('shielded_access_token');
           window.location.href = '/';
+        }}
+      />
+      <LoginRequiredPopup
+        isOpen={loginRequiredOpen}
+        onClose={() => setLoginRequiredOpen(false)}
+        onGoToLogin={() => {
+          const returnUrl = window.location.pathname + window.location.search;
+          sessionStorage.setItem('shielded_return_url', returnUrl);
+          window.location.href = '/login';
         }}
       />
     </ModalContext.Provider>

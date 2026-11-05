@@ -2,13 +2,14 @@
 
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
-import { ProtectedRoute } from '@/lib/routeProtection';
+import { Navbar, Footer } from '@/components/shared';
+import { useAuth } from '@/hooks';
+import { useModals } from '@/components/shared/GlobalModals';
 
 function WellnessEDContent() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const { settingsOpen, setSettingsOpen, userMenuOpen, setUserMenuOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -63,6 +64,14 @@ function WellnessEDContent() {
     }
   ];
 
+  const handleNavigation = (href) => {
+    if (isLoggedIn) {
+      window.location.href = href;
+    } else {
+      setLoginRequiredOpen(true);
+    }
+  };
+
   return (
     <>
       <Navbar
@@ -81,7 +90,7 @@ function WellnessEDContent() {
 
           <div className="wellness-grid">
             {activities.map((activity, index) => (
-              <a key={index} href={activity.href} className="wellness-card activity-card">
+              <a key={index} href="#" className="wellness-card activity-card" onClick={() => handleNavigation(activity.href)}>
                 <div className="card-header">
                   <div className="card-icon">
                     <i className={activity.icon}></i>
@@ -101,25 +110,10 @@ function WellnessEDContent() {
       </main>
 
       <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
-        }}
-      />
     </>
   );
 }
 
 export default function WellnessED() {
-  return (
-    <ProtectedRoute fallback={null}>
-      <WellnessEDContent />
-    </ProtectedRoute>
-  );
+  return <WellnessEDContent />;
 }

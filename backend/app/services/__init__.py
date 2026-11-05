@@ -1,30 +1,34 @@
 # VoiceED Backend - Services Package
-# Business logic services
+# Business logic services compatible with Supabase
 
 """
 Services module for VoiceED backend.
 
 This module contains business logic separated from routes:
-- Authentication service (password hashing, JWT tokens)
-- User service (profile management, preferences)
+- Supabase client (auth, database, storage)
+- Authentication service (Supabase Auth integration)
+- Profile service (profile management, preferences)
 - Report service (CRUD, workflow, notifications)
 - Wellness service (tips, resources, journal)
 - Inspire service (stories, quotes, moderation)
 - Share service (materials, uploads, downloads)
 - Email service (notifications, verification)
-- File storage service (local, S3, Firebase)
+- File storage service (Supabase Storage)
 - Tracking service (tracking code generation)
 """
 
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import Optional, List, BinaryIO
 from passlib.context import CryptContext
 from jose import jwt, JWTError
+from supabase import create_client, Client
+from gotrue import AsyncGoTrueClient
+from gotrue.types import User as SupabaseUser
 from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
 from app.models import (
-    User, Report, ReportAttachment, ReportTimeline, 
+    Profile, Report, ReportAttachment, ReportTimeline, 
     ReportTimelineAttachment, JournalEntry, WellnessTip,
     InspireStory, InspireQuote, SharedMaterial, UserRole, ReportStatus, ReportCategory
 )
@@ -35,27 +39,172 @@ import string
 import aiofiles
 from pathlib import Path
 
-# Password hashing
+
+# Password hashing (kept for any legacy needs)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ============================================================================
-# Authentication Service
+# Supabase Client Service
+# ============================================================================
+
+class SupabaseService:
+    """Singleton Supabase client for auth, database, and storage."""
+    
+    _instance: Optional["SupabaseService"] = None
+    _client: Optional[Client] = None
+    _auth_client: Optional[AsyncGoTrueClient] = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def __init__(self):
+        if self._client is None:
+            self._init_client()
+    
+    def _init_client(self):
+            """Initialize Supabase client."""
+            # Check if we have valid Supabase credentials (not placeholders)
+            url = settings.SUPABASE_URL
+            key = settings.SUPABASE_SERVICE_ROLE_KEY
+        
+            if url and key and not url.startswith("https://your-project") and not key.startswith("your-"):
+                try:
+                    self._client = create_client(url, key)
+                    # For auth operations
+                    self._auth_client = AsyncGoTrueClient(
+                        url=f"{url}/auth/v1",
+                        headers={"apikey": key}
+                    )
+                except Exception as e:
+                    print(f"[Supabase] Failed to initialize client: {e}")
+                    self._client = None
+                    self._auth_client = None
+            else:
+                print("[Supabase] Warning: SUPABASE_URL or SERVICE_ROLE_KEY not configured or using placeholder values")
+    
+    @property
+    def client(self) -> Optional[Client]:
+        return self._client
+    
+    @property
+    def auth(self) -> Optional[AsyncGoTrueClient]:
+        return self._auth_client
+    
+    def get_storage_bucket(self, bucket: Optional[str] = None):
+        """Get Supabase Storage bucket."""
+        if not self._client:
+            return None
+        bucket_name = bucket or settings.SUPABASE_STORAGE_BUCKET
+        return self._client.storage.from_(bucket_name)
+
+
+supabase_service = SupabaseService()
+
+
+# ============================================================================
+# Authentication Service (Supabase Auth)
 # ============================================================================
 
 class AuthService:
-    """Handle authentication logic."""
-
+    """Handle authentication logic using Supabase Auth."""
+    
+    def __init__(self):
+        self.supabase = supabase_service
+    
+    async def sign_up(self, email: str, password: str, metadata: dict = None) -> SupabaseUser:
+        """Register a new user with Supabase Auth."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        response = await self.supabase.auth.sign_up({
+            "email": email,
+            "password": password,
+            "data": metadata or {}
+        })
+        
+        if response.user is None:
+            raise ValueError("Failed to create user")
+        
+        return response.user
+    
+    async def sign_in(self, email: str, password: str) -> SupabaseUser:
+        """Sign in a user with Supabase Auth."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        response = await self.supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+        
+        if response.user is None:
+            raise ValueError("Invalid credentials")
+        
+        return response.user
+    
+    async def sign_out(self, access_token: str) -> bool:
+        """Sign out a user."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        try:
+            await self.supabase.auth.sign_out(access_token)
+            return True
+        except Exception:
+            return False
+    
+    async def refresh_session(self, refresh_token: str):
+        """Refresh access token using refresh token."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        response = await self.supabase.auth.refresh_session(refresh_token)
+        return response.session
+    
+    async def get_user(self, access_token: str) -> Optional[SupabaseUser]:
+        """Get user from access token."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        try:
+            response = await self.supabase.auth.get_user(access_token)
+            return response.user
+        except Exception:
+            return None
+    
+    async def reset_password_email(self, email: str) -> bool:
+        """Send password reset email."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        try:
+            await self.supabase.auth.reset_password_for_email(email)
+            return True
+        except Exception:
+            return False
+    
+    async def update_password(self, access_token: str, new_password: str) -> SupabaseUser:
+        """Update user password."""
+        if not self.supabase.auth:
+            raise ValueError("Supabase Auth not configured")
+        
+        response = await self.supabase.auth.update_user(
+            access_token,
+            {"password": new_password}
+        )
+        return response.user
+    
+    # Legacy methods for compatibility
     def hash_password(self, password: str) -> str:
-        """Hash a password."""
         return pwd_context.hash(password)
-
+    
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """Verify a password against its hash."""
         return pwd_context.verify(plain_password, hashed_password)
-
+    
     def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
-        """Create JWT access token."""
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
@@ -64,113 +213,160 @@ class AuthService:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
-
+    
     def create_refresh_token(self, data: dict) -> str:
-        """Create JWT refresh token."""
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire, "type": "refresh"})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
-
+    
     def decode_token(self, token: str) -> dict:
-        """Decode and validate JWT token."""
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             return payload
         except JWTError:
             raise ValueError("Invalid token")
 
-    async def authenticate_user(self, db: AsyncSession, username: str, password: str) -> Optional[User]:
-        """Authenticate a user with username and password."""
-        result = await db.execute(select(User).where(User.username == username))
-        user = result.scalar_one_or_none()
-        if not user:
-            return None
-        if not self.verify_password(password, user.hashed_password):
-            return None
-        return user
-
 
 # ============================================================================
-# User Service
+# Profile Service
 # ============================================================================
 
-class UserService:
-    """Handle user-related business logic."""
-
-    async def get_by_id(self, db: AsyncSession, user_id: int) -> Optional[User]:
-        result = await db.execute(select(User).where(User.id == user_id))
+class ProfileService:
+    """Handle profile-related business logic."""
+    
+    async def get_by_id(self, db: AsyncSession, user_id: uuid.UUID) -> Optional[Profile]:
+        result = await db.execute(select(Profile).where(Profile.id == user_id))
         return result.scalar_one_or_none()
-
-    async def get_by_email(self, db: AsyncSession, email: str) -> Optional[User]:
-        result = await db.execute(select(User).where(User.email == email))
+    
+    async def get_by_email(self, db: AsyncSession, email: str) -> Optional[Profile]:
+        result = await db.execute(select(Profile).where(Profile.email == email))
         return result.scalar_one_or_none()
-
-    async def get_by_username(self, db: AsyncSession, username: str) -> Optional[User]:
-        result = await db.execute(select(User).where(User.username == username))
+    
+    async def get_by_username(self, db: AsyncSession, username: str) -> Optional[Profile]:
+        result = await db.execute(select(Profile).where(Profile.username == username))
         return result.scalar_one_or_none()
-
-    async def create(self, db: AsyncSession, user_data: dict) -> User:
-        user = User(**user_data)
-        db.add(user)
+    
+    async def create(self, db: AsyncSession, profile_data: dict) -> Profile:
+        profile = Profile(**profile_data)
+        db.add(profile)
         await db.commit()
-        await db.refresh(user)
-        return user
-
-    async def update(self, db: AsyncSession, user_id: int, data: dict) -> Optional[User]:
-        user = await self.get_by_id(db, user_id)
-        if not user:
+        await db.refresh(profile)
+        return profile
+    
+    async def update(self, db: AsyncSession, user_id: uuid.UUID, data: dict) -> Optional[Profile]:
+        profile = await self.get_by_id(db, user_id)
+        if not profile:
             return None
         for key, value in data.items():
-            setattr(user, key, value)
-        user.updated_at = datetime.utcnow()
+            setattr(profile, key, value)
+        profile.updated_at = datetime.utcnow()
         await db.commit()
-        await db.refresh(user)
-        return user
-
-    async def delete(self, db: AsyncSession, user_id: int) -> bool:
-        user = await self.get_by_id(db, user_id)
-        if not user:
+        await db.refresh(profile)
+        return profile
+    
+    async def delete(self, db: AsyncSession, user_id: uuid.UUID) -> bool:
+        profile = await self.get_by_id(db, user_id)
+        if not profile:
             return False
-        await db.delete(user)
-        await db.commit()
-        return True
-
-    async def change_password(self, db: AsyncSession, user_id: int, current_password: str, new_password: str) -> bool:
-        user = await self.get_by_id(db, user_id)
-        if not user:
-            return False
-        if not auth_service.verify_password(current_password, user.hashed_password):
-            return False
-        user.hashed_password = auth_service.hash_password(new_password)
+        await db.delete(profile)
         await db.commit()
         return True
-
-    async def list_users(
+    
+    async def list_profiles(
         self, 
         db: AsyncSession, 
         page: int = 1, 
         limit: int = 20,
         role: Optional[UserRole] = None,
         is_active: Optional[bool] = None
-    ) -> tuple[List[User], int]:
-        query = select(User)
+    ) -> tuple[List[Profile], int]:
+        query = select(Profile)
         if role:
-            query = query.where(User.role == role)
+            query = query.where(Profile.role == role)
         if is_active is not None:
-            query = query.where(User.is_active == is_active)
+            query = query.where(Profile.is_active == is_active)
         
-        # Count total
         count_query = select(func.count()).select_from(query.subquery())
         total = (await db.execute(count_query)).scalar_one()
         
-        # Paginate
-        query = query.offset((page - 1) * limit).limit(limit).order_by(User.created_at.desc())
+        query = query.offset((page - 1) * limit).limit(limit).order_by(Profile.created_at.desc())
         result = await db.execute(query)
-        users = result.scalars().all()
+        profiles = result.scalars().all()
         
-        return users, total
+        return profiles, total
+    
+    async def ensure_profile_exists(
+            self, 
+            db: AsyncSession, 
+            supabase_user: SupabaseUser,
+            metadata: dict = None
+        ) -> Profile:
+            """Ensure a profile exists for a Supabase Auth user.
+        
+            Creates profile if it doesn't exist, updates email/username if changed.
+            """
+            profile = await self.get_by_id(db, uuid.UUID(supabase_user.id))
+        
+            if profile:
+                # Update email/username if changed
+                updated = False
+                if profile.email != supabase_user.email:
+                    profile.email = supabase_user.email
+                    updated = True
+                if metadata and metadata.get("username") and profile.username != metadata["username"]:
+                    profile.username = metadata["username"]
+                    updated = True
+                if metadata and metadata.get("full_name") and profile.full_name != metadata["full_name"]:
+                    profile.full_name = metadata["full_name"]
+                    updated = True
+                if metadata and metadata.get("birthday") and profile.birthday != metadata["birthday"]:
+                    profile.birthday = metadata["birthday"]
+                    updated = True
+                if metadata and metadata.get("school_id") and profile.school_id != metadata["school_id"]:
+                    profile.school_id = metadata["school_id"]
+                    updated = True
+                if metadata and metadata.get("gender") and profile.gender != metadata["gender"]:
+                    profile.gender = metadata["gender"]
+                    updated = True
+                if updated:
+                    profile.updated_at = datetime.utcnow()
+                    await db.commit()
+                    await db.refresh(profile)
+                return profile
+        
+            # Create new profile
+            username = metadata.get("username") if metadata else None
+            if not username:
+                # Generate username from email
+                username = supabase_user.email.split("@")[0]
+                # Ensure uniqueness
+                base_username = username
+                counter = 1
+                while await self.get_by_username(db, username):
+                    username = f"{base_username}{counter}"
+                    counter += 1
+        
+            # Parse birthday if provided
+            birthday = None
+            if metadata and metadata.get("birthday"):
+                try:
+                    birthday = datetime.fromisoformat(metadata["birthday"].replace("Z", "+00:00"))
+                except (ValueError, TypeError):
+                    pass
+        
+            profile = await self.create(db, {
+                "id": uuid.UUID(supabase_user.id),
+                "username": username,
+                "email": supabase_user.email,
+                "full_name": metadata.get("full_name") if metadata else None,
+                "role": UserRole.STUDENT,
+                "birthday": birthday,
+                "school_id": metadata.get("school_id") if metadata else None,
+                "gender": metadata.get("gender") if metadata else None,
+            })
+            return profile
 
 
 # ============================================================================
@@ -217,11 +413,11 @@ class TrackingService:
 
 
 # ============================================================================
-# File Storage Service
+# File Storage Service (Supabase Storage)
 # ============================================================================
 
 class FileStorageService:
-    """Handle file uploads, validation, and storage."""
+    """Handle file uploads, validation, and storage using Supabase Storage."""
     
     # Allowed file types for report attachments
     ALLOWED_MIME_TYPES = {
@@ -236,8 +432,8 @@ class FileStorageService:
     MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
     
     def __init__(self):
-        self.upload_dir = Path(settings.UPLOAD_DIR) / "reports"
-        self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.supabase = supabase_service
+        self.bucket_name = settings.SUPABASE_STORAGE_BUCKET
     
     def validate_file(self, filename: str, mime_type: str, file_size: int) -> tuple[bool, Optional[str]]:
         """Validate file extension, MIME type, and size.
@@ -265,42 +461,82 @@ class FileStorageService:
         unique_id = uuid.uuid4().hex
         return f"{unique_id}{ext}"
     
-    async def save_file(
+    async def upload_file(
         self, 
         file_content: bytes, 
         original_filename: str,
-        report_id: int
+        report_id: int,
+        folder: str = "reports"
     ) -> tuple[str, str, int]:
-        """Save file to disk and return (stored_filename, file_path, file_size)."""
+        """Upload file to Supabase Storage and return (stored_filename, file_path, file_size)."""
+        if not self.supabase.client:
+            raise ValueError("Supabase Storage not configured")
+        
         stored_filename = self.generate_stored_filename(original_filename)
-        
-        # Create report-specific subdirectory
-        report_dir = self.upload_dir / str(report_id)
-        report_dir.mkdir(parents=True, exist_ok=True)
-        
-        file_path = report_dir / stored_filename
-        
-        async with aiofiles.open(file_path, "wb") as f:
-            await f.write(file_content)
-        
+        file_path = f"{folder}/{report_id}/{stored_filename}"
         file_size = len(file_content)
         
-        return stored_filename, str(file_path), file_size
+        # Upload to Supabase Storage
+        bucket = self.supabase.get_storage_bucket()
+        if not bucket:
+            raise ValueError("Storage bucket not available")
+        
+        # Upload file
+        response = bucket.upload(
+            path=file_path,
+            file=file_content,
+            file_options={"content-type": "application/octet-stream"}
+        )
+        
+        if hasattr(response, 'error') and response.error:
+            raise ValueError(f"Upload failed: {response.error}")
+        
+        return stored_filename, file_path, file_size
     
-    async def delete_file(self, file_path: str) -> bool:
-        """Delete a file from storage."""
+    async def delete_file(self, file_path: str, bucket: Optional[str] = None) -> bool:
+        """Delete a file from Supabase Storage."""
+        if not self.supabase.client:
+            return False
+        
         try:
-            Path(file_path).unlink(missing_ok=True)
+            bucket_client = self.supabase.get_storage_bucket(bucket)
+            if not bucket_client:
+                return False
+            
+            response = bucket_client.remove([file_path])
             return True
         except Exception:
             return False
     
-    def get_file_url(self, file_path: str) -> str:
-        """Get the public URL for a file (for serving via static files or CDN)."""
-        # In production, this would return a signed URL or CDN URL
-        # For now, return a relative path that can be served by FastAPI static files
-        rel_path = Path(file_path).relative_to(Path(settings.UPLOAD_DIR))
-        return f"/uploads/{rel_path}"
+    def get_file_url(self, file_path: str, bucket: Optional[str] = None) -> str:
+        """Get the public URL for a file in Supabase Storage."""
+        if not self.supabase.client:
+            return ""
+        
+        bucket_client = self.supabase.get_storage_bucket(bucket)
+        if not bucket_client:
+            return ""
+        
+        try:
+            response = bucket_client.get_public_url(file_path)
+            return response
+        except Exception:
+            return ""
+    
+    def get_signed_url(self, file_path: str, expires_in: int = 3600, bucket: Optional[str] = None) -> str:
+        """Get a signed URL for private file access."""
+        if not self.supabase.client:
+            return ""
+        
+        bucket_client = self.supabase.get_storage_bucket(bucket)
+        if not bucket_client:
+            return ""
+        
+        try:
+            response = bucket_client.create_signed_url(file_path, expires_in)
+            return response.get("signedURL", "")
+        except Exception:
+            return ""
 
 
 # ============================================================================
@@ -494,7 +730,6 @@ class EmailService:
     ) -> bool:
         """Send report submission confirmation email."""
         if not self.is_configured():
-            # Log but don't fail - email is optional
             print(f"[Email] Not configured, would send confirmation to {to_email}")
             return False
         
@@ -567,7 +802,7 @@ class ReportService:
         self,
         db: AsyncSession,
         data: dict,
-        user_id: Optional[int] = None,
+        user_id: Optional[uuid.UUID] = None,
         is_anonymous: bool = False,
         reporter_email: Optional[str] = None
     ) -> Report:
@@ -607,7 +842,7 @@ class ReportService:
         # Send email notification if email available
         email_to_send = None
         if not is_anonymous and user_id:
-            user = await user_service.get_by_id(db, user_id)
+            user = await profile_service.get_by_id(db, user_id)
             if user:
                 email_to_send = user.email
         elif is_anonymous and reporter_email:
@@ -630,11 +865,6 @@ class ReportService:
     
     async def get_by_id(self, db: AsyncSession, report_id: int, include_relations: bool = True) -> Optional[Report]:
         query = select(Report).where(Report.id == report_id)
-        if include_relations:
-            query = query.options(
-                # Note: SQLAlchemy 2.0 doesn't use joinedload in select() the same way
-                # We'll load relationships separately if needed
-            )
         result = await db.execute(query)
         return result.scalar_one_or_none()
     
@@ -647,7 +877,7 @@ class ReportService:
     async def get_user_reports(
         self, 
         db: AsyncSession, 
-        user_id: int, 
+        user_id: uuid.UUID, 
         page: int = 1, 
         limit: int = 20,
         status: Optional[ReportStatus] = None
@@ -656,11 +886,9 @@ class ReportService:
         if status:
             query = query.where(Report.status == status)
         
-        # Count total
         count_query = select(func.count()).select_from(query.subquery())
         total = (await db.execute(count_query)).scalar_one()
         
-        # Paginate
         query = query.offset((page - 1) * limit).limit(limit).order_by(Report.created_at.desc())
         result = await db.execute(query)
         reports = result.scalars().all()
@@ -675,7 +903,7 @@ class ReportService:
         status: Optional[ReportStatus] = None,
         category: Optional[ReportCategory] = None,
         is_anonymous: Optional[bool] = None,
-        assignee_id: Optional[int] = None
+        assignee_id: Optional[uuid.UUID] = None
     ) -> tuple[List[Report], int]:
         query = select(Report)
         
@@ -688,11 +916,9 @@ class ReportService:
         if assignee_id:
             query = query.where(Report.assignee_id == assignee_id)
         
-        # Count total
         count_query = select(func.count()).select_from(query.subquery())
         total = (await db.execute(count_query)).scalar_one()
         
-        # Paginate
         query = query.offset((page - 1) * limit).limit(limit).order_by(Report.created_at.desc())
         result = await db.execute(query)
         reports = result.scalars().all()
@@ -706,7 +932,7 @@ class ReportService:
         db: AsyncSession, 
         report_id: int, 
         data: dict,
-        current_user: Optional[User] = None
+        current_user: Optional[Profile] = None
     ) -> Optional[Report]:
         report = await self.get_by_id(db, report_id)
         if not report:
@@ -743,7 +969,7 @@ class ReportService:
             # Send email notification if reporter has email
             email_to_send = None
             if not report.is_anonymous and report.user_id:
-                user = await user_service.get_by_id(db, report.user_id)
+                user = await profile_service.get_by_id(db, report.user_id)
                 if user:
                     email_to_send = user.email
             elif report.is_anonymous and report.reporter_email:
@@ -764,14 +990,14 @@ class ReportService:
         await db.refresh(report)
         return report
     
-    async def assign_report(self, db: AsyncSession, report_id: int, assignee_id: int, current_user: User) -> Optional[Report]:
+    async def assign_report(self, db: AsyncSession, report_id: int, assignee_id: uuid.UUID, current_user: Profile) -> Optional[Report]:
         """Assign a report to an admin/moderator."""
         report = await self.get_by_id(db, report_id)
         if not report:
             return None
         
         # Verify assignee exists and is admin/moderator
-        assignee = await user_service.get_by_id(db, assignee_id)
+        assignee = await profile_service.get_by_id(db, assignee_id)
         if not assignee or assignee.role not in (UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN):
             raise ValueError("Assignee must be an admin or moderator")
         
@@ -798,7 +1024,7 @@ class ReportService:
         report_id: int,
         status: ReportStatus,
         remarks: Optional[str],
-        created_by_user_id: Optional[int],
+        created_by_user_id: Optional[uuid.UUID],
         attachment_ids: Optional[List[int]] = None
     ) -> Optional[ReportTimeline]:
         """Add a timeline entry with optional attachments."""
@@ -846,7 +1072,7 @@ class ReportService:
         file_content: bytes,
         original_filename: str,
         mime_type: str,
-        uploaded_by_user_id: Optional[int] = None
+        uploaded_by_user_id: Optional[uuid.UUID] = None
     ) -> Optional[ReportAttachment]:
         """Add an attachment to a report."""
         report = await self.get_by_id(db, report_id)
@@ -859,8 +1085,8 @@ class ReportService:
         if not is_valid:
             raise ValueError(error)
         
-        # Save file
-        stored_filename, file_path, saved_size = await self.file_storage.save_file(
+        # Upload to Supabase Storage
+        stored_filename, file_path, saved_size = await self.file_storage.upload_file(
             file_content, original_filename, report_id
         )
         
@@ -869,7 +1095,7 @@ class ReportService:
             report_id=report_id,
             filename=original_filename,
             stored_filename=stored_filename,
-            file_path=file_path,
+            file_path=file_path,  # Supabase Storage path
             file_size=saved_size,
             mime_type=mime_type,
             extension=Path(original_filename).suffix.lower(),
@@ -892,7 +1118,7 @@ class ReportService:
         if not attachment:
             return False
         
-        # Delete file from storage
+        # Delete file from Supabase Storage
         await self.file_storage.delete_file(attachment.file_path)
         
         # Delete record
@@ -912,8 +1138,8 @@ class ReportService:
         closed = (await db.execute(select(func.count(Report.id)).where(Report.status == ReportStatus.CLOSED))).scalar_one()
         anonymous = (await db.execute(select(func.count(Report.id)).where(Report.is_anonymous == True))).scalar_one()
         authenticated = (await db.execute(select(func.count(Report.id)).where(Report.is_anonymous == False))).scalar_one()
-        total_users = (await db.execute(select(func.count(User.id)))).scalar_one()
-        total_admins = (await db.execute(select(func.count(User.id)).where(User.role.in_([UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN])))).scalar_one()
+        total_users = (await db.execute(select(func.count(Profile.id)))).scalar_one()
+        total_admins = (await db.execute(select(func.count(Profile.id)).where(Profile.role.in_([UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN])))).scalar_one()
         
         return {
             "total_reports": total,
@@ -957,7 +1183,7 @@ class ShareService:
 # ============================================================================
 
 auth_service = AuthService()
-user_service = UserService()
+profile_service = ProfileService()
 report_service = ReportService()
 email_service = EmailService()
 file_storage_service = FileStorageService()
@@ -968,7 +1194,7 @@ share_service = ShareService()
 
 __all__ = [
     "AuthService",
-    "UserService",
+    "ProfileService",
     "ReportService",
     "EmailService",
     "FileStorageService",
@@ -976,8 +1202,10 @@ __all__ = [
     "WellnessService",
     "InspireService",
     "ShareService",
+    "SupabaseService",
+    "supabase_service",
     "auth_service",
-    "user_service",
+    "profile_service",
     "report_service",
     "email_service",
     "file_storage_service",

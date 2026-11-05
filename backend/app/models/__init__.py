@@ -1,10 +1,12 @@
 # VoiceED Backend - Database Models
+# Compatible with Supabase Auth (auth.users) and Session Pooler
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, UUID as SQLUUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
+import uuid
 
 
 class UserRole(str, enum.Enum):
@@ -40,33 +42,40 @@ class Gender(str, enum.Enum):
     LGBTQ = "lgbtq+"
 
 
-class User(Base):
-    __tablename__ = "users"
+class Profile(Base):
+    """User profile linked to Supabase Auth (auth.users).
 
-    id = Column(Integer, primary_key=True, index=True)
+    Supabase Auth manages authentication (auth.users table).
+    This table stores application-specific profile data.
+    The 'id' matches the Supabase Auth user ID (UUID).
+    """
+    __tablename__ = "profiles"
+
+    id = Column(SQLUUID(as_uuid=True), primary_key=True, index=True)  # Matches auth.users.id
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
     role = Column(Enum(UserRole), default=UserRole.STUDENT, nullable=False)
     gender = Column(Enum(Gender), nullable=True)
     birthday = Column(DateTime, nullable=True)
+    school_id = Column(String(50), unique=True, index=True, nullable=True)
     avatar_url = Column(String(500), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
-    is_verified = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    reports = relationship("Report", back_populates="user", cascade="all, delete-orphan")
+    reports = relationship("Report", back_populates="user", cascade="all, delete-orphan", foreign_keys="Report.user_id")
     journal_entries = relationship("JournalEntry", back_populates="user", cascade="all, delete-orphan")
     stories = relationship("InspireStory", back_populates="user", cascade="all, delete-orphan")
     materials = relationship("SharedMaterial", back_populates="user", cascade="all, delete-orphan")
     assigned_reports = relationship("Report", back_populates="assignee", foreign_keys="Report.assignee_id")
+    uploaded_attachments = relationship("ReportAttachment", back_populates="uploaded_by", foreign_keys="ReportAttachment.uploaded_by_user_id")
+    created_timeline_entries = relationship("ReportTimeline", back_populates="created_by", foreign_keys="ReportTimeline.created_by_user_id")
 
     def __repr__(self):
-        return f"<User(id={self.id}, username={self.username}, email={self.email}, role={self.role})>"
+        return f"<Profile(id={self.id}, username={self.username}, email={self.email}, role={self.role})>"
 
     @property
     def is_admin(self) -> bool:
@@ -89,8 +98,8 @@ class Report(Base):
     is_anonymous = Column(Boolean, default=False, nullable=False)
     location = Column(String(255), nullable=True)
     incident_date = Column(DateTime(timezone=True), nullable=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    assignee_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
+    assignee_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
     reporter_email = Column(String(255), nullable=True)  # For anonymous reports with email
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
@@ -98,8 +107,8 @@ class Report(Base):
     closed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user = relationship("User", back_populates="reports", foreign_keys=[user_id])
-    assignee = relationship("User", back_populates="assigned_reports", foreign_keys=[assignee_id])
+    user = relationship("Profile", back_populates="reports", foreign_keys=[user_id])
+    assignee = relationship("Profile", back_populates="assigned_reports", foreign_keys=[assignee_id])
     attachments = relationship("ReportAttachment", back_populates="report", cascade="all, delete-orphan")
     timeline_entries = relationship("ReportTimeline", back_populates="report", cascade="all, delete-orphan", order_by="ReportTimeline.created_at")
 
@@ -122,16 +131,16 @@ class ReportAttachment(Base):
     report_id = Column(Integer, ForeignKey("reports.id", ondelete="CASCADE"), nullable=False)
     filename = Column(String(255), nullable=False)
     stored_filename = Column(String(255), nullable=False)  # UUID-based stored name
-    file_path = Column(String(500), nullable=False)
+    file_path = Column(String(500), nullable=False)  # Supabase Storage path
     file_size = Column(Integer, nullable=False)
     mime_type = Column(String(100), nullable=False)
     extension = Column(String(20), nullable=False)
-    uploaded_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Who uploaded (admin or user)
+    uploaded_by_user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)  # Who uploaded (admin or user)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
     report = relationship("Report", back_populates="attachments")
-    uploaded_by = relationship("User")
+    uploaded_by = relationship("Profile", back_populates="uploaded_attachments", foreign_keys=[uploaded_by_user_id])
 
     def __repr__(self):
         return f"<ReportAttachment(id={self.id}, report_id={self.report_id}, filename={self.filename})>"
@@ -144,17 +153,12 @@ class ReportTimeline(Base):
     report_id = Column(Integer, ForeignKey("reports.id", ondelete="CASCADE"), nullable=False)
     status = Column(Enum(ReportStatus), nullable=False)
     remarks = Column(Text, nullable=True)  # Admin remarks (max 250 words)
-    created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Admin who made the update
+    created_by_user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)  # Admin who made the update
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
     report = relationship("Report", back_populates="timeline_entries")
-    created_by = relationship("User")
-
-    # Attachments for this timeline entry (via association table)
-    # Using a separate association table for many-to-many between timeline and attachments
-    # For simplicity, we'll add attachment_ids as JSON or use a separate model
-    # Actually, let's use a separate association model
+    created_by = relationship("Profile", back_populates="created_timeline_entries", foreign_keys=[created_by_user_id])
 
     def __repr__(self):
         return f"<ReportTimeline(id={self.id}, report_id={self.report_id}, status={self.status})>"
@@ -184,12 +188,12 @@ class JournalEntry(Base):
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=False)
     mood = Column(String(50), nullable=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
     # Relationships
-    user = relationship("User", back_populates="journal_entries")
+    user = relationship("Profile", back_populates="journal_entries")
 
     def __repr__(self):
         return f"<JournalEntry(id={self.id}, title={self.title})>"
@@ -216,11 +220,11 @@ class InspireStory(Base):
     content = Column(Text, nullable=False)
     author_name = Column(String(255), nullable=True)
     is_anonymous = Column(Boolean, default=False, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    user = relationship("User", back_populates="stories")
+    user = relationship("Profile", back_populates="stories")
 
     def __repr__(self):
         return f"<InspireStory(id={self.id}, title={self.title})>"
@@ -245,15 +249,15 @@ class SharedMaterial(Base):
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     subject = Column(String(100), nullable=False, index=True)
-    file_url = Column(String(500), nullable=False)
+    file_url = Column(String(500), nullable=False)  # Supabase Storage public URL
     file_type = Column(String(50), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     is_anonymous = Column(Boolean, default=False, nullable=False)
     download_count = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    user = relationship("User", back_populates="materials")
+    user = relationship("Profile", back_populates="materials")
 
     # Indexes
     __table_args__ = (

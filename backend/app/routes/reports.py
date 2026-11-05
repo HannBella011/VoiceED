@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
+import uuid
+from datetime import datetime
+
 from app.database import get_db
 from app.schemas import (
     ReportCreate, ReportCreateAnonymous, ReportUpdate, ReportResponse, ReportListResponse,
@@ -10,8 +13,8 @@ from app.schemas import (
     AdminStatsResponse, AdminUserUpdate, AdminReportUpdate,
     PaginationParams, ReportStatus, ReportCategory, UserRole
 )
-from app.services import report_service, user_service, auth_service
-from app.models import User, UserRole as UserRoleModel, ReportStatus as ReportStatusModel, ReportCategory as ReportCategoryModel
+from app.services import report_service, profile_service, auth_service
+from app.models import Profile, UserRole as UserRoleModel, ReportStatus as ReportStatusModel, ReportCategory as ReportCategoryModel
 import aiofiles
 
 router = APIRouter()
@@ -21,28 +24,7 @@ router = APIRouter()
 # Dependencies
 # ============================================================================
 
-async def get_current_user(
-    db: AsyncSession = Depends(get_db),
-    token: str = Depends(auth_service.decode_token)  # This won't work directly, need proper auth dependency
-) -> User:
-    """Get current authenticated user from JWT token."""
-    # TODO: Implement proper JWT dependency
-    # For now, return None - we'll handle auth in each endpoint
-    pass
-
-
-def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    """Require admin or super_admin role."""
-    if not current_user or not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin access required")
-    return current_user
-
-
-def require_super_admin(current_user: User = Depends(get_current_user)) -> User:
-    """Require super_admin role."""
-    if not current_user or not current_user.is_super_admin:
-        raise HTTPException(status_code=403, detail="Super admin access required")
-    return current_user
+from app.routes.auth import get_current_active_user, get_current_admin_user, get_current_super_admin_user
 
 
 # ============================================================================
@@ -59,13 +41,12 @@ async def submit_report_authenticated(
     is_anonymous: bool = Form(False),
     files: List[UploadFile] = File(default=[]),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Submit a report as an authenticated user."""
     # Parse incident_date if provided
     parsed_incident_date = None
     if incident_date:
-        from datetime import datetime
         try:
             parsed_incident_date = datetime.fromisoformat(incident_date.replace('Z', '+00:00'))
         except ValueError:
@@ -115,7 +96,6 @@ async def submit_report_anonymous(
     # Parse incident_date if provided
     parsed_incident_date = None
     if incident_date:
-        from datetime import datetime
         try:
             parsed_incident_date = datetime.fromisoformat(incident_date.replace('Z', '+00:00'))
         except ValueError:
@@ -164,7 +144,6 @@ async def track_report(
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     
-    # Load timeline and attachments
     # For public tracking, we don't expose user identity for anonymous reports
     return report
 
@@ -179,7 +158,7 @@ async def get_my_reports(
     limit: int = Query(20, ge=1, le=100),
     status: Optional[ReportStatus] = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Get reports submitted by the current authenticated user."""
     reports, total = await report_service.get_user_reports(db, current_user.id, page, limit, status)
@@ -198,7 +177,7 @@ async def get_my_reports(
 async def get_report(
     report_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Get a specific report by ID (authenticated users only)."""
     report = await report_service.get_by_id(db, report_id)
@@ -219,7 +198,7 @@ async def get_report(
 @router.get("/admin/stats", response_model=AdminStatsResponse)
 async def get_admin_stats(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Get admin dashboard statistics."""
     return await report_service.get_admin_stats(db)
@@ -232,13 +211,14 @@ async def admin_list_reports(
     status: Optional[ReportStatus] = Query(None),
     category: Optional[ReportCategory] = Query(None),
     is_anonymous: Optional[bool] = Query(None),
-    assignee_id: Optional[int] = Query(None),
+    assignee_id: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """List all reports (admin only)."""
+    assignee_uuid = uuid.UUID(assignee_id) if assignee_id else None
     reports, total = await report_service.list_reports(
-        db, page, limit, status, category, is_anonymous, assignee_id
+        db, page, limit, status, category, is_anonymous, assignee_uuid
     )
     total_pages = (total + limit - 1) // limit
     
@@ -255,7 +235,7 @@ async def admin_list_reports(
 async def admin_get_report(
     report_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Get a specific report (admin only)."""
     report = await report_service.get_by_id(db, report_id)
@@ -269,7 +249,7 @@ async def admin_update_report_status(
     report_id: int,
     status_update: ReportStatusUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Update report status and add timeline entry (admin only)."""
     # Validate remarks length (250 words max)
@@ -286,12 +266,6 @@ async def admin_update_report_status(
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     
-    # Handle attachment linking to timeline
-    if status_update.attachment_ids:
-        # The timeline entry was created in update_report, need to link attachments
-        # This is a simplified approach - in production you'd want to get the latest timeline entry
-        pass
-    
     return report
 
 
@@ -300,11 +274,12 @@ async def admin_assign_report(
     report_id: int,
     assignment: ReportAssignment,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Assign a report to an admin/moderator (admin only)."""
     try:
-        report = await report_service.assign_report(db, report_id, assignment.assignee_id, current_user)
+        assignee_uuid = uuid.UUID(assignment.assignee_id)
+        report = await report_service.assign_report(db, report_id, assignee_uuid, current_user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -319,10 +294,14 @@ async def admin_update_report(
     report_id: int,
     update: AdminReportUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: Profile = Depends(get_current_admin_user)
 ):
     """Update report details (admin only)."""
     update_data = update.model_dump(exclude_unset=True)
+    # Convert assignee_id string to UUID if present
+    if "assignee_id" in update_data and update_data["assignee_id"]:
+        update_data["assignee_id"] = uuid.UUID(update_data["assignee_id"])
+    
     report = await report_service.update_report(db, report_id, update_data, current_user=current_user)
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
@@ -338,7 +317,7 @@ async def upload_attachments(
     report_id: int,
     files: List[UploadFile] = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Upload attachments to a report."""
     report = await report_service.get_by_id(db, report_id)
@@ -365,15 +344,17 @@ async def upload_attachments(
                 db, report_id, content, file.filename, mime_type, uploaded_by_user_id=current_user.id
             )
             if attachment:
-                uploaded.append(FileUploadResponse(
+                uploaded.append(ReportAttachmentResponse(
                     id=str(attachment.id),
+                    report_id=str(attachment.report_id),
                     filename=attachment.filename,
                     stored_filename=attachment.stored_filename,
                     file_path=attachment.file_path,
                     file_size=attachment.file_size,
                     mime_type=attachment.mime_type,
                     extension=attachment.extension,
-                    url=f"/uploads/reports/{report_id}/{attachment.stored_filename}"
+                    uploaded_by_user_id=str(attachment.uploaded_by_user_id) if attachment.uploaded_by_user_id else None,
+                    created_at=attachment.created_at
                 ))
         except ValueError as e:
             errors.append(FileUploadError(filename=file.filename, error=str(e)))
@@ -385,7 +366,7 @@ async def upload_attachments(
 async def delete_attachment(
     attachment_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Delete an attachment."""
     # Check if attachment exists and user has permission
@@ -422,7 +403,7 @@ async def delete_attachment(
 async def create_report_legacy(
     data: ReportCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Legacy endpoint for creating reports."""
     report = await report_service.create_report(
@@ -438,7 +419,7 @@ async def list_reports_legacy(
     status: Optional[ReportStatus] = Query(None),
     category: Optional[ReportCategory] = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Legacy endpoint for listing reports."""
     if current_user.is_admin:
@@ -460,7 +441,7 @@ async def list_reports_legacy(
 async def get_report_legacy(
     report_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Legacy endpoint for getting a report."""
     report = await report_service.get_by_id(db, report_id)
@@ -478,7 +459,7 @@ async def update_report_legacy(
     report_id: int,
     data: ReportUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Legacy endpoint for updating reports."""
     update_data = data.model_dump(exclude_unset=True)
@@ -492,7 +473,7 @@ async def update_report_legacy(
 async def delete_report_legacy(
     report_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Profile = Depends(get_current_active_user)
 ):
     """Legacy endpoint for deleting reports (admin only)."""
     if not current_user.is_admin:
