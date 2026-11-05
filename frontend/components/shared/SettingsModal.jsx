@@ -4,10 +4,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
+
+const GENDER_OPTIONS = [
+  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Male' },
+  { value: 'lgbtq+', label: 'LGBTQ+' },
+  { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+];
 
 export function SettingsModal({ isOpen, onClose }) {
+  const { currentUser, updateProfile } = useAuthContext();
   const [settings, setSettings] = useState({
     color: 'blue',
+    gender: currentUser?.gender || '',
   });
 
   const loadSettings = () => {
@@ -15,12 +25,15 @@ export function SettingsModal({ isOpen, onClose }) {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        setSettings({ color: parsed.color || 'blue' });
+        setSettings({ 
+          color: parsed.color || 'blue',
+          gender: parsed.gender || '',
+        });
       } catch (e) {
-        setSettings({ color: 'blue' });
+        setSettings({ color: 'blue', gender: '' });
       }
     } else {
-      setSettings({ color: 'blue' });
+      setSettings({ color: 'blue', gender: currentUser?.gender || '' });
     }
   };
 
@@ -37,11 +50,31 @@ export function SettingsModal({ isOpen, onClose }) {
     }
   };
 
-  const saveSettings = (newSettings) => {
+  const saveSettings = async (newSettings) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
     localStorage.setItem('shielded_settings', JSON.stringify(updated));
     applySettings(updated);
+    
+    // If gender changed, update profile via API
+    if (newSettings.gender !== undefined && newSettings.gender !== settings.gender) {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+        await fetch(`${apiBase}/auth/me`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ gender: newSettings.gender || null }),
+        });
+        // Update local context
+        updateProfile({ gender: newSettings.gender || null });
+      } catch (err) {
+        console.warn('Failed to sync gender to backend:', err);
+      }
+    }
   };
 
   // Load settings on mount
@@ -49,7 +82,7 @@ export function SettingsModal({ isOpen, onClose }) {
     if (typeof window !== 'undefined') {
       loadSettings();
     }
-  }, []);
+  }, [currentUser?.gender]);
 
   if (!isOpen) return null;
 
@@ -148,6 +181,29 @@ export function SettingsModal({ isOpen, onClose }) {
               </label>
             </div>
           </div>
+
+          <div className="setting-group">
+            <h3>Gender</h3>
+            <div className="setting-option">
+              <label className="select-wrapper">
+                <select
+                  value={settings.gender}
+                  onChange={(e) => saveSettings({ gender: e.target.value })}
+                  disabled={!currentUser}
+                >
+                  <option value="">Select gender (optional)</option>
+                  {GENDER_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <i className="fas fa-chevron-down" aria-hidden="true"></i>
+              </label>
+              {!currentUser && <small className="input-hint">Log in to update gender</small>}
+            </div>
+          </div>
+
           <button className="save-settings-btn" onClick={() => { onClose(); }}>Save Settings</button>
         </div>
       </div>

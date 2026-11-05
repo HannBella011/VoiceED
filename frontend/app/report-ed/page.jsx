@@ -1,12 +1,17 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { submitReportAuthenticated, submitReportAnonymous } from '@/services/reports';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
-function ReportEDContent() {
+export function ReportEDContent() {
   const pathname = usePathname();
+  const fileInputRef = useRef(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [trackingCode, setTrackingCode] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -74,39 +79,33 @@ function ReportEDContent() {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const reportData = {
-      anonymous: isAnonymous,
-      name: formData.name,
-      email: formData.email,
-      category: formData.category,
-      date: formData.date,
-      location: formData.location,
-      description: formData.description,
-      timestamp: new Date().toISOString()
-    };
-
-    // Store in localStorage
-    let reports = JSON.parse(localStorage.getItem('voiceed_reports') || '[]');
-    reports.unshift(reportData);
-    localStorage.setItem('voiceed_reports', JSON.stringify(reports));
-
-    alert('Thank you for your report. Your submission has been received securely. The VoiceED team will review it promptly.');
-
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      category: '',
-      date: '',
-      location: '',
-      description: ''
-    });
-    setIsAnonymous(false);
-    setRightNow(false);
-    setSelectedFiles([]);
+    setError('');
+    setTrackingCode('');
+    setSubmitting(true);
+    try {
+      const reportData = {
+        title: `${formData.category.replaceAll('_', ' ')} incident`,
+        description: formData.description,
+        category: formData.category,
+        incident_date: formData.date ? new Date(formData.date).toISOString() : undefined,
+        location: formData.location,
+      };
+      const result = isAnonymous
+        ? await submitReportAnonymous(reportData, selectedFiles)
+        : await submitReportAuthenticated(reportData, selectedFiles);
+      setTrackingCode(result.tracking_code);
+      setFormData({ name: '', email: '', category: '', date: '', location: '', description: '' });
+      setIsAnonymous(false);
+      setRightNow(false);
+      setSelectedFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to submit your report.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleMapSearch = (e) => {
@@ -227,6 +226,8 @@ function ReportEDContent() {
                     referrerPolicy="no-referrer-when-downgrade"
                   ></iframe>
                 </div>
+                {error && <p className="error-message" role="alert">{error}</p>}
+                {trackingCode && <p className="success-message" role="status">Report submitted. Tracking code: <a href={`/track/${trackingCode}`}>{trackingCode}</a></p>}
                 <form className="map-search" onSubmit={handleMapSearch}>
                   <input
                     type="text"
@@ -390,7 +391,7 @@ function ReportEDContent() {
                       <option value="harassment">Harassment or Bullying</option>
                       <option value="safety">Facility/Safety Hazard</option>
                       <option value="discrimination">Discrimination</option>
-                      <option value="mental-health">Mental Health Concern</option>
+                      <option value="mental_health">Mental Health Concern</option>
                       <option value="violence">Violence or Threat</option>
                       <option value="other">Other</option>
                     </select>
@@ -469,14 +470,15 @@ function ReportEDContent() {
                         id="evidenceUpload"
                         className="file-input"
                         multiple
-                        accept="image/*,video/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx"
+                        accept=".png,.jpg,.jpeg,.pdf"
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) => e.target.files && handleFilesChange(e.target.files)}
                         style={{ display: 'none' }}
                       />
                       <div className="file-upload-label">
                         <i className="fas fa-cloud-upload-alt"></i>
                         <p>Drag and drop files here or click to browse</p>
-                        <span className="file-types">Supports: Images, Videos, PDF, Word, Excel, PowerPoint, Text files</span>
+                        <span className="file-types">Supports: PNG, JPEG and PDF, up to 25 MB per file</span>
                       </div>
                     </div>
                   </div>
@@ -487,7 +489,7 @@ function ReportEDContent() {
                         <span>{file.name}</span>
                         <span className="file-size">({formatFileSize(file.size)})</span>
                         <button
-                          className="remove-file"
+                          type="button" className="remove-file"
                           onClick={(e) => { e.stopPropagation(); removeFile(index); }}
                         >
                           <i className="fas fa-times"></i>
@@ -498,9 +500,9 @@ function ReportEDContent() {
 
                   {/* Submit Button */}
                   <div className="form-submit">
-                    <button type="submit" className="submit-btn">
+                    <button type="submit" className="submit-btn" disabled={submitting}>
                       <i className="fas fa-paper-plane"></i>
-                      Submit Report
+                      {submitting ? 'Submitting...' : 'Submit Report'}
                     </button>
                   </div>
 

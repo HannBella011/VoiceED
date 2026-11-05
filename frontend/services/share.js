@@ -1,15 +1,13 @@
 // Share Service - VoiceED
-// Placeholder functions for ShareED API calls
+// Database-backed ShareED API calls.
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 async function request(endpoint, options = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
   
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  const headers = { ...options.headers };
+  if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -22,7 +20,7 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || `HTTP ${response.status}`);
+    throw new Error(Array.isArray(error.detail) ? error.detail.map(item => item.msg).join('; ') : error.detail || `HTTP ${response.status}`);
   }
 
   if (response.status === 204) {
@@ -33,14 +31,14 @@ async function request(endpoint, options = {}) {
 }
 
 export const shareService = {
-  async getMaterials(params) {
+  async getMaterials(params, options = {}) {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) searchParams.append(key, String(value));
       });
     }
-    return request(`/share/materials?${searchParams.toString()}`);
+    return request(`/share/materials?${searchParams.toString()}`, options);
   },
 
   async getMaterial(materialId) {
@@ -50,8 +48,12 @@ export const shareService = {
   async uploadMaterial(data) {
     return request('/share/materials', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: data,
     });
+  },
+
+  async recordDownload(materialId) {
+    return request(`/share/materials/${materialId}/download`, { method: 'POST' });
   },
 
   async deleteMaterial(materialId) {

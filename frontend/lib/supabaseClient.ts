@@ -8,6 +8,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    flowType: "pkce",
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,

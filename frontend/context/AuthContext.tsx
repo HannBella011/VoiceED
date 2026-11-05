@@ -66,69 +66,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loginStats, setLoginStats] = useState<LoginStats>({ counts: {}, lastLogin: undefined });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize Supabase auth listener
-  useEffect(() => {
-    const initAuth = async () => {
-      // Get initial session
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      
-      if (session?.user) {
-        setSupabaseUser(session.user);
-        // Fetch profile from backend
-        await fetchProfile(session.user.id);
-      }
-      
-      setIsLoading(false);
-    };
-
-    initAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      
-      if (session?.user) {
-        setSupabaseUser(session.user);
-        await fetchProfile(session.user.id);
-      } else {
-        setSupabaseUser(null);
-        setCurrentUser(null);
-        setIsLoggedIn(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (accessToken: string) => {
     try {
       const response = await fetch(`${API_BASE}/auth/me`, {
-        headers: {
-          "Authorization": `Bearer ${session?.access_token}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
-
-      if (response.ok) {
-        const profile = await response.json();
-        setCurrentUser(profile);
-        setIsLoggedIn(true);
-        
-        // Update login stats
-        const newLoginStats = { ...loginStats };
-        newLoginStats.counts[profile.username] = (newLoginStats.counts[profile.username] || 0) + 1;
-        newLoginStats.lastLogin = new Date().toISOString();
-        setLoginStats(newLoginStats);
-        localStorage.setItem("shielded_login_stats", JSON.stringify(newLoginStats));
-      } else {
-        setCurrentUser(null);
-        setIsLoggedIn(false);
-      }
+      if (!response.ok) throw new Error("Unable to load profile");
+      const profile = await response.json();
+      setCurrentUser(profile);
+      setIsLoggedIn(true);
+      setLoginStats((previous) => {
+        const updated = {
+          counts: { ...previous.counts, [profile.username]: (previous.counts[profile.username] || 0) + 1 },
+          lastLogin: new Date().toISOString(),
+        };
+        localStorage.setItem("shielded_login_stats", JSON.stringify(updated));
+        return updated;
+      });
     } catch {
       setCurrentUser(null);
       setIsLoggedIn(false);
     }
-  }, [session?.access_token, loginStats]);
+  }, []);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setSupabaseUser(session?.user ?? null);
+        const accessToken = localStorage.getItem("access_token");
+        if (accessToken) await fetchProfile(accessToken);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initAuth();
+    // Keep Supabase credentials separate from backend API credentials.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setSupabaseUser(session?.user ?? null);
+      if (event === "SIGNED_OUT") {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await fetch(`${API_BASE}/auth/login`, {
@@ -141,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.detail || "Login failed");
+      throw new Error(Array.isArray(error.detail) ? error.detail.map((item: { msg: string }) => item.msg).join("; ") : error.detail || "Login failed");
     }
 
     const data = await response.json();
@@ -150,19 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("access_token", data.access_token);
     localStorage.setItem("refresh_token", data.refresh_token);
     
-    setSession({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
-      user: { id: data.user.id, email: data.user.email },
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-      token_type: "bearer",
-    } as Session);
-    setSupabaseUser({ id: data.user.id, email: data.user.email } as SupabaseUser);
-    
-    await fetchProfile(data.user.id);
-    
+    await fetchProfile(data.access_token);
+
     return data.user;
-  }, []);
+  }, [fetchProfile]);
 
   const register = useCallback(async (userData: {
     fullName: string;
@@ -213,21 +190,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await response.json();
-    
-    // Store tokens
-    localStorage.setItem("access_token", data.access_token);
-    localStorage.setItem("refresh_token", data.refresh_token);
-    
-    setSession({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
-      user: { id: data.user.id, email: data.user.email },
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-      token_type: "bearer",
-    } as Session);
-    setSupabaseUser({ id: data.user.id, email: data.user.email } as SupabaseUser);
-    
-    await fetchProfile(data.user.id);
     
     return data.user;
   }, []);

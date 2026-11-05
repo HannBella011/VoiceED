@@ -1,64 +1,72 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Navbar, Footer } from '@/components/shared';
-import { useAuth } from '@/hooks';
-import { useModals } from '@/components/shared/GlobalModals';
 
-export default function Meditation() {
-  const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
-  const { settingsOpen, setSettingsOpen, userMenuOpen, setUserMenuOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
+import { ActivityShell } from '@/components/features/wellness/ActivityShell';
+import { useCountdown } from '@/hooks/useWellnessActivity';
+import { formatTimer } from '@/lib/wellness';
 
-  const handleUserMenuClick = () => {
-    setUserMenuOpen(true);
-  };
-
-  const handleSettingsClick = () => {
-    setSettingsOpen(true);
-  };
-
-  const handleNavigation = (href) => {
-    if (isLoggedIn) {
-      window.location.href = href;
-    } else {
-      setLoginRequiredOpen(true);
-    }
-  };
-
+export function Activity() {
+  const timer = useCountdown(10);
   return (
-    <>
-      <Navbar
-        currentPage={pathname}
-        variant="wellness"
-        onUserMenuClick={handleUserMenuClick}
-        onSettingsClick={handleSettingsClick}
-      />
-
-      <main className="wellness-main">
+<main className="wellness-main">
         <div className="container">
-          <div className="wellness-hero">
-            <h2>Meditation</h2>
-            <p>Guided meditation sessions for relaxation and mental clarity.</p>
-          </div>
+            <div className="wellness-hero">
+                <h2>Meditation</h2>
+                <p>Guided meditation sessions for relaxation and mental clarity</p>
+            </div>
 
-          <div className="wellness-card">
-            <div className="card-header">
-              <div className="card-icon">
-                <i className="fas fa-info-circle"></i>
-              </div>
-              <h3>Coming Soon</h3>
+            <div className="wellness-grid">
+                <div className="wellness-card">
+                    <div className="card-header">
+                        <div className="card-icon">
+                            <i className="fas fa-clock"></i>
+                        </div>
+                        <h3>Meditation Timer</h3>
+                    </div>
+                    <div className="card-body">
+                        <div className="timer-display" id="meditationTimerDisplay">{formatTimer(timer.remaining)}</div>
+                        <div className="timer-presets">
+                            <button className="preset-btn" data-time="5" aria-pressed={timer.duration === 300} onClick={() => timer.select(5)}>5</button>
+                            <button className="preset-btn" data-time="10" aria-pressed={timer.duration === 600} onClick={() => timer.select(10)}>10</button>
+                            <button className="preset-btn" data-time="15" aria-pressed={timer.duration === 900} onClick={() => timer.select(15)}>15</button>
+                            <button className="preset-btn" data-time="20" aria-pressed={timer.duration === 1200} onClick={() => timer.select(20)}>20</button>
+                        </div>
+                        {timer.completed && <p role="status">Meditation session complete!</p>}
+                        <div className="timer-controls">
+                            <button className="wellness-btn primary-btn" id="startMeditation" onClick={timer.start} style={{ display: timer.running ? 'none' : undefined }}>Start</button>
+                            <button className="wellness-btn secondary-btn" id="pauseMeditation" onClick={timer.pause} style={{ display: !timer.running ? 'none' : undefined }}>Pause</button>
+                            <button className="wellness-btn outline-btn" id="resetMeditation" onClick={timer.reset}>Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="wellness-card">
+                    <div className="card-header">
+                        <div className="card-icon">
+                            <i className="fas fa-leaf"></i>
+                        </div>
+                        <h3>Meditation Tips</h3>
+                    </div>
+                    <div className="card-body">
+                        <ul className="breathing-steps">
+                            <li>Find a quiet, comfortable space</li>
+                            <li>Sit or lie down in a relaxed position</li>
+                            <li>Close your eyes and focus on your breath</li>
+                            <li>Let thoughts come and go without judgment</li>
+                            <li>Start with short sessions (5-10 minutes)</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div className="card-body">
-              <p className="card-description">This feature is currently under development. Please check back later.</p>
-              <button className="card-btn" onClick={() => handleNavigation('/wellness-ed')}>Back to WellnessED <i className="fas fa-arrow-right"></i></button>
+
+            <div className="back-button-container">
+                <a href="/wellness-ed" className="back-btn"><i className="fas fa-arrow-left"></i> Back to WellnessED</a>
             </div>
-          </div>
         </div>
-      </main>
-
-      <Footer />
-    </>
+    </main>
   );
+}
+
+export default function Page() {
+  return <ActivityShell Activity={Activity} />;
 }

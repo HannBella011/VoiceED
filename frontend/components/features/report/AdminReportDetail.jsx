@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { ReportTimeline } from './ReportTimeline';
-import { ReportCard } from './ReportCard';
+import { ReportCard, STATUS_COLORS, CATEGORY_LABELS } from './ReportCard';
 
 const STATUS_LABELS = {
   submitted: 'Submitted',
@@ -98,7 +98,7 @@ export function AdminReportDetail({
         <div className="admin-report-status-section">
           <span 
             className="admin-status-badge"
-            style={{ backgroundColor: getStatusColor(report.status) }}
+            style={{ backgroundColor: STATUS_COLORS[report.status] || '#7f8c8d' }}
           >
             {STATUS_LABELS[report.status]}
           </span>
@@ -134,7 +134,7 @@ export function AdminReportDetail({
       <div className="admin-report-info-grid">
         <div className="info-card">
           <h4>Category</h4>
-          <p>{getCategoryLabel(report.category)}</p>
+          <p>{CATEGORY_LABELS[report.category] || report.category}</p>
         </div>
         
         <div className="info-card">

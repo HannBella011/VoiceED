@@ -33,10 +33,10 @@ async function request(endpoint, options = {}) {
 }
 
 export const authService = {
-  async login(username, password) {
+  async login(email, password) {
     return request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email: email.trim(), password }),
     });
   },
 

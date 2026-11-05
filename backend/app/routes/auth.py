@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, Header
 from fastapi.security import OAuth2PasswordBearer
+from gotrue.errors import AuthApiError
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, EmailStr
 from datetime import timedelta, datetime
@@ -10,7 +12,7 @@ from app.database import get_db
 from app.services import auth_service, profile_service
 from app.config import settings
 from app.models import Profile, UserRole
-from app.schemas import UserResponse, Token, RegisterRequest, CompleteProfileRequest
+from app.schemas import UserResponse, Token, RegisterRequest, CompleteProfileRequest, Gender
 
 router = APIRouter()
 
@@ -28,6 +30,10 @@ class TokenResponse(BaseModel):
     refresh_token: str
     user: UserResponse
     profile_complete: bool = True
+
+
+class RegistrationResponse(BaseModel):
+    user: UserResponse
 
 
 class RefreshTokenRequest(BaseModel):
@@ -95,7 +101,10 @@ async def login(
 ):
     """Login endpoint - uses Supabase Auth."""
     # Authenticate with Supabase
-    supabase_user = await auth_service.sign_in(form_data.email, form_data.password)
+    try:
+        supabase_user = await auth_service.sign_in(form_data.email, form_data.password)
+    except (AuthApiError, ValueError) as exc:
+        raise HTTPException(status_code=401, detail="Invalid email or password, or email not confirmed") from exc
     if not supabase_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -112,6 +121,8 @@ async def login(
     # Update last login
     profile.last_login = datetime.utcnow()
     await db.commit()
+    # Reload database-generated fields before serializing the async ORM object.
+    await db.refresh(profile)
     
     # Create tokens (local JWT for API access)
     access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
@@ -138,6 +149,7 @@ async def login(
             full_name=profile.full_name,
             role=profile.role,
             is_active=profile.is_active,
+            is_verified=bool(supabase_user.email_confirmed_at),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -150,13 +162,20 @@ async def login(
     )
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=RegistrationResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     response: Response,
     user_data: RegisterRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """Register a new user via Supabase Auth."""
+    user_data.username = user_data.display_name or user_data.username
+    if user_data.birthday:
+        try:
+            datetime.fromisoformat(user_data.birthday.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid birthday format")
+
     # Check if username exists locally
     if user_data.username:
         existing_user = await profile_service.get_by_username(db, user_data.username)
@@ -208,24 +227,7 @@ async def register(
     # Create local profile
     profile = await profile_service.ensure_profile_exists(db, supabase_user, metadata)
     
-    # Create tokens
-    access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
-    refresh_token = auth_service.create_refresh_token(data={"sub": str(profile.id)})
-    
-    # Set refresh token in httpOnly cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=not settings.DEBUG,
-        samesite="lax",
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
-    )
-    
-    return TokenResponse(
-        access_token=access_token,
-        token_type="bearer",
-        refresh_token=refresh_token,
+    return RegistrationResponse(
         user=UserResponse(
             id=str(profile.id),
             username=profile.username,
@@ -233,6 +235,7 @@ async def register(
             full_name=profile.full_name,
             role=profile.role,
             is_active=profile.is_active,
+            is_verified=bool(supabase_user.email_confirmed_at),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -240,8 +243,7 @@ async def register(
             school_id=profile.school_id,
             avatar_url=profile.avatar_url,
             last_login=profile.last_login
-        ),
-        profile_complete=True
+        )
     )
 
 
@@ -330,6 +332,88 @@ async def get_me(current_user: Profile = Depends(get_current_active_user)):
         full_name=current_user.full_name,
         role=current_user.role,
         is_active=current_user.is_active,
+        is_verified=False,
+        created_at=current_user.created_at,
+        updated_at=current_user.updated_at,
+        gender=current_user.gender,
+        birthday=current_user.birthday,
+        school_id=current_user.school_id,
+        avatar_url=current_user.avatar_url,
+        last_login=current_user.last_login
+    )
+
+
+class ProfileUpdateRequest(BaseModel):
+    """Request model for updating profile fields."""
+    full_name: Optional[str] = None
+    username: Optional[str] = None
+    gender: Optional[Gender] = None
+    birthday: Optional[str] = None
+    school_id: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_me(
+    response: Response,
+    profile_data: ProfileUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: Profile = Depends(get_current_active_user)
+):
+    """Update current user's profile."""
+    # Check if username is being changed and if it's already taken
+    if profile_data.username and profile_data.username != current_user.username:
+        existing_user = await profile_service.get_by_username(db, profile_data.username)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+        current_user.username = profile_data.username
+    
+    # Update other fields
+    if profile_data.full_name is not None:
+        current_user.full_name = profile_data.full_name
+    
+    if profile_data.gender is not None:
+        current_user.gender = profile_data.gender
+    
+    if profile_data.birthday is not None:
+        try:
+            current_user.birthday = datetime.fromisoformat(profile_data.birthday.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid birthday format"
+            )
+    
+    if profile_data.school_id is not None:
+        # Check if school_id is already taken by another user
+        existing_school_id = await db.execute(
+            select(Profile).where(Profile.school_id == profile_data.school_id)
+        )
+        if existing_school_id.scalar_one_or_none() and existing_school_id.scalar_one_or_none().id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="School ID already registered"
+            )
+        current_user.school_id = profile_data.school_id
+    
+    if profile_data.avatar_url is not None:
+        current_user.avatar_url = profile_data.avatar_url
+    
+    current_user.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(current_user)
+    
+    return UserResponse(
+        id=str(current_user.id),
+        username=current_user.username,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        role=current_user.role,
+        is_active=current_user.is_active,
+        is_verified=False,
         created_at=current_user.created_at,
         updated_at=current_user.updated_at,
         gender=current_user.gender,
@@ -375,7 +459,7 @@ async def oauth_callback(
     response: Response,
     request: OAuthCallbackRequest,
     db: AsyncSession = Depends(get_db),
-    authorization: str = Depends(lambda x: x.headers.get("Authorization"))
+    authorization: Optional[str] = Header(default=None)
 ):
     """Handle OAuth callback from frontend - exchange Supabase session for local tokens."""
     if not authorization or not authorization.startswith("Bearer "):
@@ -410,6 +494,8 @@ async def oauth_callback(
     # Update last login
     profile.last_login = datetime.utcnow()
     await db.commit()
+    # Reload database-generated fields before serializing the async ORM object.
+    await db.refresh(profile)
     
     # Create tokens (local JWT for API access)
     access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
@@ -436,6 +522,7 @@ async def oauth_callback(
             full_name=profile.full_name,
             role=profile.role,
             is_active=profile.is_active,
+            is_verified=bool(supabase_user.email_confirmed_at),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -453,7 +540,7 @@ async def complete_profile(
     response: Response,
     profile_data: CompleteProfileRequest,
     db: AsyncSession = Depends(get_db),
-    authorization: str = Depends(lambda x: x.headers.get("Authorization"))
+    authorization: Optional[str] = Header(default=None)
 ):
     """Complete profile for first-time Google OAuth users."""
     if not authorization or not authorization.startswith("Bearer "):
@@ -495,7 +582,7 @@ async def complete_profile(
     # Update profile fields
     if profile_data.birthday:
         try:
-            profile.birthday = datetime.fromisoformat(profile_data.birthday.replace("Z", "+00:00"))
+            profile.birthday = datetime.fromisoformat(profile_data.birthday.replace("Z", "+00:00")).replace(tzinfo=None)
         except (ValueError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -506,7 +593,8 @@ async def complete_profile(
         existing_school_id = await db.execute(
             select(Profile).where(Profile.school_id == profile_data.school_id)
         )
-        if existing_school_id.scalar_one_or_none() and existing_school_id.scalar_one_or_none().id != profile.id:
+        school_profile = existing_school_id.scalar_one_or_none()
+        if school_profile and school_profile.id != profile.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="School ID already registered"
@@ -523,6 +611,8 @@ async def complete_profile(
     # Update last login
     profile.last_login = datetime.utcnow()
     await db.commit()
+    # Reload database-generated fields before serializing the async ORM object.
+    await db.refresh(profile)
     
     # Create tokens
     access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
@@ -549,6 +639,7 @@ async def complete_profile(
             full_name=profile.full_name,
             role=profile.role,
             is_active=profile.is_active,
+            is_verified=bool(supabase_user.email_confirmed_at),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,

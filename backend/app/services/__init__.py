@@ -26,7 +26,9 @@ from gotrue import AsyncGoTrueClient
 from gotrue.types import User as SupabaseUser
 from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, func, and_, or_, update
+from sqlalchemy.orm import selectinload
+from starlette.concurrency import run_in_threadpool
 from app.models import (
     Profile, Report, ReportAttachment, ReportTimeline, 
     ReportTimelineAttachment, JournalEntry, WellnessTip,
@@ -122,7 +124,7 @@ class AuthService:
         response = await self.supabase.auth.sign_up({
             "email": email,
             "password": password,
-            "data": metadata or {}
+            "options": {"data": metadata or {}}
         })
         
         if response.user is None:
@@ -307,6 +309,14 @@ class ProfileService:
         
             Creates profile if it doesn't exist, updates email/username if changed.
             """
+            metadata = dict(metadata or {})
+            if not metadata.get("username") and metadata.get("display_name"):
+                metadata["username"] = metadata["display_name"]
+            if metadata.get("birthday"):
+                birthday_value = metadata["birthday"]
+                if isinstance(birthday_value, str):
+                    birthday_value = datetime.fromisoformat(birthday_value.replace("Z", "+00:00"))
+                metadata["birthday"] = birthday_value.replace(tzinfo=None)
             profile = await self.get_by_id(db, uuid.UUID(supabase_user.id))
         
             if profile:
@@ -348,14 +358,8 @@ class ProfileService:
                     username = f"{base_username}{counter}"
                     counter += 1
         
-            # Parse birthday if provided
-            birthday = None
-            if metadata and metadata.get("birthday"):
-                try:
-                    birthday = datetime.fromisoformat(metadata["birthday"].replace("Z", "+00:00"))
-                except (ValueError, TypeError):
-                    pass
-        
+            birthday = metadata.get("birthday")
+
             profile = await self.create(db, {
                 "id": uuid.UUID(supabase_user.id),
                 "username": username,
@@ -1175,7 +1179,91 @@ class InspireService:
 # ============================================================================
 
 class ShareService:
-    pass
+    """Persist ShareED materials in PostgreSQL and files in Supabase Storage."""
+
+    ALLOWED_TYPES = {
+        ".pdf": {"application/pdf"},
+        ".doc": {"application/msword"},
+        ".docx": {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+        ".ppt": {"application/vnd.ms-powerpoint"},
+        ".pptx": {"application/vnd.openxmlformats-officedocument.presentationml.presentation"},
+        ".png": {"image/png"},
+        ".jpg": {"image/jpeg", "image/jpg"},
+        ".jpeg": {"image/jpeg", "image/jpg"},
+    }
+
+    async def get_materials(self, db, subject=None, pagination=None):
+        pagination = pagination or {"page": 1, "limit": 20}
+        query = select(SharedMaterial).options(selectinload(SharedMaterial.user))
+        if subject:
+            query = query.where(SharedMaterial.subject == subject)
+        count = await db.scalar(select(func.count()).select_from(query.subquery()))
+        result = await db.execute(
+            query.order_by(SharedMaterial.created_at.desc(), SharedMaterial.id.desc())
+            .offset((pagination["page"] - 1) * pagination["limit"])
+            .limit(pagination["limit"])
+        )
+        return result.scalars().all(), count
+
+    async def get_material(self, db, material_id):
+        result = await db.execute(
+            select(SharedMaterial).options(selectinload(SharedMaterial.user))
+            .where(SharedMaterial.id == material_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def increment_download_count(self, db, material_id):
+        await db.execute(
+            update(SharedMaterial).where(SharedMaterial.id == material_id)
+            .values(download_count=SharedMaterial.download_count + 1)
+        )
+        await db.commit()
+
+    async def upload_material(self, db, data, user_id, content, filename, mime_type, is_anonymous=False):
+        extension = Path(filename).suffix.lower()
+        if extension not in self.ALLOWED_TYPES or mime_type not in self.ALLOWED_TYPES[extension]:
+            raise ValueError("Unsupported file type. Use PDF, Word, PowerPoint, PNG or JPEG.")
+        if not content or len(content) > 25 * 1024 * 1024:
+            raise ValueError("Choose a nonempty file up to 25 MB.")
+        if not data["title"].strip() or not data["subject"].strip():
+            raise ValueError("Title and subject are required.")
+        bucket = supabase_service.get_storage_bucket()
+        if not bucket:
+            raise ValueError("Study material storage is not configured.")
+        path = f"materials/{user_id}/{uuid.uuid4().hex}{extension}"
+        await run_in_threadpool(
+            bucket.upload, path=path, file=content, file_options={"content-type": mime_type}
+        )
+        try:
+            url = await run_in_threadpool(bucket.get_public_url, path)
+            material = SharedMaterial(
+                title=data["title"].strip(), subject=data["subject"].strip(),
+                description=data.get("description"), file_url=url,
+                file_type=mime_type, user_id=user_id, is_anonymous=is_anonymous,
+            )
+            db.add(material)
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            await run_in_threadpool(bucket.remove, [path])
+            raise
+        return await self.get_material(db, material.id)
+
+    async def delete_material(self, db, material_id, user_id):
+        material = await self.get_material(db, material_id)
+        if not material or material.user_id != user_id:
+            return False
+        await db.delete(material)
+        await db.commit()
+        return True
+
+    async def get_subjects(self, db):
+        result = await db.execute(select(SharedMaterial.subject).distinct().order_by(SharedMaterial.subject))
+        return list(result.scalars().all())
+
+    async def get_file_types(self, db):
+        result = await db.execute(select(SharedMaterial.file_type).distinct().order_by(SharedMaterial.file_type))
+        return list(result.scalars().all())
 
 
 # ============================================================================

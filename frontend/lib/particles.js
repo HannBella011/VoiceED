@@ -74,6 +74,7 @@ class ParticleSystem {
 
 // Modal functionality
 const modal = document.getElementById('loginModal');
+const settingsModal = document.getElementById('settingsModal');
 const loginBtn = document.getElementById('loginBtn');
 const closeBtn = document.querySelector('.close-button');
 
@@ -83,8 +84,8 @@ const closeBtn = document.querySelector('.close-button');
 const closeButtons = document.querySelectorAll('.close, .close-button');
 closeButtons.forEach(button => {
     button.addEventListener('click', () => {
-        modal.style.display = 'none';
-        settingsModal.style.display = 'none';
+        if (modal) modal.style.display = 'none';
+        if (settingsModal) settingsModal.style.display = 'none';
         document.body.style.overflow = 'auto';
     });
 });
@@ -92,11 +93,11 @@ closeButtons.forEach(button => {
 // Close modal when clicking outside of it
 window.addEventListener('click', (e) => {
     if (e.target === modal) {
-        modal.style.display = 'none';
+        if (modal) modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
     if (e.target === settingsModal) {
-        settingsModal.style.display = 'none';
+        if (settingsModal) settingsModal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
 });
@@ -122,7 +123,7 @@ if (saveSettingsBtn) {
         showNotification('Color theme saved successfully!', 'success');
         
         // Close modal
-        settingsModal.style.display = 'none';
+        if (settingsModal) settingsModal.style.display = 'none';
         document.body.style.overflow = 'auto';
     });
 }
@@ -224,7 +225,7 @@ if (loginForm) {
         updateLoginState();
         
         // Close modal
-        modal.style.display = 'none';
+        if (modal) modal.style.display = 'none';
         document.body.style.overflow = 'auto';
         
         // Show success notification
@@ -450,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Show login modal immediately on index.html load
     if (modal && window.location.pathname.includes('index.html')) {
-        modal.style.display = 'none'; // Hide modal initially
+        if (modal) modal.style.display = 'none'; // Hide modal initially
         document.body.style.overflow = 'auto';
     }
     

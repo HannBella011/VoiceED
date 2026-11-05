@@ -13,7 +13,7 @@ const STATUS_LABELS = {
   closed: 'Closed',
 };
 
-const STATUS_COLORS = {
+export const STATUS_COLORS = {
   submitted: '#3498db',
   under_review: '#f39c12',
   assigned: '#9b59b6',
@@ -23,12 +23,12 @@ const STATUS_COLORS = {
   closed: '#7f8c8d',
 };
 
-const CATEGORY_LABELS = {
+export const CATEGORY_LABELS = {
   academic: 'Academic Concern',
   harassment: 'Harassment or Bullying',
   safety: 'Facility/Safety Hazard',
   discrimination: 'Discrimination',
-  'mental-health': 'Mental Health Concern',
+  mental_health: 'Mental Health Concern',
   violence: 'Violence or Threat',
   other: 'Other',
 };
@@ -38,7 +38,7 @@ const CATEGORY_ICONS = {
   harassment: 'fas fa-user-slash',
   safety: 'fas fa-exclamation-triangle',
   discrimination: 'fas fa-balance-scale',
-  'mental-health': 'fas fa-brain',
+  mental_health: 'fas fa-brain',
   violence: 'fas fa-fist-raised',
   other: 'fas fa-ellipsis-h',
 };

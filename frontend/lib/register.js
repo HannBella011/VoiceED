@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    const daySelect = document.getElementById('birthDay');
+
     // Update days based on month and year selection
     function updateDays() {
         const month = parseInt(document.getElementById('birthMonth').value);

@@ -1,86 +1,47 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function AuthCallbackPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const syncProfileWithBackend = async (accessToken) => {
-    try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-      const response = await fetch(`${apiBase}/auth/callback`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        console.warn("Backend profile sync failed:", await response.text());
-        return null;
-      }
-
-      return await response.json();
-    } catch (err) {
-      console.warn("Backend sync error:", err);
-      return null;
-    }
-  };
+  const started = useRef(false);
 
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     const handleAuthCallback = async () => {
-      const code = searchParams.get("code");
-      const error = searchParams.get("error");
-      const errorDescription = searchParams.get("error_description");
-      const next = searchParams.get("next") || "/dashboard";
-
-      if (error) {
-        console.error("OAuth error:", error, errorDescription);
-        router.push(`/login?error=${encodeURIComponent(errorDescription || error)}`);
-        return;
-      }
-
-      if (code) {
-        try {
-          // Exchange the auth code for a session
-          const { data, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
-
-          if (sessionError) {
-            console.error("Session exchange error:", sessionError);
-            router.push(`/login?error=${encodeURIComponent(sessionError.message)}`);
-            return;
-          }
-
-          if (data.session?.user) {
-            // Sync profile with backend
-            const result = await syncProfileWithBackend(data.session.access_token);
-
-            if (result && !result.profile_complete) {
-              // Profile incomplete - redirect to complete profile page
-              router.push(`/complete-profile?next=${encodeURIComponent(next)}`);
-            } else {
-              // Redirect to intended page or dashboard
-              router.push(next);
-            }
-          } else {
-            router.push("/login?error=Authentication failed - no user session");
-          }
-        } catch (err) {
-          console.error("Auth callback error:", err);
-          router.push(`/login?error=${encodeURIComponent("Authentication failed")}`);
-        }
-      } else {
-        // No code in URL, might be a direct navigation
-        router.push("/login");
+      const params = new URLSearchParams(window.location.search);
+      const requestedNext = params.get("next") || "/dashboard";
+      const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//") && !requestedNext.includes("\\")
+        ? requestedNext : "/dashboard";
+      try {
+        const oauthError = params.get("error_description") || params.get("error");
+        if (oauthError) throw new Error(oauthError);
+        // Initialization automatically exchanges the PKCE code exactly once.
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!data.session) throw new Error("Authentication failed. Please sign in again.");
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+        const response = await fetch(`${apiBase}/auth/callback`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${data.session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ provider: "google" }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(typeof result.detail === "string" ? result.detail : "Unable to finish Google sign-in.");
+        localStorage.setItem("access_token", result.access_token);
+        localStorage.setItem("refresh_token", result.refresh_token);
+        sessionStorage.removeItem("shielded_return_url");
+        window.location.replace(result.profile_complete ? next : `/complete-profile?next=${encodeURIComponent(next)}`);
+      } catch (err) {
+        window.location.replace(`/login?error=${encodeURIComponent(err instanceof Error ? err.message : "Authentication failed")}`);
       }
     };
-
     handleAuthCallback();
-  }, [searchParams, router, syncProfileWithBackend]);
+  }, []);
 
   return (
     <div className="login-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>

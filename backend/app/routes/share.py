@@ -3,29 +3,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
 
 from app.database import get_db
-from app.services import share_service, profile_service
-from app.schemas import (
-    SharedMaterialCreate, SharedMaterialResponse,
-    FileUploadResponse, FileUploadError, FileUploadResult,
-    PaginationParams
-)
+from app.services import share_service
+from app.schemas import SharedMaterialResponse
 from app.routes.auth import get_current_active_user
 from app.models import Profile
 
 router = APIRouter()
 
 
+def material_response(material):
+    return SharedMaterialResponse(
+        id=str(material.id), user_id=None if material.is_anonymous else str(material.user_id),
+        title=material.title, description=material.description, subject=material.subject,
+        file_url=material.file_url, file_type=material.file_type,
+        download_count=material.download_count, is_anonymous=material.is_anonymous,
+        uploader_name=None if material.is_anonymous else material.user.username,
+        created_at=material.created_at,
+    )
+
+
 @router.get("/materials", response_model=List[SharedMaterialResponse])
 async def get_shared_materials(
     subject: Optional[str] = Query(None),
-    page: int = 1,
-    limit: int = 20,
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_active_user)
 ):
     """Get shared study materials."""
     materials, total = await share_service.get_materials(db, subject, {"page": page, "limit": limit})
-    return materials
+    return [material_response(material) for material in materials]
 
 
 @router.get("/materials/{material_id}", response_model=SharedMaterialResponse)
@@ -39,15 +46,27 @@ async def get_shared_material(
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     
-    # Increment download count
+    return material_response(material)
+
+
+@router.post("/materials/{material_id}/download", response_model=SharedMaterialResponse)
+async def download_shared_material(
+    material_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: Profile = Depends(get_current_active_user)
+):
+    material = await share_service.get_material(db, material_id)
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
     await share_service.increment_download_count(db, material_id)
-    return material
+    material = await share_service.get_material(db, material_id)
+    return material_response(material)
 
 
-@router.post("/materials", response_model=FileUploadResult, status_code=status.HTTP_201_CREATED)
+@router.post("/materials", response_model=SharedMaterialResponse, status_code=status.HTTP_201_CREATED)
 async def upload_material(
-    title: str = Form(...),
-    subject: str = Form(...),
+    title: str = Form(..., min_length=1, max_length=200),
+    subject: str = Form(..., min_length=1, max_length=100),
     description: Optional[str] = Form(None),
     file: UploadFile = File(...),
     is_anonymous: bool = Form(False),
@@ -74,21 +93,7 @@ async def upload_material(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-    return FileUploadResult(
-        uploaded=[FileUploadResponse(
-            id=str(material.id),
-            filename=material.filename,
-            stored_filename=material.stored_filename,
-            file_path=material.file_path,
-            file_size=material.file_size,
-            mime_type=material.mime_type,
-            extension=material.extension,
-            url=material.file_url,
-            download_count=material.download_count,
-            created_at=material.created_at
-        )],
-        errors=[]
-    )
+    return material_response(material)
 
 
 @router.delete("/materials/{material_id}")

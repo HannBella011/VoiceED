@@ -1,12 +1,13 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const pathname = usePathname();
+  const router = useRouter();
   const { register } = useAuthContext();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -161,7 +162,7 @@ export default function RegisterPage() {
 
     try {
       // Format birthday as ISO string
-      const birthday = new Date(birthYear, birthMonth - 1, birthDay).toISOString();
+      const birthday = `${birthYear}-${birthMonth.padStart(2, "0")}-${birthDay.padStart(2, "0")}`;
 
       await register({
         fullName: fullName.trim(),
@@ -175,9 +176,7 @@ export default function RegisterPage() {
       });
 
       setSuccess("Account created successfully! Redirecting to login page...");
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
+      router.replace("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {

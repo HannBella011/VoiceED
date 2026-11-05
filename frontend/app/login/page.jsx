@@ -8,10 +8,15 @@ import Link from "next/link";
 export default function LoginPage() {
   const pathname = usePathname();
   const { login } = useAuthContext();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const message = new URLSearchParams(window.location.search).get("error");
+    if (message) setError(message);
+  }, []);
 
   const handleGoogleLogin = async () => {
     try {
@@ -45,7 +50,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await login(username, password);
+      await login(email.trim(), password);
 
       const returnUrl = sessionStorage.getItem("shielded_return_url");
       if (returnUrl) {
@@ -76,18 +81,18 @@ export default function LoginPage() {
 
             <form id="loginForm" onSubmit={handleSubmit}>
               <div className="input-group">
-                <label htmlFor="username" className="input-label">Username</label>
+                <label htmlFor="email" className="input-label">Email</label>
                 <div className="input-wrapper">
                   <i className="fas fa-user input-icon-left" aria-hidden="true"></i>
                   <input
-                    type="text"
-                    id="username"
-                    placeholder="Enter your username"
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email address"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
-                    autoComplete="username"
+                    autoComplete="email"
                   />
                 </div>
               </div>

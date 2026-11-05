@@ -440,7 +440,8 @@ class SharedMaterialCreate(SharedMaterialBase):
 
 class SharedMaterialResponse(SharedMaterialBase):
     id: str
-    user_id: str
+    user_id: Optional[str] = None
+    uploader_name: Optional[str] = None
     download_count: int = 0
     is_anonymous: bool = False
     created_at: datetime

@@ -69,19 +69,23 @@ export default function CompleteProfilePage() {
 
     try {
       // Format birthday as ISO string
-      const birthday = new Date(birthYear, birthMonth - 1, birthDay).toISOString();
+      const birthday = `${birthYear}-${birthMonth.padStart(2, "0")}-${birthDay.padStart(2, "0")}`;
+
+      const { supabase } = await import("@/lib/supabaseClient");
+      const { data: authData } = await supabase.auth.getSession();
+      if (!authData.session) throw new Error("Please sign in with Google again.");
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/auth/complete-profile`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token}`,
+          "Authorization": `Bearer ${authData.session.access_token}`,
         },
         body: JSON.stringify({
           display_name: displayName.trim(),
           birthday,
           school_id: schoolId.trim(),
-          gender: gender || undefined,
+          gender: gender === "prefer-not-to-say" ? undefined : gender || undefined,
         }),
       });
 
@@ -149,7 +153,7 @@ export default function CompleteProfilePage() {
 
   useEffect(() => {
     const next = searchParams.get("next");
-    if (next) {
+    if (next?.startsWith("/") && !next.startsWith("//") && !next.includes("\\")) {
       setNextPath(next);
     }
   }, [searchParams]);

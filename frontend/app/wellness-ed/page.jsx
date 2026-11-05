@@ -68,6 +68,7 @@ function WellnessEDContent() {
     if (isLoggedIn) {
       window.location.href = href;
     } else {
+      sessionStorage.setItem('shielded_return_url', href);
       setLoginRequiredOpen(true);
     }
   };
@@ -90,7 +91,7 @@ function WellnessEDContent() {
 
           <div className="wellness-grid">
             {activities.map((activity, index) => (
-              <a key={index} href="#" className="wellness-card activity-card" onClick={() => handleNavigation(activity.href)}>
+              <a key={activity.href} href={activity.href} className="wellness-card activity-card" onClick={event => { event.preventDefault(); handleNavigation(activity.href); }}>
                 <div className="card-header">
                   <div className="card-icon">
                     <i className={activity.icon}></i>
@@ -99,9 +100,9 @@ function WellnessEDContent() {
                 </div>
                 <div className="card-body">
                   <p className="card-description">{activity.description}</p>
-                  <button className="card-btn">
+                  <span className="card-btn">
                     {activity.btnText} <i className="fas fa-arrow-right"></i>
-                  </button>
+                  </span>
                 </div>
               </a>
             ))}
