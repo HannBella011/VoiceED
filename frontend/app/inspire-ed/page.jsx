@@ -1,36 +1,31 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { accountRequest } from '@/services/account';
 import { Navbar, Footer } from '@/components/shared';
 import { useAuth } from '@/hooks';
 import { useModals } from '@/components/shared/GlobalModals';
 
 function InspireEDContent() {
   const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, currentUser } = useAuth();
   const { settingsOpen, setSettingsOpen, userMenuOpen, setUserMenuOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
   
+  const owner = useRef(currentUser?.id);
+  owner.current = currentUser?.id;
   const [activeTab, setActiveTab] = useState('home');
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [quotes, setQuotes] = useState([
-    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", isUserAdded: false },
-    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", isUserAdded: false },
-    { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt", isUserAdded: false },
-    { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", isUserAdded: false },
-    { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius", isUserAdded: false },
-    { text: "Your limitation—it's only your imagination.", author: "Unknown", isUserAdded: false },
-    { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown", isUserAdded: false },
-    { text: "Great things never come from comfort zones.", author: "Unknown", isUserAdded: false },
-    { text: "Dream it. Wish it. Do it.", author: "Unknown", isUserAdded: false },
-    { text: "Success doesn't just find you. You have to go out and get it.", author: "Unknown", isUserAdded: false }
-  ]);
+  const [quotes, setQuotes] = useState([]);
+  const [error, setError] = useState('');
+  const [composer, setComposer] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState({ text: '', title: '', author: '', recipient: '', anonymous: false });
+  const [commentTarget, setCommentTarget] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
-  const [heartedQuotes, setHeartedQuotes] = useState(new Set());
-  const [heartCount, setHeartCount] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
-  const [shareCount, setShareCount] = useState(0);
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -40,192 +35,49 @@ function InspireEDContent() {
     setSettingsOpen(true);
   };
 
-  useEffect(() => {
-    const savedPosts = localStorage.getItem('inspireED_posts');
-    if (savedPosts) {
-      try {
-        setPosts(JSON.parse(savedPosts));
-      } catch (e) {
-        setPosts([]);
-      }
-    } else {
-      const defaultPosts = [
-        {
-          id: 1,
-          type: 'quote',
-          author: 'System',
-          avatar: 'S',
-          time: '2 hours ago',
-          content: { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs' },
-          likes: 28, comments: 15, shares: 12, userLiked: false, isUserCreated: false
-        },
-        {
-          id: 2,
-          type: 'story',
-          author: 'Jane Doe',
-          avatar: 'J',
-          time: '5 hours ago',
-          content: { text: 'I started my freshman year with failing grades. Through dedication and seeking help from professors, I turned my academic journey around. Never be afraid to ask for help!', category: 'Academic Growth' },
-          likes: 42, comments: 12, shares: 8, userLiked: false, isUserCreated: false
-        },
-        {
-          id: 3,
-          type: 'kudos',
-          author: 'John Smith',
-          avatar: 'J',
-          time: '1 day ago',
-          content: { text: 'Big congratulations to the study group for acing the finals! Your hard work and dedication really paid off.', recipient: 'Study Group A' },
-          likes: 35, comments: 8, shares: 5, userLiked: false, isUserCreated: false
-        }
-      ];
-      setPosts(defaultPosts);
-      localStorage.setItem('inspireED_posts', JSON.stringify(defaultPosts));
+  const load = async () => {
+    const identity = currentUser?.id;
+    const rows = [];
+    for (let page = 1; ; page++) {
+      const batch = await accountRequest(`/inspire/feed?limit=100&page=${page}`);
+      rows.push(...batch); if (batch.length < 100) break;
     }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('inspireED_posts', JSON.stringify(posts));
-  }, [posts]);
-
-  const filteredPosts = posts.filter(post => {
-    if (!searchTerm) return true;
-    const contentText = JSON.stringify(post.content).toLowerCase();
-    const authorName = post.author.toLowerCase();
-    return contentText.includes(searchTerm.toLowerCase()) || authorName.includes(searchTerm.toLowerCase());
+    if (owner.current !== identity) return;
+    setPosts(rows);
+    setQuotes(rows.filter(row => row.type === 'quote').map(row => ({ ...row, text: row.content.text, quoteAuthor: row.content.author, isUserAdded: row.isUserCreated })));
+  };
+  useEffect(() => { setPosts([]); setQuotes([]); if (isLoggedIn) load().catch(err => setError(err.message)); }, [currentUser?.id, isLoggedIn]);
+  const act = async callback => { if (busy) return; setBusy(true); setError(''); try { await callback(); await load(); } catch (err) { setError(err.message); } finally { setBusy(false); } };
+  const filteredPosts = posts.filter(post => JSON.stringify(post.content).toLowerCase().includes(searchTerm.toLowerCase()) || post.author.toLowerCase().includes(searchTerm.toLowerCase()));
+  const path = post => `/inspire/${post.kind}/${post.record_id}`;
+  const handleLike = id => { const post = posts.find(row => row.id === id); if (post) act(() => accountRequest(`${path(post)}/reaction`, post.userLiked ? 'DELETE' : 'PUT')); };
+  const openComposer = type => { if (!isLoggedIn) { setLoginRequiredOpen(true); return; } setDraft({ text: '', title: '', author: '', recipient: '', anonymous: false }); setComposer(type); };
+  const submit = () => act(async () => {
+    await accountRequest(`/inspire/${composer === 'quote' ? 'quotes' : 'stories'}`, 'POST', composer === 'quote' ? { quote: draft.text, author: draft.author || null } : { title: draft.title || (composer === 'story' ? 'Story' : composer === 'kudos' ? 'Kudos' : 'Post'), content: draft.text, post_type: composer, is_anonymous: draft.anonymous, recipient_label: composer === 'kudos' ? draft.recipient : null });
+    setComposer(null);
   });
-
-  const handleLike = (postId) => {
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          likes: post.userLiked ? post.likes - 1 : post.likes + 1,
-          userLiked: !post.userLiked
-        };
-      }
-      return post;
-    }));
+  const openComments = async post => {
+    if (!post) return;
+    try {
+      setError(''); const rows = [];
+      for (let page = 1; ; page++) { const batch = await accountRequest(`${path(post)}/comments?limit=100&page=${page}`); rows.push(...batch); if (batch.length < 100) break; }
+      setComments(rows); setCommentTarget(post); setCommentText('');
+    } catch (err) { setError(err.message); }
   };
-
-  const handleCreatePost = (content) => {
-    const newPost = {
-      id: Date.now(),
-      type: 'post',
-      author: 'You',
-      avatar: 'Y',
-      time: 'Just now',
-      content: { text: content },
-      likes: 0, comments: 0, shares: 0, userLiked: false, isUserCreated: true
-    };
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  const handleAddQuote = (text, author) => {
-    const newQuote = { text, author, isUserAdded: true };
-    setQuotes(prev => [...prev, newQuote]);
-    setCurrentQuoteIndex(prev => prev + 1);
-    const newPost = {
-      id: Date.now(),
-      type: 'quote',
-      author: 'You',
-      avatar: 'Y',
-      time: 'Just now',
-      content: { text, author },
-      likes: 0, comments: 0, shares: 0, userLiked: false, isUserCreated: true
-    };
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  const handleShareStory = (content) => {
-    const newPost = {
-      id: Date.now(),
-      type: 'story',
-      author: 'You',
-      avatar: 'Y',
-      time: 'Just now',
-      content: { text: content },
-      likes: 0, comments: 0, shares: 0, userLiked: false, isUserCreated: true
-    };
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  const handleSendKudos = (recipient, content, anonymous) => {
-    const newPost = {
-      id: Date.now(),
-      type: 'kudos',
-      author: anonymous ? 'Anonymous' : 'You',
-      avatar: anonymous ? 'A' : 'Y',
-      time: 'Just now',
-      content: { text: content, recipient },
-      likes: 0, comments: 0, shares: 0, userLiked: false, isUserCreated: true
-    };
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  const handleAddMilestone = (title, description) => {
-    const newPost = {
-      id: Date.now(),
-      type: 'milestone',
-      author: 'You',
-      avatar: 'Y',
-      time: 'Just now',
-      content: { title, text: description },
-      likes: 0, comments: 0, shares: 0, userLiked: false, isUserCreated: true
-    };
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  const handleQuoteHeart = () => {
-    if (heartedQuotes.has(currentQuoteIndex)) {
-      alert('You have already liked this quote!');
-      return;
-    }
-    setHeartedQuotes(prev => new Set([...prev, currentQuoteIndex]));
-    setHeartCount(prev => prev + 1);
-  };
-
-  const handleQuoteNext = () => {
-    setCurrentQuoteIndex(prev => (prev + 1) % quotes.length);
-    setHeartCount(0);
-    setCommentCount(0);
-    setShareCount(0);
-  };
-
-  const handleQuotePrev = () => {
-    setCurrentQuoteIndex(prev => (prev - 1 + quotes.length) % quotes.length);
-    setHeartCount(0);
-    setCommentCount(0);
-    setShareCount(0);
-  };
-
-  const handleQuoteDelete = () => {
-    if (quotes[currentQuoteIndex].isUserAdded) {
-      if (confirm('Are you sure you want to delete this quote?')) {
-        setQuotes(prev => prev.filter((_, i) => i !== currentQuoteIndex));
-        setCurrentQuoteIndex(prev => Math.min(prev, quotes.length - 2));
-      }
-    } else {
-      alert('You can only delete quotes you have added!');
-    }
-  };
-
-  const handleQuoteCopy = () => {
-    const fullQuote = `\${quotes[currentQuoteIndex].text} - \${quotes[currentQuoteIndex].author}`;
-    navigator.clipboard.writeText(fullQuote).then(() => {
-      alert('Quote copied to clipboard!');
-    });
-  };
-
-  const handleQuoteShare = () => {
-    setShareCount(prev => prev + 1);
-    const fullQuote = `\${quotes[currentQuoteIndex].text} - \${quotes[currentQuoteIndex].author}`;
-    if (navigator.share) {
-      navigator.share({ title: 'Daily Inspiration', text: fullQuote });
-    } else {
-      navigator.clipboard.writeText(fullQuote);
-      alert('Quote copied to clipboard!');
-    }
-  };
+  const addComment = () => act(async () => { await accountRequest(`${path(commentTarget)}/comments`, 'POST', { content: commentText }); await openComments(commentTarget); });
+  const sharePost = post => act(async () => {
+    if (!post) return;
+    const text = `${post.content.text}${post.type === 'quote' ? ` ? ${post.content.author}` : ''}`;
+    if (navigator.share) await navigator.share({ title: 'InspireED', text }); else await navigator.clipboard.writeText(text);
+    await accountRequest(`${path(post)}/shares`, 'POST');
+  });
+  const selectedQuote = quotes[currentQuoteIndex] || quotes[0];
+  const handleQuoteHeart = () => selectedQuote && handleLike(selectedQuote.id);
+  const handleQuoteNext = () => setCurrentQuoteIndex(prev => quotes.length ? (prev + 1) % quotes.length : 0);
+  const handleQuotePrev = () => setCurrentQuoteIndex(prev => quotes.length ? (prev - 1 + quotes.length) % quotes.length : 0);
+  const handleQuoteDelete = () => selectedQuote && window.confirm('Delete this quote?') && act(() => accountRequest(path(selectedQuote), 'DELETE'));
+  const handleQuoteCopy = () => selectedQuote && navigator.clipboard.writeText(`${selectedQuote.text} ? ${selectedQuote.quoteAuthor}`).catch(err => setError(err.message));
+  const handleQuoteShare = () => selectedQuote && sharePost(selectedQuote);
 
   const tabs = [
     { id: 'home', icon: 'fas fa-home', label: 'Home' },
@@ -236,32 +88,9 @@ function InspireEDContent() {
     { id: 'activity', icon: 'fas fa-chart-line', label: 'My Activity' }
   ];
 
-  const sampleStories = [
-    { id: 1, category: 'academic', title: "From Struggling Student to Dean's Lister", narrative: 'I started my freshman year with failing grades. Through dedication and seeking help from professors, I turned my academic journey around.', keyTakeaways: 'Never be afraid to ask for help. Consistency beats intensity.', year: '2024', author: 'Anonymous' },
-    { id: 2, category: 'challenges', title: 'Overcoming Financial Hurdles', narrative: 'Working part-time while studying full-time was challenging, but it taught me time management and resilience.', keyTakeaways: 'Challenges make us stronger. Balance is key.', year: '2023', author: 'Maria Santos' },
-    { id: 3, category: 'leadership', title: 'Leading a Community Project', narrative: 'Organized a literacy program for local children. It was challenging but incredibly rewarding.', keyTakeaways: 'Leadership is about service. Community impact matters.', year: '2024', author: 'Juan Dela Cruz' }
-  ];
-
-  const sampleKudos = [
-    { recipient: 'Study Group A', message: 'Amazing work on the final project! Team effort at its best.', sender: 'Anonymous', time: '2 hours ago' },
-    { recipient: 'Maria', message: 'Thank you for staying up late to help me debug my code!', sender: 'John', time: '5 hours ago' },
-    { recipient: 'CS Department', message: 'The faculty has been incredibly supportive this semester.', sender: 'Anonymous', time: '1 day ago' }
-  ];
-
-  const sampleMilestones = [
-    { title: "Dean's List", description: 'Achieved Dean\'s List for 3 consecutive semesters', category: 'academic', cheers: 124 },
-    { title: 'Research Grant', description: 'Received undergraduate research grant', category: 'innovation', cheers: 89 },
-    { title: 'Hackathon Winner', description: '1st Place in University Hackathon 2024', category: 'innovation', cheers: 156 },
-    { title: 'Community Service Award', description: 'Recognized for 100+ hours of community service', category: 'leadership', cheers: 98 }
-  ];
-
-  const handleNavigation = (href) => {
-    if (isLoggedIn) {
-      window.location.href = href;
-    } else {
-      setLoginRequiredOpen(true);
-    }
-  };
+  const stories = posts.filter(row => row.type === 'story').map(row => ({ id: row.id, title: row.content.title, author: row.author, narrative: row.content.text, year: new Date(row.created_at).getFullYear(), keyTakeaways: '' }));
+  const kudos = posts.filter(row => row.type === 'kudos').map(row => ({ recipient: row.content.recipient, message: row.content.text, sender: row.author, time: new Date(row.created_at).toLocaleString() }));
+  const milestones = posts.filter(row => row.type === 'milestone').map(row => ({ ...row, title: row.content.title, description: row.content.text, cheers: row.likes }));
 
   return (
     <>
@@ -297,6 +126,7 @@ function InspireEDContent() {
             </aside>
 
             <div className="inspireED-content">
+              {error && <p role="alert">{error}</p>}
               {/* Home Tab */}
               <div className={`tab-content ${activeTab === 'home' ? 'active' : ''}`} id="home-tab">
                 <div className="content-container">
@@ -314,7 +144,7 @@ function InspireEDContent() {
                         />
                         <i className="fas fa-search search-icon"></i>
                       </div>
-                      <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
+                      <button className="create-post-btn" onClick={() => openComposer('post')}>
                         <i className="fas fa-plus"></i> Create Post
                       </button>
                     </div>
@@ -357,14 +187,14 @@ function InspireEDContent() {
                             >
                               <i className="fas fa-heart"></i> <span>{post.likes}</span>
                             </button>
-                            <button className="post-interaction-btn" onClick={() => alert('Comments opened')}>
+                            <button className="post-interaction-btn" onClick={() => openComments(post)}>
                               <i className="fas fa-comment"></i> <span>{post.comments}</span>
                             </button>
-                            <button className="post-interaction-btn" onClick={() => alert('Shared!')}>
+                            <button className="post-interaction-btn" onClick={() => sharePost(post)}>
                               <i className="fas fa-share"></i> <span>{post.shares}</span>
                             </button>
                             {post.isUserCreated && (
-                              <button className="post-interaction-btn delete-btn" onClick={() => setPosts(prev => prev.filter(p => p.id !== post.id))}>
+                              <button className="post-interaction-btn delete-btn" disabled={busy} onClick={() => { if (window.confirm('Delete this post?')) act(() => accountRequest(path(post), 'DELETE')); }}>
                                 <i className="fas fa-trash"></i>
                               </button>
                             )}
@@ -381,15 +211,15 @@ function InspireEDContent() {
                 <div className="content-container">
                   <div className="feed-header">
                     <h3>Quotes</h3>
-                    <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
+                    <button className="create-post-btn" onClick={() => openComposer('quote')}>
                       <i className="fas fa-plus"></i> Add Quote
                     </button>
                   </div>
                   <div className="daily-quote-card">
                     <div className="quote-content">
                       <i className="fas fa-quote-left quote-icon"></i>
-                      <p className="quote-text" id="dailyQuote">"\${quotes[currentQuoteIndex]?.text || ''}"</p>
-                      <p className="quote-author" id="quoteAuthor">- {quotes[currentQuoteIndex]?.author || ''}</p>
+                      <p className="quote-text" id="dailyQuote">"{selectedQuote?.text || 'No quotes yet'}"</p>
+                      <p className="quote-author" id="quoteAuthor">- {selectedQuote?.quoteAuthor || ''}</p>
                     </div>
                     <div className="quote-actions">
                       <button className="quote-btn" onClick={handleQuotePrev}>
@@ -398,7 +228,7 @@ function InspireEDContent() {
                       <button className="quote-btn" onClick={handleQuoteCopy}>
                         <i className="fas fa-copy"></i> Copy Quote
                       </button>
-                      {quotes[currentQuoteIndex]?.isUserAdded && (
+                      {selectedQuote?.isUserAdded && (
                         <button className="quote-btn" onClick={handleQuoteDelete}>
                           <i className="fas fa-trash"></i> Delete Quote
                         </button>
@@ -408,14 +238,14 @@ function InspireEDContent() {
                       </button>
                     </div>
                     <div className="quote-interactions">
-                      <button className={`interaction-btn heart-btn ${heartedQuotes.has(currentQuoteIndex) ? 'active' : ''}`} onClick={handleQuoteHeart}>
-                        <i className="fas fa-heart"></i> <span id="heartCount">{heartCount}</span>
+                      <button className={`interaction-btn heart-btn ${selectedQuote?.userLiked ? 'active' : ''}`} onClick={handleQuoteHeart}>
+                        <i className="fas fa-heart"></i> <span id="heartCount">{selectedQuote?.likes || 0}</span>
                       </button>
-                      <button className="interaction-btn comment-btn" onClick={() => alert('Comments opened')}>
-                        <i className="fas fa-comment"></i> <span id="commentCount">{commentCount}</span>
+                      <button className="interaction-btn comment-btn" onClick={() => openComments(selectedQuote)}>
+                        <i className="fas fa-comment"></i> <span id="commentCount">{selectedQuote?.comments || 0}</span>
                       </button>
                       <button className="interaction-btn share-btn" onClick={handleQuoteShare}>
-                        <i className="fas fa-share"></i> <span id="shareCount">{shareCount}</span>
+                        <i className="fas fa-share"></i> <span id="shareCount">{selectedQuote?.shares || 0}</span>
                       </button>
                     </div>
                   </div>
@@ -427,12 +257,12 @@ function InspireEDContent() {
                 <div className="content-container">
                   <div className="feed-header">
                     <h3>Stories</h3>
-                    <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
+                    <button className="create-post-btn" onClick={() => openComposer('story')}>
                       <i className="fas fa-pen"></i> Share Your Story
                     </button>
                   </div>
                   <div className="stories-grid" id="storiesGrid">
-                    {sampleStories.map(story => (
+                    {stories.map(story => (
                       <div key={story.id} className="story-card">
                         <div className="story-header">
                           <div className="story-avatar"><i className="fas fa-user"></i></div>
@@ -442,7 +272,7 @@ function InspireEDContent() {
                           </div>
                         </div>
                         <p className="story-narrative">{story.narrative}</p>
-                        <p className="story-takeaways"><strong>Key Takeaways:</strong> {story.keyTakeaways}</p>
+                        <p className="story-takeaways">{story.keyTakeaways}</p>
                       </div>
                     ))}
                   </div>
@@ -459,13 +289,13 @@ function InspireEDContent() {
                         <input type="text" className="search-input" id="searchKudos" placeholder="Search name..." />
                         <i className="fas fa-search search-icon"></i>
                       </div>
-                      <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
+                      <button className="create-post-btn" onClick={() => openComposer('kudos')}>
                         <i className="fas fa-heart"></i> Send Kudos
                       </button>
                     </div>
                   </div>
                   <div className="kudos-grid" id="kudosGrid">
-                    {sampleKudos.map((kudo, index) => (
+                    {kudos.map((kudo, index) => (
                       <div key={index} className="kudos-card">
                         <div className="kudos-header">
                           <span className="kudos-recipient">To: {kudo.recipient}</span>
@@ -484,18 +314,18 @@ function InspireEDContent() {
                 <div className="content-container">
                   <div className="feed-header">
                     <h3>Milestones</h3>
-                    <button className="create-post-btn" onClick={() => handleNavigation('/inspire-ed')}>
+                    <button className="create-post-btn" onClick={() => openComposer('milestone')}>
                       <i className="fas fa-trophy"></i> Add Milestone
                     </button>
                   </div>
                   <div className="milestones-grid" id="milestonesGrid">
-                    {sampleMilestones.map((milestone, index) => (
+                    {milestones.map((milestone, index) => (
                       <div key={index} className="milestone-card">
                         <div className="milestone-icon"><i className="fas fa-trophy"></i></div>
                         <h4>{milestone.title}</h4>
                         <p className="milestone-description">{milestone.description}</p>
                         <div className="cheer-system">
-                          <button className="cheer-btn" data-id={milestone.title}>
+                          <button className="cheer-btn" disabled={busy} onClick={() => handleLike(milestone.id)} data-id={milestone.title}>
                             <i className="fas fa-heart"></i> Send Congratulations
                           </button>
                           <span className="cheer-count">{milestone.cheers} cheers</span>
@@ -513,7 +343,7 @@ function InspireEDContent() {
                     <h3>My Activity</h3>
                   </div>
                   <div className="activity-feed" id="activityFeed">
-                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No activity yet.</p>
+                    {posts.filter(post => post.isUserCreated || post.userLiked).length === 0 ? <p>No activity yet.</p> : posts.filter(post => post.isUserCreated || post.userLiked).map(post => <div className="post-card" key={post.id}><p>{post.isUserCreated ? 'Created' : 'Liked'} {post.type}: {post.content.text}</p><time>{new Date(post.created_at).toLocaleString()}</time></div>)}
                   </div>
                 </div>
               </div>
@@ -522,6 +352,23 @@ function InspireEDContent() {
         </div>
       </main>
 
+      {composer && <div className="modal show" style={{ display: 'block' }} onClick={() => !busy && setComposer(null)}><div className="modal-content" onClick={event => event.stopPropagation()}>
+        <h2>{({post:'Create Post',quote:'Add Your Quote',story:'Share Your Story',kudos:'Send Kudos',milestone:'Add Milestone'})[composer]}</h2>
+        <form className="add-comment-form" onSubmit={event => { event.preventDefault(); submit(); }}>
+          {error && <p role="alert">{error}</p>}
+          {composer === 'milestone' && <input required maxLength={200} placeholder="Milestone title" value={draft.title} onChange={event => setDraft({...draft,title:event.target.value})} />}
+          {composer === 'kudos' && <input required maxLength={255} placeholder="Who do you want to recognize?" value={draft.recipient} onChange={event => setDraft({...draft,recipient:event.target.value})} />}
+          <textarea required maxLength={composer === 'quote' ? 10000 : 50000} rows="4" placeholder={composer === 'quote' ? 'Enter your quote' : "Share your thoughts..."} value={draft.text} onChange={event => setDraft({...draft,text:event.target.value})} />
+          {composer === 'quote' && <input maxLength={255} placeholder="Author" value={draft.author} onChange={event => setDraft({...draft,author:event.target.value})} />}
+          {composer === 'kudos' && <label><input type="checkbox" checked={draft.anonymous} onChange={event => setDraft({...draft,anonymous:event.target.checked})} /> Send anonymously</label>}
+          <div className="form-submit"><button type="button" className="cancel-btn" disabled={busy} onClick={() => setComposer(null)}>Cancel</button><button className="submit-btn" disabled={busy || !draft.text.trim()}>Submit</button></div>
+        </form>
+      </div></div>}
+      {commentTarget && <div className="modal show" style={{ display: 'block' }}><div className="modal-content"><h2>Comments</h2><button className="close" onClick={() => setCommentTarget(null)}>&times;</button>
+        {error && <p role="alert">{error}</p>}
+        <div className="comments-list">{comments.length === 0 ? <p>No comments yet.</p> : comments.map(comment => <div className="comment" key={comment.id}><strong>{comment.author}</strong><p>{comment.content}</p><time>{new Date(comment.created_at).toLocaleString()}</time></div>)}</div>
+        <form className="add-comment-form" onSubmit={event => { event.preventDefault(); addComment(); }}><textarea required maxLength={5000} value={commentText} onChange={event => setCommentText(event.target.value)} /><button className="submit-btn" disabled={busy || !commentText.trim()}>Post Comment</button></form>
+      </div></div>}
       <Footer />
     </>
   );

@@ -3,6 +3,7 @@
 
 'use client';
 
+import { authFetch } from '@/lib/authFetch';
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 
@@ -20,23 +21,6 @@ export function SettingsModal({ isOpen, onClose }) {
     gender: currentUser?.gender || '',
   });
 
-  const loadSettings = () => {
-    const savedSettings = localStorage.getItem('shielded_settings');
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings);
-        setSettings({ 
-          color: parsed.color || 'blue',
-          gender: parsed.gender || '',
-        });
-      } catch (e) {
-        setSettings({ color: 'blue', gender: '' });
-      }
-    } else {
-      setSettings({ color: 'blue', gender: currentUser?.gender || '' });
-    }
-  };
-
   const applySettings = (newSettings) => {
     // Remove all existing color themes
     document.body.classList.remove(
@@ -50,39 +34,40 @@ export function SettingsModal({ isOpen, onClose }) {
     }
   };
 
-  const saveSettings = async (newSettings) => {
-    const updated = { ...settings, ...newSettings };
-    setSettings(updated);
-    localStorage.setItem('shielded_settings', JSON.stringify(updated));
-    applySettings(updated);
-    
-    // If gender changed, update profile via API
-    if (newSettings.gender !== undefined && newSettings.gender !== settings.gender) {
-      try {
-        const accessToken = localStorage.getItem('access_token');
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-        await fetch(`${apiBase}/auth/me`, {
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const saveSettings = async (changes) => {
+    if (saving) return;
+    const updated = { ...settings, ...changes };
+    setError('');
+    setSaving(true);
+    try {
+      if (currentUser) {
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/auth/me`, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ gender: newSettings.gender || null }),
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+          body: JSON.stringify({ theme: updated.color, gender: ['female', 'male', 'lgbtq+'].includes(updated.gender) ? updated.gender : null }),
         });
-        // Update local context
-        updateProfile({ gender: newSettings.gender || null });
-      } catch (err) {
-        console.warn('Failed to sync gender to backend:', err);
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(typeof body.detail === 'string' ? body.detail : 'Unable to save settings');
+        }
+        const profile = await response.json();
+        updateProfile(profile);
+        updated.color = profile.theme;
+        updated.gender = profile.gender || '';
       }
-    }
+      setSettings(updated);
+      applySettings(updated);
+    } catch (err) { setError(err.message); }
+    finally { setSaving(false); }
   };
 
-  // Load settings on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      loadSettings();
-    }
-  }, [currentUser?.gender]);
+    const loaded = { color: currentUser?.theme || 'blue', gender: currentUser?.gender || '' };
+    setSettings(loaded);
+    applySettings(loaded);
+  }, [currentUser?.id, currentUser?.theme, currentUser?.gender]);
 
   if (!isOpen) return null;
 
@@ -92,6 +77,7 @@ export function SettingsModal({ isOpen, onClose }) {
         <span className="close" onClick={onClose}>&times;</span>
         <h2>Settings</h2>
         <div className="settings-content">
+          {error && <p role="alert">{error}</p>}
           <div className="setting-group">
             <h3>Select Color</h3>
             <div className="color-options">
@@ -189,7 +175,7 @@ export function SettingsModal({ isOpen, onClose }) {
                 <select
                   value={settings.gender}
                   onChange={(e) => saveSettings({ gender: e.target.value })}
-                  disabled={!currentUser}
+                  disabled={!currentUser || saving}
                 >
                   <option value="">Select gender (optional)</option>
                   {GENDER_OPTIONS.map((opt) => (
@@ -204,7 +190,7 @@ export function SettingsModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          <button className="save-settings-btn" onClick={() => { onClose(); }}>Save Settings</button>
+          <button disabled={saving} className="save-settings-btn" onClick={() => { onClose(); }}>Save Settings</button>
         </div>
       </div>
     </div>

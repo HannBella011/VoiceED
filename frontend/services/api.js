@@ -1,3 +1,4 @@
+import { authFetch } from '@/lib/authFetch';
 // Frontend API client for VoiceED
 // Placeholder for API communication with backend
 
@@ -23,7 +24,7 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const response = await authFetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers,
     });
@@ -41,10 +42,10 @@ class ApiClient {
   }
 
   // Auth
-  async login(username, password) {
+  async login(email, password) {
     return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
   }
 

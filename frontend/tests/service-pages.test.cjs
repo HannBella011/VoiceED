@@ -17,7 +17,7 @@ const noop = () => {};
 const navigation = { usePathname: () => '/test', useRouter: () => ({ push: noop }) };
 const shared = {
   Navbar: () => null, Footer: () => null,
-  SettingsModal: () => null, UserMenuModal: () => null,
+  SettingsModal: () => null, LoginModal: () => null, UserMenuModal: () => null,
 };
 
 function load(filename, mocks = {}) {
@@ -115,7 +115,7 @@ test('countdowns account for delayed ticks and never become negative', () => {
 });
 
 // A small hook host lets storage effects and updates run without a DOM dependency.
-function storageHookHost() {
+function storageHookHost(request) {
   const slots = [];
   let cursor = 0;
   let effects = [];
@@ -135,9 +135,13 @@ function storageHookHost() {
       if (!slots[index] || deps.some((value, i) => value !== slots[index][i])) effects.push(effect);
       slots[index] = deps;
     },
-    useCallback: callback => callback,
+    useCallback(callback, deps) {
+      const index = cursor++;
+      if (!slots[index] || deps.some((value, i) => value !== slots[index].deps[i])) slots[index] = { callback, deps };
+      return slots[index].callback;
+    },
   };
-  const { useWellnessStorage } = load(path.join(root, 'hooks/useWellnessActivity.js'), { react: hooks });
+  const { useWellnessStorage } = load(path.join(root, 'hooks/useWellnessActivity.js'), { react: hooks, '@/services/account': { accountRequest: request } });
   return () => {
     cursor = 0;
     const result = useWellnessStorage('moods', []);
@@ -148,49 +152,130 @@ function storageHookHost() {
   };
 }
 
-test('wellness storage loads without overwriting data and survives remounts per account', () => {
+const flush = () => new Promise(resolve => setImmediate(resolve));
+test('wellness loads from API, retains history and does not import browser records', async () => {
   const original = global.localStorage;
-  const values = new Map([['voiceed:wellness:test-user:moods', JSON.stringify([{ mood: 'calm' }])]]);
-  let writes = 0;
-  global.localStorage = {
-    getItem: key => values.get(key) ?? null,
-    setItem: (key, value) => { writes++; values.set(key, value); },
+  global.localStorage = { getItem: () => { throw new Error('Legacy records must not be read'); } };
+  const rows = [{ id: 1, mood: 'calm', recorded_at: '2026-11-01T00:00:00Z' }];
+  const requests = [];
+  const request = async (path, method, data) => {
+    requests.push({ path, method });
+    if (method === 'POST') rows.unshift({ id: 2, ...data, recorded_at: '2026-11-02T00:00:00Z' });
+    return rows.slice();
   };
   try {
-    const render = storageHookHost();
-    render();
+    const render = storageHookHost(request); render(); await flush();
     let [entries, update, error, ready] = render();
-    assert.equal(ready, true);
-    assert.equal(error, '');
-    assert.deepEqual(entries, [{ mood: 'calm' }]);
-    assert.equal(writes, 0);
-    assert.equal(update(previous => [...previous, { mood: 'happy' }]), true);
-    const reloaded = storageHookHost();
-    reloaded();
-    assert.equal(reloaded()[0].length, 2);
-    auth.currentUser.id = 'another-user';
-    const other = storageHookHost();
-    other();
-    assert.deepEqual(other()[0], []);
-  } finally {
-    auth.currentUser.id = 'test-user';
-    global.localStorage = original;
-  }
+    assert.equal(ready, true); assert.equal(error, ''); assert.equal(entries[0].mood, 'calm');
+    assert.equal(await update(previous => [{ id: 'temporary', mood: 'happy' }, ...previous]), true);
+    assert.equal(render()[0].length, 2);
+    assert.equal(requests.filter(r => r.method === 'DELETE').length, 0);
+    const remount = storageHookHost(request); remount(); await flush();
+    assert.equal(remount()[0].length, 2);
+  } finally { global.localStorage = original; }
+});
+test('wellness failed API saves preserve data and return failure', async () => {
+  const render = storageHookHost(async (path, method) => {
+    if (method === 'POST') throw new Error('Server unavailable');
+    return [];
+  });
+  render(); await flush();
+  const [, update] = render();
+  assert.equal(await update([{ id: 'temporary', mood: 'happy' }]), false);
+  const [entries, , error] = render();
+  assert.deepEqual(entries, []); assert.match(error, /Server unavailable/);
 });
 
-test('wellness storage reports a failed save without claiming data was saved', () => {
-  const original = global.localStorage;
-  global.localStorage = {
-    getItem: () => null,
-    setItem: () => { throw new Error('Quota exceeded'); },
+for (const page of ['profile','message','contacts','inspire-ed','forgot-password','reset-password']) {
+  test(`${page} retains its page shell without demo data or runtime reference errors`, () => {
+    const { default: Page } = load(path.join(root, `app/${page}/page.jsx`));
+    const html = renderToStaticMarkup(React.createElement(Page));
+    assert.match(html, /<main/);
+    assert.doesNotMatch(html, /Jane Doe|Study Group A|Steve Jobs|Show Password/);
+  });
+}
+
+test('API client coalesces renewal, sends cookies and retries with the new access token', async () => {
+  const original = { fetch: global.fetch, window: global.window, localStorage: global.localStorage };
+  let token = 'expired'; let renewals = 0;
+  global.window = {};
+  global.localStorage = { getItem: key => key === 'access_token' ? token : null, setItem: (key,value) => { if(key === 'access_token') token=value; } };
+  global.fetch = async (url, options) => {
+    assert.equal(options.credentials,'include');
+    if (url.endsWith('/auth/refresh')) { renewals++; await flush(); return { ok:true, json:async()=>({access_token:'renewed'}) }; }
+    return { status:options.headers.Authorization === 'Bearer renewed' ? 200 : 401 };
   };
   try {
-    const render = storageHookHost();
-    render();
-    const [, update] = render();
-    assert.equal(update([{ mood: 'happy' }]), false);
-    const [entries, , error] = render();
-    assert.deepEqual(entries, []);
-    assert.match(error, /could not be saved/);
-  } finally { global.localStorage = original; }
+    const { authFetch } = load(path.join(root,'lib/authFetch.js'));
+    const results=await Promise.all([authFetch('http://localhost:8000/api/v1/users/me',{headers:{Authorization:'Bearer expired'}}),authFetch('http://localhost:8000/api/v1/wellness/moods',{headers:{Authorization:'Bearer expired'}})]);
+    assert.equal(renewals,1); assert.deepEqual(results.map(r=>r.status),[200,200]);
+    const response=await authFetch('http://localhost:8000/api/v1/auth/login',{headers:{Authorization:'Bearer expired'}});
+    assert.equal(response.status,401);assert.equal(renewals,1);
+  } finally { Object.assign(global,original); }
+});
+
+test('home Login and Get Started open the actual global login modal', () => {
+  const slots = []; let cursor = 0;
+  const hooks = { ...React, useEffect: noop, useState(initial) {
+    const index = cursor++;
+    if (!(index in slots)) slots[index] = initial;
+    return [slots[index], value => { slots[index] = value; }];
+  } };
+  const Login = () => null;
+  const { ModalProvider } = load(path.join(root,'components/shared/GlobalModals.jsx'), {
+    react: hooks,
+    './LoginModal': { LoginModal: Login },
+    './SettingsModal': { SettingsModal: () => null },
+    './UserMenuModal': { UserMenuModal: () => null },
+    './LoginRequiredPopup': { LoginRequiredPopup: () => null },
+  });
+  const renderProvider = () => { cursor = 0; return ModalProvider({ children: null }); };
+  const find = (node, predicate) => {
+    if (!React.isValidElement(node)) return null;
+    if (predicate(node)) return node;
+    for (const child of React.Children.toArray(node.props.children)) { const match = find(child,predicate); if (match) return match; }
+    return null;
+  };
+  const previous = auth.isLoggedIn; auth.isLoggedIn = false;
+  try {
+    let provider = renderProvider();
+    const { default: Home } = load(path.join(root,'app/page.jsx'), {
+      '@/components/shared/GlobalModals': { useModals: () => provider.props.value },
+    });
+    let home = Home();
+    find(home,node => typeof node.props.onLoginClick === 'function').props.onLoginClick();
+    provider = renderProvider();
+    assert.equal(find(provider,node => node.type === Login).props.isOpen,true);
+    find(provider,node => node.type === Login).props.onClose();
+    provider = renderProvider();
+    assert.equal(find(provider,node => node.type === Login).props.isOpen,false);
+    home = Home();
+    find(home,node => node.props.id === 'getStartedBtn').props.onClick();
+    provider = renderProvider();
+    assert.equal(find(provider,node => node.type === Login).props.isOpen,true);
+  } finally { auth.isLoggedIn = previous; }
+});
+
+test('user menu is visible when open and View Profile navigates without a callback', () => {
+  const pushed = []; let closed = 0;
+  const { UserMenuModal } = load(path.join(root,'components/shared/UserMenuModal.jsx'), {
+    'next/navigation': { useRouter: () => ({ push: href => pushed.push(href) }) },
+  });
+  const menu = UserMenuModal({ isOpen: true, onClose: () => closed++ });
+  assert.match(menu.props.className, /\bshow\b/);
+  const button = menu.props.children.props.children.find(child => child?.props?.className === 'menu-actions').props.children.find(child => child.props.id === 'profileBtn');
+  button.props.onClick();
+  assert.deepEqual(pushed,['/profile']); assert.equal(closed,1);
+  assert.equal(UserMenuModal({isOpen:false}),null);
+});
+test('user menu honors provided profile and logout callbacks exactly once', () => {
+  let profile = 0, logout = 0, fallbackLogout = 0;
+  const { UserMenuModal } = load(path.join(root,'components/shared/UserMenuModal.jsx'), {
+    '@/context/AuthContext': { useAuthContext: () => ({ currentUser: auth.currentUser, logout: () => fallbackLogout++ }) },
+  });
+  const menu = UserMenuModal({ isOpen:true, onProfileClick: () => profile++, onLogoutClick: () => logout++ });
+  const actions = menu.props.children.props.children.find(child => child?.props?.className === 'menu-actions').props.children;
+  actions.find(child => child.props.id === 'profileBtn').props.onClick();
+  actions.find(child => child.props.id === 'logoutBtn').props.onClick();
+  assert.equal(profile,1); assert.equal(logout,1); assert.equal(fallbackLogout,0);
 });

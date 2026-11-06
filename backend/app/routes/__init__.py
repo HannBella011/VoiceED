@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.routes import auth, users, reports, wellness, inspire, share, tracking
+from app.routes import auth, users, reports, wellness, inspire, share, tracking, messages, dashboard
 
 api_router = APIRouter()
 
@@ -11,3 +11,7 @@ api_router.include_router(wellness.router, prefix="/wellness", tags=["wellness"]
 api_router.include_router(inspire.router, prefix="/inspire", tags=["inspire"])
 api_router.include_router(share.router, prefix="/share", tags=["share"])
 api_router.include_router(tracking.router, prefix="/tracking", tags=["tracking"])
+
+api_router.include_router(messages.router, prefix="/messages", tags=["messages"])
+
+api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])

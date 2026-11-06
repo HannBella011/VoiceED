@@ -2,50 +2,80 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
-import { localDate, remainingSeconds } from '@/lib/wellness';
+import { accountRequest } from '@/services/account';
+import { MOODS, localDate, remainingSeconds } from '@/lib/wellness';
 
-export function useWellnessStorage(name, initialValue, validate = Array.isArray) {
+// Legacy browser data is deliberately never imported or read.
+export function useWellnessStorage(name, initialValue) {
   const { currentUser } = useAuthContext();
-  const key = `voiceed:wellness:${currentUser.id}:${name}`;
-  const initial = useRef(initialValue);
-  const validator = useRef(validate);
-  const current = useRef(initialValue);
   const [value, setValue] = useState(initialValue);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
-
+  const current = useRef(initialValue);
+  const busy = useRef(false);
+  const activeKey = useRef(`${currentUser?.id}:${name}`);
+  activeKey.current = `${currentUser?.id}:${name}`;
+  const identity = useRef(currentUser?.id);
+  identity.current = currentUser?.id;
+  const load = useCallback(async () => {
+    const owner = currentUser?.id;
+    if (!owner) return;
+    let next;
+    if (name === 'moods' || name === 'journals') {
+      const rows = [];
+      for (let page = 1; ; page++) {
+        const batch = await accountRequest(`/wellness/${name === 'moods' ? 'moods' : 'journal'}?limit=100&page=${page}`);
+        rows.push(...batch);
+        if (batch.length < 100) break;
+      }
+      next = rows.map(row => name === 'moods' ? { ...row, timestamp: row.recorded_at, emoji: Object.fromEntries(MOODS)[row.mood] } : { ...row, date: row.entry_date, timestamp: row.created_at });
+    } else {
+      const day = name.startsWith('goals:') ? name.slice(6) : localDate();
+      const rows = await accountRequest(`/wellness/goals?day=${day}`);
+      next = name === 'custom-goals' ? rows.filter(row => !row.preset_key) : Object.fromEntries(rows.map(row => [row.preset_key || row.id, row.completed]));
+      goalIds.current = Object.fromEntries(rows.map(row => [row.preset_key || row.id, row.id]));
+    }
+    if (activeKey.current === `${owner}:${name}`) { current.current = next; setValue(next); }
+  }, [name, currentUser?.id]);
+  const goalIds = useRef({});
   useEffect(() => {
-    setReady(false);
-    setError('');
+    let alive = true;
+    current.current = initialValue; setValue(initialValue); setReady(false); setError('');
+    load().then(() => { if (alive) setReady(true); }).catch(err => { if (alive) setError(err.message); });
+    return () => { alive = false; };
+  }, [load]);
+  const update = useCallback(async change => {
+    if (!ready || busy.current) return false;
+    busy.current = true;
+    const ownerKey = activeKey.current;
+    const request = (...args) => { if (activeKey.current !== ownerKey) throw new Error('Account changed. Please retry.'); return accountRequest(...args); };
+    const previous = current.current;
+    const next = typeof change === 'function' ? change(previous) : change;
     try {
-      const stored = localStorage.getItem(key);
-      const parsed = stored === null ? initial.current : JSON.parse(stored);
-      if (!validator.current(parsed)) throw new Error('Invalid saved data');
-      current.current = parsed;
-      setValue(parsed);
-    } catch {
-      current.current = initial.current;
-      setValue(initial.current);
-      setError('Saved activity data could not be read from this browser.');
-    }
-    setReady(true);
-  }, [key]);
-
-  const update = useCallback(change => {
-    if (!ready) return false;
-    const next = typeof change === 'function' ? change(current.current) : change;
-    try {
-      localStorage.setItem(key, JSON.stringify(next));
-      current.current = next;
-      setValue(next);
-      setError('');
-      return true;
-    } catch {
-      setError('Your changes could not be saved. Browser storage may be full or disabled.');
-      return false;
-    }
-  }, [key, ready]);
-
+      if (name === 'moods' || name === 'journals') {
+        const path = `/wellness/${name === 'moods' ? 'moods' : 'journal'}`;
+        if (next.length === 0) await request(path, 'DELETE');
+        else {
+          for (const row of next.filter(row => !previous.some(old => old.id === row.id))) {
+            await request(path, 'POST', name === 'moods' ? { mood: row.mood } : { title: 'Journal entry', content: row.content, mood: row.mood, entry_date: row.date });
+          }
+          for (const row of previous.filter(row => !next.some(item => item.id === row.id))) await request(`${path}/${row.id}`, 'DELETE');
+        }
+      } else if (name === 'custom-goals') {
+        for (const row of next.filter(row => !previous.some(old => old.id === row.id))) await request('/wellness/goals', 'POST', { text: row.text });
+        for (const row of previous.filter(row => !next.some(item => item.id === row.id))) await request(`/wellness/goals/${row.id}`, 'DELETE');
+      } else {
+        // Reload to pick up newly created/archived custom goals before changing progress.
+        const rows = await request(`/wellness/goals?day=${name.slice(6)}`);
+        for (const row of rows) {
+          const key = row.preset_key || row.id;
+          if (Boolean(next[key]) !== Boolean(row.completed)) await request(`/wellness/goals/${row.id}/progress`, 'PUT', { day: name.slice(6), completed: Boolean(next[key]) });
+        }
+      }
+      await load(); setError(''); return true;
+    } catch (err) { setError(err.message); return false; }
+    finally { busy.current = false; }
+  }, [ready, name, load]);
   return [value, update, error, ready];
 }
 

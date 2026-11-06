@@ -54,7 +54,7 @@ export function AdminReportDetail({
       setShowStatusModal(false);
       setRemarks('');
     } catch (error) {
-      console.error('Failed to update status:', error);
+      setRemarksError(error.message);
     }
   };
 
@@ -65,21 +65,20 @@ export function AdminReportDetail({
       setShowAssignModal(false);
       setSelectedAssignee('');
     } catch (error) {
-      console.error('Failed to assign report:', error);
+      setRemarksError(error.message);
     }
   };
 
   const getNextStatuses = (currentStatus) => {
-    const currentIndex = STATUS_ORDER.indexOf(currentStatus);
-    if (currentIndex === -1) return STATUS_ORDER;
-    // Can move to next statuses or back one step
-    return STATUS_ORDER.slice(Math.max(0, currentIndex - 1), currentIndex + 3);
+    const allowed = { submitted: ['under_review'], under_review: ['awaiting_additional_info','closed'], assigned: ['in_progress','awaiting_additional_info'], in_progress: ['resolved','awaiting_additional_info'], awaiting_additional_info: ['under_review', ...(report.assignee_id ? ['in_progress'] : [])], resolved: ['closed'], closed: [] };
+    return [currentStatus, ...(allowed[currentStatus] || [])];
   };
 
   const nextStatuses = getNextStatuses(report.status);
 
   return (
     <div className="admin-report-detail">
+      {remarksError && <p role="alert">{remarksError}</p>}
       {/* Report Header */}
       <div className="admin-report-header">
         <div className="admin-report-title-section">
@@ -267,7 +266,7 @@ export function AdminReportDetail({
                   onChange={(e) => setRemarks(e.target.value)}
                   rows={4}
                   placeholder="Add any notes about this status change..."
-                  maxLength={1500}
+                  maxLength={50000}
                 />
                 <div className="form-hint">
                   {remarks.split(/\s+/).filter(Boolean).length} / 250 words

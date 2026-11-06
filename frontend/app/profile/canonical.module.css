@@ -1,0 +1,644 @@
+/* Canonical base/profile.css scoped to the Profile page. */
+.canonical {
+    padding-top: var(--profile-header-height, 128px);
+}
+/* Profile Page Styles */
+.canonical :global(.profile-main) {
+    padding: 3rem 0;
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Body theme backgrounds - same as other pages */
+:global(body.blue-theme) .canonical :global(.profile-main) {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+:global(body.purple-theme) .canonical :global(.profile-main) {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg1.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+:global(body.red-theme) .canonical :global(.profile-main) {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg2.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+:global(body.green-theme) .canonical :global(.profile-main) {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg3.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+:global(body.orange-theme) .canonical :global(.profile-main) {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg4.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+:global(body.pink-theme) .canonical :global(.profile-main) {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                url('/bg5.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+
+.canonical :global(.profile-header) {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.canonical :global(.profile-header h2) {
+    font-size: 2.5rem;
+    color: var(--accent-cyan);
+    margin-bottom: 1rem;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+.canonical :global(.profile-header p) {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.canonical :global(.profile-container) {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.canonical :global(.profile-card) {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.canonical :global(.profile-avatar-section) {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.canonical :global(.profile-avatar) {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--primary-dark);
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4);
+    flex-shrink: 0;
+}
+
+.canonical :global(.profile-info h3) {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.canonical :global(.profile-info p) {
+    color: var(--text-secondary);
+    margin: 0.25rem 0;
+}
+
+/* Info Section */
+.canonical :global(.info-section), .canonical :global(.stats-section), .canonical :global(.actions-section) {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.canonical :global(.info-section h3), .canonical :global(.stats-section h3), .canonical :global(.actions-section h3) {
+    color: var(--accent-cyan);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.canonical :global(.info-grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.canonical :global(.info-item) {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.canonical :global(.info-item label) {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.canonical :global(.info-item p) {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.canonical :global(.status-active) {
+    color: #00ff88 !important;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+/* Stats Section */
+.canonical :global(.stats-grid) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.canonical :global(.stat-card) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.canonical :global(.stat-card:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    border-color: rgba(0, 212, 255, 0.4);
+}
+
+.canonical :global(.stat-icon) {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    flex-shrink: 0;
+}
+
+.canonical :global(.stat-info h4) {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+}
+
+.canonical :global(.stat-info p) {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Actions Section */
+.canonical :global(.action-buttons) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.canonical :global(.action-btn) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.canonical :global(.action-btn:hover) {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--accent-cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.canonical :global(.action-btn i) {
+    font-size: 1.5rem;
+    color: var(--accent-cyan);
+}
+
+/* Navigation Active State */
+.canonical :global(.nav-links .nav-active) {
+    color: white !important;
+    text-decoration: underline;
+    text-decoration-color: var(--accent-color, #00d4ff);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+}
+
+/* Mobile Menu Button */
+.canonical :global(.mobile-menu-btn) {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.canonical :global(.mobile-menu-btn:hover) {
+    color: var(--accent-cyan);
+}
+
+.canonical :global(.mobile-menu-btn.active i) {
+    transform: rotate(90deg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .canonical :global(.mobile-menu-btn) {
+        display: block;
+    }
+    
+    .canonical :global(.header-content) {
+        flex-direction: row;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        align-items: center;
+    }
+    
+    .canonical :global(.logo-section) {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+    }
+    
+    .canonical :global(.logo img) {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .canonical :global(.brand-text h1) {
+        font-size: 1.8rem;
+    }
+    
+    .canonical :global(.brand-text p) {
+        font-size: 0.9rem;
+    }
+    
+    .canonical :global(.navbar) {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-glow);
+        box-shadow: var(--shadow-glow);
+        width: 90%;
+        max-width: 400px;
+        backdrop-filter: blur(10px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 2001;
+    }
+    
+    .canonical :global(.navbar.active) {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .canonical :global(.navbar ul) {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+        flex-wrap: nowrap;
+        justify-content: center;
+    }
+    
+    .canonical :global(.nav-links li) {
+        font-size: 1.2rem;
+        padding: 0.8rem 0;
+        width: 100%;
+    }
+    
+    .canonical :global(.nav-links a) {
+        display: block;
+        padding: 0.8rem;
+        width: 100%;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+    }
+    
+    .canonical :global(.nav-links a:hover) {
+        background: rgba(0, 212, 255, 0.1);
+    }
+    
+    /* Settings button visible on mobile */
+    .canonical :global(.settings-nav-btn) {
+        display: block !important;
+    }
+    
+    .canonical :global(.profile-header h2) {
+        font-size: 2rem;
+    }
+    
+    .canonical :global(.profile-avatar-section) {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .canonical :global(.info-grid) {
+        grid-template-columns: 1fr;
+    }
+    
+    .canonical :global(.stats-grid) {
+        grid-template-columns: 1fr;
+    }
+    
+    .canonical :global(.action-buttons) {
+        grid-template-columns: 1fr;
+    }
+    
+    .canonical :global(.profile-container) {
+        padding: 0 1rem;
+    }
+    
+    .canonical :global(.modal-content) {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        max-width: 90%;
+        padding: 2.5rem;
+        width: auto;
+        min-width: 300px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .canonical :global(#settingsModal .modal-content) {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .canonical :global(.profile-card) {
+        padding: 1.5rem;
+    }
+    
+    .canonical :global(.profile-card h3) {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .canonical :global(.header-content) {
+        padding: 0.5rem 0;
+        gap: 0.5rem;
+    }
+    
+    .canonical :global(.logo img) {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .canonical :global(.brand-text h1) {
+        font-size: 1.6rem;
+    }
+    
+    .canonical :global(.brand-text p) {
+        font-size: 0.85rem;
+    }
+    
+    .canonical :global(.mobile-menu-btn) {
+        font-size: 1.3rem;
+        padding: 0.5rem;
+    }
+    
+    .canonical :global(.navbar) {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .canonical :global(.nav-links li) {
+        font-size: 1.1rem;
+        padding: 0.7rem 0;
+    }
+    
+    .canonical :global(.nav-links a) {
+        padding: 0.7rem;
+    }
+    
+    .canonical :global(.profile-header h2) {
+        font-size: 1.5rem;
+    }
+    
+    .canonical :global(.modal-content) {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        max-width: 95%;
+        padding: 2rem;
+        width: auto;
+        min-width: 280px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .canonical :global(#settingsModal .modal-content) {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .canonical :global(.user-menu-button) {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    .canonical :global(.profile-card) {
+        padding: 1rem;
+    }
+    
+    .canonical :global(.profile-card h3) {
+        font-size: 1rem;
+    }
+}
+
+
+/* Profile editing uses compact controls instead of registration form sizing. */
+.editButton,
+.cancelButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    color: var(--primary-dark, #0a0a1f);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.editButton:hover {
+    box-shadow: 0 0 14px var(--glow-cyan);
+}
+
+.editButton:focus-visible,
+.cancelButton:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 3px;
+}
+
+.editButton:disabled,
+.cancelButton:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.editOverlay:global(.modal.show) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.editOverlay .editDialog {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    max-width: 440px;
+    max-height: calc(100dvh - 2rem);
+    margin: 0;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: rgba(10, 10, 31, 0.96);
+}
+
+.editDialog h2 {
+    margin: 0 0 1.2rem;
+    font-size: 1.4rem;
+}
+
+.editForm {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.editForm p {
+    margin: 0;
+}
+
+.editField {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.editField label {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.editField input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border-glow);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    color-scheme: dark;
+    font: inherit;
+    font-size: 1rem;
+}
+
+.editField input:focus {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 1px;
+}
+
+.editActions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.35rem;
+}
+
+.editActions button {
+    flex: 1;
+    margin: 0;
+}
+
+.cancelButton {
+    background: rgba(255, 68, 68, 0.08);
+    border-color: rgba(255, 68, 68, 0.4);
+    color: #ff5555;
+}
+
+@media (max-width: 480px) {
+    .editOverlay .editDialog {
+        padding: 1.1rem;
+    }
+}

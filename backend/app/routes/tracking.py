@@ -61,9 +61,11 @@ async def admin_list_users(
                 full_name=u.full_name,
                 role=u.role,
                 is_active=u.is_active,
-                is_verified=u.is_verified,
+                is_verified=None,
+        theme=u.theme,
                 gender=u.gender,
                 birthday=u.birthday,
+                school_id=u.school_id,
                 avatar_url=u.avatar_url,
                 created_at=u.created_at,
                 updated_at=u.updated_at,
@@ -94,9 +96,11 @@ async def admin_get_user(
         full_name=user.full_name,
         role=user.role,
         is_active=user.is_active,
-        is_verified=user.is_verified,
+        is_verified=None,
+        theme=user.theme,
         gender=user.gender,
         birthday=user.birthday,
+        school_id=user.school_id,
         avatar_url=user.avatar_url,
         created_at=user.created_at,
         updated_at=user.updated_at,
@@ -129,9 +133,11 @@ async def admin_update_user(
         full_name=user.full_name,
         role=user.role,
         is_active=user.is_active,
-        is_verified=user.is_verified,
+        is_verified=None,
+        theme=user.theme,
         gender=user.gender,
         birthday=user.birthday,
+        school_id=user.school_id,
         avatar_url=user.avatar_url,
         created_at=user.created_at,
         updated_at=user.updated_at,
@@ -305,16 +311,16 @@ async def get_available_assignees(
     """Get list of admins/moderators available for report assignment."""
     users, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
-        role=UserRoleModel.ADMIN
+        role=UserRoleModel.ADMIN, is_active=True
     )
     # Also include moderators and super_admins
     moderators, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
-        role=UserRoleModel.MODERATOR
+        role=UserRoleModel.MODERATOR, is_active=True
     )
     super_admins, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
-        role=UserRoleModel.SUPER_ADMIN
+        role=UserRoleModel.SUPER_ADMIN, is_active=True
     )
     
     all_assignees = users + moderators + super_admins
@@ -326,9 +332,11 @@ async def get_available_assignees(
             full_name=u.full_name,
             role=u.role,
             is_active=u.is_active,
-            is_verified=u.is_verified,
+            is_verified=None,
+        theme=u.theme,
             gender=u.gender,
             birthday=u.birthday,
+            school_id=u.school_id,
             avatar_url=u.avatar_url,
             created_at=u.created_at,
             updated_at=u.updated_at,

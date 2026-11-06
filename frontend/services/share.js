@@ -1,3 +1,4 @@
+import { authFetch } from '@/lib/authFetch';
 // Share Service - VoiceED
 // Database-backed ShareED API calls.
 
@@ -13,7 +14,7 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await authFetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });

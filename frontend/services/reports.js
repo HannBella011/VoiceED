@@ -1,3 +1,4 @@
+import { authFetch } from '@/lib/authFetch';
 // Reports Service - VoiceED
 // API calls for ReportED functionality
 
@@ -15,7 +16,7 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await authFetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });
@@ -43,7 +44,7 @@ async function requestFormData(endpoint, formData, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await authFetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     method: 'POST',
     headers,
@@ -125,7 +126,7 @@ export async function getReport(reportId) {
 // ============================================================================
 
 export async function getAdminStats() {
-  return request('/admin/stats');
+  return request('/reports/admin/stats');
 }
 
 export async function adminListReports(params) {
@@ -135,29 +136,29 @@ export async function adminListReports(params) {
       if (value !== undefined) searchParams.append(key, String(value));
     });
   }
-  return request(`/admin/reports?${searchParams.toString()}`);
+  return request(`/reports/admin/reports?${searchParams.toString()}`);
 }
 
 export async function adminGetReport(reportId) {
-  return request(`/admin/reports/${reportId}`);
+  return request(`/reports/admin/reports/${reportId}`);
 }
 
 export async function adminUpdateReportStatus(reportId, data) {
-  return request(`/admin/reports/${reportId}/status`, {
+  return request(`/reports/admin/reports/${reportId}/status`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
 }
 
 export async function adminAssignReport(reportId, data) {
-  return request(`/admin/reports/${reportId}/assign`, {
+  return request(`/reports/admin/reports/${reportId}/assign`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
 }
 
 export async function adminUpdateReport(reportId, data) {
-  return request(`/admin/reports/${reportId}`, {
+  return request(`/reports/admin/reports/${reportId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
@@ -169,21 +170,13 @@ export async function adminAddTimelineEntry(
   remarks, 
   attachmentIds
 ) {
-  const formData = new FormData();
-  formData.append('status', status);
-  if (remarks) formData.append('remarks', remarks);
-  if (attachmentIds) {
-    attachmentIds.forEach(id => formData.append('attachment_ids', String(id)));
-  }
-  
-  return requestFormData(
-    `/admin/reports/${reportId}/timeline`, 
-    formData
-  );
+  return request(`/reports/admin/reports/${reportId}/timeline`, {
+    method: 'POST', body: JSON.stringify({ status, remarks: remarks || null, attachment_ids: attachmentIds || [] }),
+  });
 }
 
 export async function getAvailableAssignees() {
-  return request('/admin/assignees');
+  return request('/tracking/admin/assignees');
 }
 
 export async function adminListUsers(
@@ -202,7 +195,7 @@ export async function adminListUsers(
 }
 
 export async function adminGetUser(userId) {
-  return request(`/users/admin/${userId}`);
+  return request(`/tracking/admin/users/${userId}`);
 }
 
 export async function adminUpdateUser(userId, data) {

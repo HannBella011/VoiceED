@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
 
 export function UserMenuModal({ 
@@ -10,20 +11,28 @@ export function UserMenuModal({
   onClose, 
   onProfileClick, 
   onLogoutClick,
-  username = 'User',
-  email = 'user@voiceed.com'
+  username,
+  email
 }) {
-  const { logout } = useAuthContext();
+  const { logout, currentUser } = useAuthContext();
+  const router = useRouter();
+
+  const handleProfile = () => {
+    onClose?.();
+    if (onProfileClick) onProfileClick();
+    else router.push('/profile');
+  };
 
   const handleLogout = () => {
-    logout();
-    onLogoutClick();
+    onClose?.();
+    if (onLogoutClick) onLogoutClick();
+    else logout();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal user-menu-modal" id="userMenuModal" onClick={onClose}>
+    <div className="modal user-menu-modal show" id="userMenuModal" onClick={onClose}>
       <div className="modal-content user-menu-modal-content" onClick={(e) => e.stopPropagation()}>
         <span className="close-button" onClick={onClose}>&times;</span>
         <h2>User Menu</h2>
@@ -32,12 +41,12 @@ export function UserMenuModal({
             <i className="fas fa-user"></i>
           </div>
           <div className="user-details">
-            <h3 id="menuUsername">{username}</h3>
-            <p id="menuEmail">{email}</p>
+            <h3 id="menuUsername">{username || currentUser?.username || 'User'}</h3>
+            <p id="menuEmail">{email || currentUser?.email || ''}</p>
           </div>
         </div>
         <div className="menu-actions">
-          <button className="user-menu-button" id="profileBtn" onClick={() => { onProfileClick(); onClose(); }}>
+          <button className="user-menu-button" id="profileBtn" onClick={handleProfile}>
             <i className="fas fa-user"></i>
             <span>View Profile</span>
           </button>

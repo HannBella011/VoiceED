@@ -12,10 +12,10 @@ export function Activity() {
   const [content, setContent] = useState('');
   const [saved, setSaved] = useState(false);
   const moodEmojis = Object.fromEntries(MOODS);
-  const save = () => {
+  const save = async () => {
     if (!content.trim() || !date) return;
     const entry = { id: crypto.randomUUID(), date, mood: mood || 'okay', content: content.trim(), timestamp: new Date().toISOString() };
-    if (setEntries(previous => [entry, ...previous].slice(0, 10))) {
+    if (await setEntries(previous => [entry, ...previous])) {
       setContent(''); setMood(''); setDate(localDate()); setSaved(true);
     }
   };
@@ -38,7 +38,7 @@ export function Activity() {
                     <div className="card-body">
                         <div className="journal-form">
 {error && <p className="error-message" role="alert">{error}</p>}
-{saved && <p role="status">Entry saved on this browser.</p>}
+{saved && <p role="status">Entry saved to your account.</p>}
                             <div className="form-group">
                                 <label htmlFor="journalDate">Date</label>
                                 <input type="date" id="journalDate" value={date} onChange={event => setDate(event.target.value)} required className="journal-input" />

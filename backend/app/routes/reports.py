@@ -31,10 +31,37 @@ from app.routes.auth import get_current_active_user, get_current_admin_user, get
 # Report Submission (Public - Anonymous & Authenticated)
 # ============================================================================
 
+async def submit_with_files(db, data, files, owner=None, anonymous=False, email=None):
+    # Validate before writing either database records or storage objects.
+    prepared = []
+    for file in files:
+        if not file.filename: continue
+        content = await file.read(report_service.file_storage.MAX_FILE_SIZE + 1)
+        mime = file.content_type or 'application/octet-stream'
+        valid, error = report_service.file_storage.validate_file(file.filename, mime, len(content))
+        if not valid: raise HTTPException(400, error)
+        prepared.append((file.filename, mime, content))
+    paths = []
+    try:
+        report = await report_service.create_report(db, data, user_id=owner, is_anonymous=anonymous, reporter_email=email, commit=False)
+        for filename, mime, content in prepared:
+            attachment = await report_service.add_attachment(db, report.id, content, filename, mime, uploaded_by_user_id=None if anonymous else owner, commit=False)
+            paths.append(attachment.file_path)
+        await db.commit()
+    except Exception as exc:
+        await db.rollback()
+        for path in paths: await report_service.file_storage.delete_file(path)
+        if isinstance(exc, HTTPException): raise
+        raise HTTPException(503, 'Report could not be saved. Please try again.') from exc
+    report = await report_service.get_by_id(db, report.id)
+    await report_service.notify_submission(db, report)
+    return report
+
+
 @router.post("/submit", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
 async def submit_report_authenticated(
-    title: str = Form(...),
-    description: str = Form(...),
+    title: str = Form(..., min_length=1, max_length=200),
+    description: str = Form(..., min_length=1),
     category: ReportCategory = Form(...),
     location: Optional[str] = Form(None),
     incident_date: Optional[str] = Form(None),
@@ -60,31 +87,14 @@ async def submit_report_authenticated(
         "incident_date": parsed_incident_date,
     }
     
-    report = await report_service.create_report(
-        db, data, user_id=current_user.id, is_anonymous=is_anonymous
-    )
-    
-    # Handle file uploads
-    for file in files:
-        if file.filename:
-            content = await file.read()
-            mime_type = file.content_type or "application/octet-stream"
-            try:
-                await report_service.add_attachment(
-                    db, report.id, content, file.filename, mime_type, uploaded_by_user_id=current_user.id
-                )
-            except ValueError as e:
-                raise HTTPException(status_code=400, detail=str(e))
-    
-    # Reload report with attachments
-    report = await report_service.get_by_id(db, report.id)
-    return report
+    return await submit_with_files(db, data, files, current_user.id, is_anonymous)
+
 
 
 @router.post("/submit/anonymous", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
 async def submit_report_anonymous(
-    title: str = Form(...),
-    description: str = Form(...),
+    title: str = Form(..., min_length=1, max_length=200),
+    description: str = Form(..., min_length=1),
     category: ReportCategory = Form(...),
     location: Optional[str] = Form(None),
     incident_date: Optional[str] = Form(None),
@@ -109,25 +119,8 @@ async def submit_report_anonymous(
         "incident_date": parsed_incident_date,
     }
     
-    report = await report_service.create_report(
-        db, data, user_id=None, is_anonymous=True, reporter_email=reporter_email
-    )
-    
-    # Handle file uploads
-    for file in files:
-        if file.filename:
-            content = await file.read()
-            mime_type = file.content_type or "application/octet-stream"
-            try:
-                await report_service.add_attachment(
-                    db, report.id, content, file.filename, mime_type, uploaded_by_user_id=None
-                )
-            except ValueError as e:
-                raise HTTPException(status_code=400, detail=str(e))
-    
-    # Reload report with attachments
-    report = await report_service.get_by_id(db, report.id)
-    return report
+    return await submit_with_files(db, data, files, anonymous=True, email=reporter_email)
+
 
 
 # ============================================================================
@@ -260,7 +253,7 @@ async def admin_update_report_status(
     
     report = await report_service.update_report(
         db, report_id, 
-        {"status": status_update.status, "remarks": status_update.remarks},
+        {"status": status_update.status, "remarks": status_update.remarks, "attachment_ids": status_update.attachment_ids},
         current_user=current_user
     )
     if not report:
@@ -486,3 +479,9 @@ async def delete_report_legacy(
     await db.delete(report)
     await db.commit()
     return {"message": "Report deleted successfully"}
+
+@router.post('/admin/reports/{report_id}/timeline', response_model=ReportResponse)
+async def admin_timeline(report_id: int, data: ReportStatusUpdate, db: AsyncSession = Depends(get_db), current_user: Profile = Depends(get_current_admin_user)):
+    report = await report_service.update_report(db, report_id, data.model_dump(), current_user)
+    if report is None: raise HTTPException(404, 'Report not found')
+    return report

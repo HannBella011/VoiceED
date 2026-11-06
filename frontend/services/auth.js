@@ -1,3 +1,4 @@
+import { authFetch } from '@/lib/authFetch';
 // Auth Service - VoiceED
 // Placeholder functions for authentication API calls
 
@@ -15,7 +16,7 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await authFetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });
@@ -61,7 +62,7 @@ export const authService = {
   async resetPassword(token, newPassword) {
     return request('/auth/reset-password', {
       method: 'POST',
-      body: JSON.stringify({ token, new_password: newPassword }),
+      body: JSON.stringify({ token_hash: token, new_password: newPassword }),
     });
   },
 

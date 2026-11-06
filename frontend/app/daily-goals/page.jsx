@@ -12,13 +12,13 @@ export function Activity() {
   const defaults = [ { id: 'sleep', text: '7-8 hours sleep' }, { id: 'water', text: '8 glasses water' }, { id: 'exercise', text: '30 min exercise' }, { id: 'breaks', text: 'Study breaks' } ];
   const goals = [...defaults, ...custom.map(goal => ({ ...goal, custom: true }))];
   const count = goals.filter(goal => completed[goal.id]).length;
-  const addGoal = () => {
+  const addGoal = async () => {
     const text = customText.trim();
-    if (text && setCustom(previous => [...previous, { id: crypto.randomUUID(), text }])) setCustomText('');
+    if (text && await setCustom(previous => [...previous, { id: crypto.randomUUID(), text }])) setCustomText('');
   };
-  const removeGoal = id => {
-    if (setCustom(previous => previous.filter(goal => goal.id !== id))) {
-      setCompleted(previous => { const next = { ...previous }; delete next[id]; return next; });
+  const removeGoal = async id => {
+    if (await setCustom(previous => previous.filter(goal => goal.id !== id))) {
+      await setCompleted(previous => { const next = { ...previous }; delete next[id]; return next; });
     }
   };
   return (

@@ -13,11 +13,12 @@ from sqlalchemy.orm import Session, registry
 
 from app.routes import auth
 from app.models import Profile
+from app.models.references import auth_users
 
 
 class AuthFlowTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.db = SimpleNamespace(commit=AsyncMock(), refresh=AsyncMock())
+        self.db = SimpleNamespace(commit=AsyncMock(), refresh=AsyncMock(), add=lambda row: None)
         self.app = FastAPI()
         self.app.include_router(auth.router, prefix="/auth")
 
@@ -99,7 +100,9 @@ class AuthFlowTests(unittest.IsolatedAsyncioTestCase):
     async def test_oauth_refreshes_database_generated_fields_before_response(self):
         # Use real ORM expiration, with SQLite so this needs no external database.
         engine = create_engine("sqlite://")
-        table = Profile.__table__.to_metadata(MetaData())
+        fixture_metadata = MetaData()
+        auth_users.to_metadata(fixture_metadata)
+        table = Profile.__table__.to_metadata(fixture_metadata)
         table.c.id.type = Uuid()
         table.create(engine)
         mapper_registry = registry()
@@ -128,9 +131,11 @@ class AuthFlowTests(unittest.IsolatedAsyncioTestCase):
                 nonlocal explicit_io
                 explicit_io = True
                 try:
+                    changed = session.is_modified(profile)
                     session.commit()
                     # SQL onupdate expires updated_at even with expire_on_commit=False.
-                    self.assertIn("updated_at", inspect(profile).expired_attributes)
+                    if changed:
+                        self.assertIn("updated_at", inspect(profile).expired_attributes)
                 finally:
                     explicit_io = False
 

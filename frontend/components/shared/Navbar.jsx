@@ -96,7 +96,8 @@ export function Navbar({
   const handleUserMenuClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    onUserMenuClickRef.current?.();
+    if (onUserMenuClickRef.current) onUserMenuClickRef.current();
+    else router.push('/profile');
   };
 
   const menuIconClass = isOpen ? 'fas fa-times' : 'fas fa-bars';

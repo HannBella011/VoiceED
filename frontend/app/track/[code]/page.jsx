@@ -3,7 +3,7 @@
 
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer } from '@/components/shared';
 import { ReportCard } from '@/components/features/report';
@@ -11,8 +11,9 @@ import { ReportTimeline } from '@/components/features/report';
 import { trackReport } from '@/services';
 import { useModals } from '@/components/shared/GlobalModals';
 
-export default function TrackingPage({ params }) {
+export default function TrackingPage() {
   const pathname = usePathname();
+  const params = useParams();
   const { settingsOpen, setSettingsOpen } = useModals();
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

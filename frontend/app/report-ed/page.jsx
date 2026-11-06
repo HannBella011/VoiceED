@@ -4,10 +4,12 @@ import { usePathname } from 'next/navigation';
 import { useState, useRef } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { submitReportAuthenticated, submitReportAnonymous } from '@/services/reports';
+import { useAuthContext } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
 export function ReportEDContent() {
   const pathname = usePathname();
+  const { logout } = useAuthContext();
   const fileInputRef = useRef(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -526,7 +528,7 @@ export function ReportEDContent() {
         onClose={() => setUserMenuOpen(false)}
         onProfileClick={() => window.location.href = '/profile'}
         onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
+          logout();
         }}
       />
     </>

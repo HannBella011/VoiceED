@@ -3,15 +3,16 @@
 
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { AdminReportDetail } from '@/components/features/report';
-import { adminGetReport, getAvailableAssignees } from '@/services';
+import { adminGetReport, getAvailableAssignees, adminUpdateReportStatus, adminAssignReport } from '@/services';
 import { useAuth } from '@/hooks';
 
-export default function AdminReportDetailPage({ params }) {
+export default function AdminReportDetailPage() {
   const pathname = usePathname();
+  const params = useParams();
   const { isLoggedIn, currentUser, logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -58,8 +59,7 @@ export default function AdminReportDetailPage({ params }) {
   const handleStatusUpdate = async (reportId, status, remarks) => {
     setUpdating(true);
     try {
-      // The actual update happens in AdminReportDetail component
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setReport(await adminUpdateReportStatus(reportId, { status, remarks }));
     } finally {
       setUpdating(false);
     }
@@ -68,7 +68,7 @@ export default function AdminReportDetailPage({ params }) {
   const handleAssign = async (reportId, assigneeId) => {
     setUpdating(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setReport(await adminAssignReport(reportId, { assignee_id: assigneeId }));
     } finally {
       setUpdating(false);
     }

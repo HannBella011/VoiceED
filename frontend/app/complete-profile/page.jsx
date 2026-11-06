@@ -77,6 +77,7 @@ export default function CompleteProfilePage() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/auth/complete-profile`, {
         method: "POST",
+          credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authData.session.access_token}`,
@@ -98,7 +99,8 @@ export default function CompleteProfilePage() {
       
       // Update local storage with new tokens
       localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
+
+    localStorage.removeItem("refresh_token");
 
       setSuccess("Profile completed successfully! Redirecting...");
       setTimeout(() => {

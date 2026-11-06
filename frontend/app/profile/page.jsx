@@ -3,13 +3,27 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
+import { useAuthContext } from '@/context/AuthContext';
+import { accountRequest } from '@/services/account';
 import { ProtectedRoute } from '@/lib/routeProtection';
+import styles from './canonical.module.css';
 
 function ProfileContent() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const { currentUser: user, logout, updateProfile } = useAuthContext();
+
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({});
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const edit = () => { setDraft({ full_name: user.full_name || '', username: user.username || '', birthday: user.birthday?.slice(0,10) || '', school_id: user.school_id || '' }); setError(''); setEditing(true); };
+  const save = async event => {
+    event.preventDefault(); if (saving) return; setSaving(true); setError('');
+    try { const profile = await accountRequest('/auth/me', 'PATCH', draft); updateProfile(profile); setEditing(false); }
+    catch(err) { setError(err.message); } finally { setSaving(false); }
+  };
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -19,43 +33,15 @@ function ProfileContent() {
     setSettingsOpen(true);
   };
 
-  const loadUser = () => {
-    const stored = localStorage.getItem('shielded_current_user');
-    if (stored) {
-      try {
-        const userData = JSON.parse(stored);
-        setUser(userData);
-      } catch (e) {
-        setUser(null);
-      }
-    }
-  };
-
-  const formatAccountAge = (createdAt) => {
-    if (!createdAt) return 'New';
-    const createdDate = new Date(createdAt);
-    const today = new Date();
-    const daysSinceCreation = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
-
-    if (daysSinceCreation === 0) return 'New';
-    else if (daysSinceCreation === 1) return '1 day';
-    else if (daysSinceCreation < 30) return daysSinceCreation + ' days';
-    else if (daysSinceCreation < 365) {
-      const months = Math.floor(daysSinceCreation / 30);
-      return months + ' month' + (months > 1 ? 's' : '');
-    } else {
-      const years = Math.floor(daysSinceCreation / 365);
-      return years + ' year' + (years > 1 ? 's' : '');
-    }
-  };
-
-  const getLoginCount = (username) => {
-    const loginStats = JSON.parse(localStorage.getItem('shielded_login_stats') || '{}');
-    return loginStats[username] || 0;
-  };
-
+  const [headerHeight, setHeaderHeight] = useState(128);
   useEffect(() => {
-    loadUser();
+    const header = document.querySelector('.header');
+    if (!header) return;
+    const measure = () => setHeaderHeight(header.getBoundingClientRect().height);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    return () => observer.disconnect();
   }, []);
 
   if (!user) {
@@ -67,14 +53,14 @@ function ProfileContent() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="profile-main">
+        <div className={styles.canonical} style={{ '--profile-header-height': `${headerHeight}px` }}><main className="profile-main">
           <div className="container">
             <div className="profile-loading">
               <div className="spinner"></div>
               <p>Loading profile...</p>
             </div>
           </div>
-        </main>
+        </main></div>
         <Footer />
         <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
         <UserMenuModal
@@ -82,18 +68,16 @@ function ProfileContent() {
           onClose={() => setUserMenuOpen(false)}
           onProfileClick={() => window.location.href = '/profile'}
           onLogoutClick={() => {
-            localStorage.removeItem('shielded_current_user');
+            logout();
           }}
         />
       </>
     );
   }
 
-  const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Today';
-  const birthday = user.birthday || '-';
+  const memberSince = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Today';
+  const birthday = user.birthday ? new Date(user.birthday).toLocaleDateString() : '-';
   const gender = user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : '-';
-  const loginCount = getLoginCount(user.username);
-  const accountAge = formatAccountAge(user.createdAt);
 
   return (
     <>
@@ -104,24 +88,20 @@ function ProfileContent() {
         onSettingsClick={handleSettingsClick}
       />
 
-      <main className="profile-main">
+      <div className={styles.canonical} style={{ '--profile-header-height': `${headerHeight}px` }}><main className="profile-main">
         <div className="container">
-          <div className="profile-header">
-            <h2>My Profile</h2>
-            <p>View and manage your personal information</p>
-          </div>
-
           <div className="profile-container">
             {/* Profile Card */}
             <div className="profile-card">
               <div className="profile-avatar-section">
                 <div className="profile-avatar">
-                  <img src="/pfp.jpg" alt="User Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  <img src={user.avatar_url || "/pfp.jpg"} alt="User Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 </div>
                 <div className="profile-info">
                   <h3 id="profileUsername">{user.username}</h3>
-                  <p id="profileEmail">{user.username}@voiceed.com</p>
+                  <p id="profileEmail">{user.email}</p>
                   <p id="profileMember">Member since <span id="memberSince">{memberSince}</span></p>
+                  <button className={styles.editButton} onClick={edit}><i className="fas fa-edit" /> Edit Profile</button>
                 </div>
               </div>
             </div>
@@ -136,7 +116,7 @@ function ProfileContent() {
                 </div>
                 <div className="info-item">
                   <label>Email</label>
-                  <p id="infoEmail">{user.username}@voiceed.com</p>
+                  <p id="infoEmail">{user.email}</p>
                 </div>
                 <div className="info-item">
                   <label>Birthday</label>
@@ -148,7 +128,7 @@ function ProfileContent() {
                 </div>
                 <div className="info-item">
                   <label>Account Status</label>
-                  <p className="status-active">Active</p>
+                  <p className="status-active">{user.is_active ? 'Active' : 'Inactive'}</p>
                 </div>
                 <div className="info-item">
                   <label>Member Since</label>
@@ -157,52 +137,30 @@ function ProfileContent() {
               </div>
             </div>
 
-            {/* Account Statistics */}
-            <div className="stats-section">
-              <h3>Account Statistics</h3>
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <i className="fas fa-sign-in-alt"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h4 id="statLoginCount">{loginCount}</h4>
-                    <p>Total Logins</p>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <i className="fas fa-clock"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h4 id="statLastLogin">{user.loginTime ? new Date(user.loginTime).toLocaleDateString() : 'Today'}</h4>
-                    <p>Last Login</p>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <i className="fas fa-calendar"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h4 id="statAccountAge">{accountAge}</h4>
-                    <p>Account Age</p>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <i className="fas fa-shield-alt"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h4>Verified</h4>
-                    <p>Account Status</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
-      </main>
+      </main></div>
 
+      {editing && (
+        <div className={`modal show ${styles.editOverlay}`} onClick={() => { if (!saving) setEditing(false); }}>
+          <div className={`modal-content ${styles.editDialog}`} role="dialog" aria-modal="true" aria-labelledby="edit-profile-title" onClick={event => event.stopPropagation()}>
+            <h2 id="edit-profile-title">Edit Profile</h2>
+            <form className={styles.editForm} onSubmit={save}>
+              {error && <p role="alert">{error}</p>}
+              {[['full_name','Full Name'],['username','Display Name'],['birthday','Birthday'],['school_id','School ID']].map(([field,label]) => (
+                <div className={styles.editField} key={field}>
+                  <label htmlFor={`edit-${field}`}>{label}</label>
+                  <input id={`edit-${field}`} type={field === 'birthday' ? 'date' : 'text'} required maxLength={['school_id','username'].includes(field) ? 50 : 255} value={draft[field]} onChange={event => setDraft({...draft,[field]:event.target.value})} />
+                </div>
+              ))}
+              <div className={styles.editActions}>
+                <button type="button" className={styles.cancelButton} disabled={saving} onClick={() => setEditing(false)}>Cancel</button>
+                <button className={styles.editButton} disabled={saving}>{saving ? 'Saving...' : 'Save Profile'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <Footer />
 
       {/* Modals */}
@@ -212,7 +170,7 @@ function ProfileContent() {
         onClose={() => setUserMenuOpen(false)}
         onProfileClick={() => window.location.href = '/profile'}
         onLogoutClick={() => {
-          localStorage.removeItem('shielded_current_user');
+          logout();
         }}
       />
     </>

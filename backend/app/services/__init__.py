@@ -17,7 +17,8 @@ This module contains business logic separated from routes:
 - Tracking service (tracking code generation)
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import hashlib
 from typing import Optional, List, BinaryIO
 from passlib.context import CryptContext
 from jose import jwt, JWTError
@@ -28,11 +29,12 @@ from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_, update
 from sqlalchemy.orm import selectinload
+from fastapi import HTTPException
 from starlette.concurrency import run_in_threadpool
 from app.models import (
     Profile, Report, ReportAttachment, ReportTimeline, 
     ReportTimelineAttachment, JournalEntry, WellnessTip,
-    InspireStory, InspireQuote, SharedMaterial, UserRole, ReportStatus, ReportCategory
+    InspireStory, InspireQuote, SharedMaterial, ApiSession, UserRole, ReportStatus, ReportCategory
 )
 import os
 import uuid
@@ -183,22 +185,44 @@ class AuthService:
             raise ValueError("Supabase Auth not configured")
         
         try:
-            await self.supabase.auth.reset_password_for_email(email)
+            await self.supabase.auth.reset_password_for_email(email, {"redirect_to": f"{settings.FRONTEND_URL.rstrip('/')}/reset-password"})
             return True
         except Exception:
             return False
     
-    async def update_password(self, access_token: str, new_password: str) -> SupabaseUser:
-        """Update user password."""
-        if not self.supabase.auth:
-            raise ValueError("Supabase Auth not configured")
-        
-        response = await self.supabase.auth.update_user(
-            access_token,
-            {"password": new_password}
-        )
-        return response.user
-    
+    async def recover_password(self, token_hash: str, new_password: str):
+        # Never mutate a shared server Auth session or accept an arbitrary access token.
+        client = AsyncGoTrueClient(url=f"{settings.SUPABASE_URL}/auth/v1", headers={"apiKey": settings.SUPABASE_ANON_KEY}, auto_refresh_token=False, persist_session=False)
+        try:
+            result = await client.verify_otp({"token_hash": token_hash, "type": "recovery"})
+            if not result.session or not result.user:
+                raise ValueError("Invalid recovery link")
+            response = await client.update_user({"password": new_password})
+            await client.sign_out()
+            return response.user
+        finally:
+            await client.close()
+
+    async def issue_api_session(self, db, profile, email_verified=None):
+        if not profile.is_active: raise HTTPException(403, 'Inactive account')
+        identity=uuid.uuid4()
+        data={'sub':str(profile.id),'sid':str(identity),'email_verified':email_verified}
+        refresh=self.create_refresh_token({**data,'jti':uuid.uuid4().hex})
+        db.add(ApiSession(id=identity,user_id=profile.id,refresh_hash=hashlib.sha256(refresh.encode()).hexdigest(),expires_at=datetime.now(timezone.utc)+timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)))
+        await db.commit()
+        return self.create_access_token(data), refresh
+
+    async def active_api_session(self, db, payload, lock=False):
+        try:
+            identity=uuid.UUID(payload['sid']); owner=uuid.UUID(payload['sub'])
+        except (ValueError,KeyError,TypeError,AttributeError):
+            raise HTTPException(401,'Invalid API session')
+        query=select(ApiSession).where(ApiSession.id==identity,ApiSession.user_id==owner,ApiSession.revoked_at.is_(None),ApiSession.expires_at>datetime.now(timezone.utc))
+        if lock: query=query.with_for_update()
+        session=await db.scalar(query)
+        if session is None: raise HTTPException(401,'API session expired or revoked')
+        return session
+
     # Legacy methods for compatibility
     def hash_password(self, password: str) -> str:
         return pwd_context.hash(password)
@@ -212,7 +236,7 @@ class AuthService:
             expire = datetime.utcnow() + expires_delta
         else:
             expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": expire, "type": "access"})
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
     
@@ -437,7 +461,7 @@ class FileStorageService:
     
     def __init__(self):
         self.supabase = supabase_service
-        self.bucket_name = settings.SUPABASE_STORAGE_BUCKET
+        self.bucket_name = settings.REPORT_STORAGE_BUCKET
     
     def validate_file(self, filename: str, mime_type: str, file_size: int) -> tuple[bool, Optional[str]]:
         """Validate file extension, MIME type, and size.
@@ -454,7 +478,10 @@ class FileStorageService:
             return False, f"File type '{ext}' not allowed. Allowed: {', '.join(self.ALLOWED_EXTENSIONS)}"
         
         # Check MIME type
-        if mime_type not in self.ALLOWED_MIME_TYPES:
+        if file_size <= 0:
+            return False, "File is empty"
+        expected = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".pdf": "application/pdf"}
+        if mime_type != expected.get(ext):
             return False, f"MIME type '{mime_type}' not allowed"
         
         return True, None
@@ -481,7 +508,7 @@ class FileStorageService:
         file_size = len(file_content)
         
         # Upload to Supabase Storage
-        bucket = self.supabase.get_storage_bucket()
+        bucket = self.supabase.get_storage_bucket(self.bucket_name)
         if not bucket:
             raise ValueError("Storage bucket not available")
         
@@ -489,7 +516,7 @@ class FileStorageService:
         response = bucket.upload(
             path=file_path,
             file=file_content,
-            file_options={"content-type": "application/octet-stream"}
+            file_options={"content-type": {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".pdf": "application/pdf"}[Path(original_filename).suffix.lower()]}
         )
         
         if hasattr(response, 'error') and response.error:
@@ -503,7 +530,7 @@ class FileStorageService:
             return False
         
         try:
-            bucket_client = self.supabase.get_storage_bucket(bucket)
+            bucket_client = self.supabase.get_storage_bucket(bucket or self.bucket_name)
             if not bucket_client:
                 return False
             
@@ -517,7 +544,7 @@ class FileStorageService:
         if not self.supabase.client:
             return ""
         
-        bucket_client = self.supabase.get_storage_bucket(bucket)
+        bucket_client = self.supabase.get_storage_bucket(bucket or self.bucket_name)
         if not bucket_client:
             return ""
         
@@ -532,7 +559,7 @@ class FileStorageService:
         if not self.supabase.client:
             return ""
         
-        bucket_client = self.supabase.get_storage_bucket(bucket)
+        bucket_client = self.supabase.get_storage_bucket(bucket or self.bucket_name)
         if not bucket_client:
             return ""
         
@@ -800,6 +827,24 @@ class ReportService:
         self.file_storage = FileStorageService()
         self.email_service = EmailService()
     
+    def relations(self):
+        return [selectinload(Report.attachments), selectinload(Report.assignee),
+            selectinload(Report.timeline_entries).selectinload(ReportTimeline.created_by),
+            selectinload(Report.timeline_entries).selectinload(ReportTimeline.attachments).selectinload(ReportTimelineAttachment.attachment)]
+
+    def validate_transition(self, old, new, assigned):
+        old, new = ReportStatus(old), ReportStatus(new)
+        allowed = {
+            ReportStatus.SUBMITTED: {ReportStatus.UNDER_REVIEW},
+            ReportStatus.UNDER_REVIEW: {ReportStatus.ASSIGNED, ReportStatus.AWAITING_ADDITIONAL_INFO, ReportStatus.CLOSED},
+            ReportStatus.ASSIGNED: {ReportStatus.IN_PROGRESS, ReportStatus.AWAITING_ADDITIONAL_INFO},
+            ReportStatus.IN_PROGRESS: {ReportStatus.RESOLVED, ReportStatus.AWAITING_ADDITIONAL_INFO},
+            ReportStatus.AWAITING_ADDITIONAL_INFO: {ReportStatus.UNDER_REVIEW, ReportStatus.IN_PROGRESS},
+            ReportStatus.RESOLVED: {ReportStatus.CLOSED}, ReportStatus.CLOSED: set(),
+        }
+        if new != old and new not in allowed[old]: raise HTTPException(409, 'Invalid report status transition')
+        if new in (ReportStatus.ASSIGNED, ReportStatus.IN_PROGRESS) and not assigned: raise HTTPException(409, 'Assign an administrator or moderator first')
+
     # --- Report Creation ---
     
     async def create_report(
@@ -808,7 +853,8 @@ class ReportService:
         data: dict,
         user_id: Optional[uuid.UUID] = None,
         is_anonymous: bool = False,
-        reporter_email: Optional[str] = None
+        reporter_email: Optional[str] = None,
+        commit: bool = True
     ) -> Report:
         """Create a new report (authenticated or anonymous)."""
         # Generate tracking code
@@ -840,9 +886,18 @@ class ReportService:
         )
         db.add(timeline)
         
-        await db.commit()
+        if commit:
+            await db.commit()
+        else:
+            await db.flush()
         await db.refresh(report)
-        
+        if commit:
+            await self.notify_submission(db, report)
+        return await self.get_by_id(db, report.id)
+
+    async def notify_submission(self, db, report):
+        is_anonymous, user_id, reporter_email = report.is_anonymous, report.user_id, report.reporter_email
+        tracking_code = report.tracking_code
         # Send email notification if email available
         email_to_send = None
         if not is_anonymous and user_id:
@@ -853,7 +908,7 @@ class ReportService:
             email_to_send = reporter_email
         
         if email_to_send:
-            tracking_url = f"{settings.BACKEND_CORS_ORIGINS[0]}/track/{tracking_code}"
+            tracking_url = f"{settings.FRONTEND_URL.rstrip('/')}/track/{tracking_code}"
             await self.email_service.send_report_confirmation(
                 to_email=email_to_send,
                 tracking_code=tracking_code,
@@ -863,18 +918,18 @@ class ReportService:
                 is_anonymous=is_anonymous
             )
         
-        return report
+        return None
     
     # --- Report Retrieval ---
     
     async def get_by_id(self, db: AsyncSession, report_id: int, include_relations: bool = True) -> Optional[Report]:
-        query = select(Report).where(Report.id == report_id)
+        query = select(Report).where(Report.id == report_id).options(*self.relations()).execution_options(populate_existing=True)
         result = await db.execute(query)
         return result.scalar_one_or_none()
     
     async def get_by_tracking_code(self, db: AsyncSession, tracking_code: str) -> Optional[Report]:
         result = await db.execute(
-            select(Report).where(Report.tracking_code == tracking_code)
+            select(Report).where(Report.tracking_code == tracking_code).options(*self.relations()).execution_options(populate_existing=True)
         )
         return result.scalar_one_or_none()
     
@@ -886,7 +941,7 @@ class ReportService:
         limit: int = 20,
         status: Optional[ReportStatus] = None
     ) -> tuple[List[Report], int]:
-        query = select(Report).where(Report.user_id == user_id)
+        query = select(Report).where(Report.user_id == user_id).options(*self.relations())
         if status:
             query = query.where(Report.status == status)
         
@@ -909,7 +964,7 @@ class ReportService:
         is_anonymous: Optional[bool] = None,
         assignee_id: Optional[uuid.UUID] = None
     ) -> tuple[List[Report], int]:
-        query = select(Report)
+        query = select(Report).options(*self.relations())
         
         if status:
             query = query.where(Report.status == status)
@@ -931,144 +986,57 @@ class ReportService:
     
     # --- Report Updates ---
     
-    async def update_report(
-        self, 
-        db: AsyncSession, 
-        report_id: int, 
-        data: dict,
-        current_user: Optional[Profile] = None
-    ) -> Optional[Report]:
+    async def update_report(self, db, report_id, data, current_user=None):
         report = await self.get_by_id(db, report_id)
-        if not report:
-            return None
-        
-        # Track status change for timeline
-        old_status = report.status
-        
-        for key, value in data.items():
-            if hasattr(report, key) and key not in ("id", "tracking_code", "user_id", "created_at"):
-                setattr(report, key, value)
-        
-        report.updated_at = datetime.utcnow()
-        
-        # Handle status change
-        if "status" in data and data["status"] != old_status:
-            new_status = data["status"]
-            
-            # Set resolved/closed timestamps
-            if new_status == ReportStatus.RESOLVED and not report.resolved_at:
-                report.resolved_at = datetime.utcnow()
-            elif new_status == ReportStatus.CLOSED and not report.closed_at:
-                report.closed_at = datetime.utcnow()
-            
-            # Create timeline entry
-            timeline = ReportTimeline(
-                report_id=report.id,
-                status=new_status,
-                remarks=data.get("remarks"),
-                created_by_user_id=current_user.id if current_user else None
-            )
-            db.add(timeline)
-            
-            # Send email notification if reporter has email
-            email_to_send = None
-            if not report.is_anonymous and report.user_id:
-                user = await profile_service.get_by_id(db, report.user_id)
-                if user:
-                    email_to_send = user.email
-            elif report.is_anonymous and report.reporter_email:
-                email_to_send = report.reporter_email
-            
-            if email_to_send:
-                tracking_url = f"{settings.BACKEND_CORS_ORIGINS[0]}/track/{report.tracking_code}"
-                await self.email_service.send_status_update(
-                    to_email=email_to_send,
-                    tracking_code=report.tracking_code,
-                    report_title=report.title,
-                    new_status=new_status,
-                    remarks=data.get("remarks"),
-                    tracking_url=tracking_url
-                )
-        
+        if not report: return None
+        if current_user is None: raise HTTPException(403, 'Authentication required')
+        if not current_user.is_admin:
+            if report.user_id != current_user.id: raise HTTPException(403, 'Not authorized')
+            if any(key in data for key in ('status','assignee_id','remarks','attachment_ids')): raise HTTPException(403, 'Administrator access required')
+        remarks = data.get('remarks')
+        if remarks and len(remarks.split()) > 250: raise HTTPException(422, 'Remarks exceed 250 words maximum')
+        assignment = data.get('assignee_id', report.assignee_id)
+        if 'assignee_id' in data and assignment:
+            if not isinstance(assignment, uuid.UUID):
+                try: assignment = uuid.UUID(str(assignment))
+                except ValueError: raise HTTPException(422, 'Invalid assignee')
+            assignee = await profile_service.get_by_id(db, assignment)
+            if not assignee or not assignee.is_active or not assignee.is_admin: raise HTTPException(422, 'Assignee must be an active administrator or moderator')
+        new_status = ReportStatus(data.get('status', report.status))
+        self.validate_transition(report.status, new_status, assignment)
+        ids = list(dict.fromkeys(data.get('attachment_ids') or []))
+        if ids:
+            attachments=(await db.execute(select(ReportAttachment.id).where(ReportAttachment.report_id==report.id,ReportAttachment.id.in_(ids)))).scalars().all()
+            if set(attachments)!=set(ids): raise HTTPException(422,'Attachments must belong to this report')
+        changed = new_status != report.status
+        for key in ('title','description','category','location','incident_date'):
+            if key in data: setattr(report,key,data[key])
+        if 'assignee_id' in data: report.assignee_id=assignment
+        report.status=new_status; report.updated_at=datetime.utcnow()
+        if changed or remarks or ids:
+            timeline=ReportTimeline(report_id=report.id,status=new_status,remarks=remarks,created_by_user_id=current_user.id)
+            db.add(timeline); await db.flush()
+            for identity in ids: db.add(ReportTimelineAttachment(timeline_id=timeline.id,attachment_id=identity))
+        if new_status==ReportStatus.RESOLVED and not report.resolved_at: report.resolved_at=datetime.utcnow()
+        if new_status==ReportStatus.CLOSED and not report.closed_at: report.closed_at=datetime.utcnow()
         await db.commit()
-        await db.refresh(report)
-        return report
-    
-    async def assign_report(self, db: AsyncSession, report_id: int, assignee_id: uuid.UUID, current_user: Profile) -> Optional[Report]:
-        """Assign a report to an admin/moderator."""
-        report = await self.get_by_id(db, report_id)
-        if not report:
-            return None
-        
-        # Verify assignee exists and is admin/moderator
-        assignee = await profile_service.get_by_id(db, assignee_id)
-        if not assignee or assignee.role not in (UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN):
-            raise ValueError("Assignee must be an admin or moderator")
-        
-        report.assignee_id = assignee_id
-        report.status = ReportStatus.ASSIGNED
-        report.updated_at = datetime.utcnow()
-        
-        # Create timeline entry
-        timeline = ReportTimeline(
-            report_id=report.id,
-            status=ReportStatus.ASSIGNED,
-            remarks=f"Assigned to {assignee.full_name or assignee.username}",
-            created_by_user_id=current_user.id
-        )
-        db.add(timeline)
-        
-        await db.commit()
-        await db.refresh(report)
-        return report
-    
-    async def add_timeline_entry(
-        self,
-        db: AsyncSession,
-        report_id: int,
-        status: ReportStatus,
-        remarks: Optional[str],
-        created_by_user_id: Optional[uuid.UUID],
-        attachment_ids: Optional[List[int]] = None
-    ) -> Optional[ReportTimeline]:
-        """Add a timeline entry with optional attachments."""
-        report = await self.get_by_id(db, report_id)
-        if not report:
-            return None
-        
-        timeline = ReportTimeline(
-            report_id=report_id,
-            status=status,
-            remarks=remarks,
-            created_by_user_id=created_by_user_id
-        )
-        db.add(timeline)
-        await db.flush()
-        
-        # Link attachments if provided
-        if attachment_ids:
-            for att_id in attachment_ids:
-                link = ReportTimelineAttachment(
-                    timeline_id=timeline.id,
-                    attachment_id=att_id
-                )
-                db.add(link)
-        
-        # Update report status if changed
-        if status != report.status:
-            report.status = status
-            report.updated_at = datetime.utcnow()
-            if status == ReportStatus.RESOLVED and not report.resolved_at:
-                report.resolved_at = datetime.utcnow()
-            elif status == ReportStatus.CLOSED and not report.closed_at:
-                report.closed_at = datetime.utcnow()
-        
-        await db.commit()
-        await db.refresh(timeline)
-        return timeline
-    
-    # --- File Attachments ---
-    
+        if changed:
+            email = report.reporter_email if report.is_anonymous else None
+            if report.user_id and not report.is_anonymous:
+                reporter = await profile_service.get_by_id(db, report.user_id)
+                email = reporter.email if reporter else None
+            if email:
+                await self.email_service.send_status_update(email, report.tracking_code, report.title, new_status, remarks, f"{settings.FRONTEND_URL.rstrip('/')}/track/{report.tracking_code}")
+        return await self.get_by_id(db,report.id)
+
+    async def assign_report(self, db, report_id, assignee_id, current_user):
+        return await self.update_report(db,report_id,{'assignee_id':assignee_id,'status':ReportStatus.ASSIGNED},current_user)
+
+    async def add_timeline_entry(self,db,report_id,status,remarks,created_by_user_id,attachment_ids=None):
+        actor=await profile_service.get_by_id(db,created_by_user_id)
+        report=await self.update_report(db,report_id,{'status':status,'remarks':remarks,'attachment_ids':attachment_ids},actor)
+        return report.timeline_entries[-1] if report and report.timeline_entries else None
+
     async def add_attachment(
         self,
         db: AsyncSession,
@@ -1076,7 +1044,8 @@ class ReportService:
         file_content: bytes,
         original_filename: str,
         mime_type: str,
-        uploaded_by_user_id: Optional[uuid.UUID] = None
+        uploaded_by_user_id: Optional[uuid.UUID] = None,
+        commit: bool = True
     ) -> Optional[ReportAttachment]:
         """Add an attachment to a report."""
         report = await self.get_by_id(db, report_id)
@@ -1105,9 +1074,16 @@ class ReportService:
             extension=Path(original_filename).suffix.lower(),
             uploaded_by_user_id=uploaded_by_user_id
         )
-        db.add(attachment)
-        await db.commit()
-        await db.refresh(attachment)
+        try:
+            db.add(attachment)
+            if commit:
+                await db.commit()
+            else:
+                await db.flush()
+            await db.refresh(attachment)
+        except Exception:
+            await self.file_storage.delete_file(file_path)
+            raise
         
         return attachment
     
@@ -1230,7 +1206,7 @@ class ShareService:
         bucket = supabase_service.get_storage_bucket()
         if not bucket:
             raise ValueError("Study material storage is not configured.")
-        path = f"materials/{user_id}/{uuid.uuid4().hex}{extension}"
+        path = f"materials/{uuid.uuid4().hex}{extension}"
         await run_in_threadpool(
             bucket.upload, path=path, file=content, file_options={"content-type": mime_type}
         )

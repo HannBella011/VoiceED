@@ -2,7 +2,7 @@
 # Environment-based settings using Pydantic Settings
 
 from pydantic_settings import BaseSettings
-from typing import List, Optional
+from typing import List, Optional, Literal
 import secrets
 
 
@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    REFRESH_COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
+    REFRESH_COOKIE_SECURE: bool = True
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
@@ -35,11 +37,15 @@ class Settings(BaseSettings):
     
     # Supabase Storage
     SUPABASE_STORAGE_BUCKET: str = "voiceed-uploads"
+    REPORT_STORAGE_BUCKET: str = "voiceed-reports"
     
     # Firebase (legacy)
     FIREBASE_CREDENTIALS_PATH: Optional[str] = None
     FIREBASE_PROJECT_ID: Optional[str] = None
     
+    SUPPORT_RECIPIENT_ID: Optional[str] = None
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # Email (optional)
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: Optional[int] = None

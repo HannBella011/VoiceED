@@ -24,6 +24,7 @@ export default function AuthCallbackPage() {
         const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
         const response = await fetch(`${apiBase}/auth/callback`, {
           method: "POST",
+          credentials: "include",
           headers: {
             Authorization: `Bearer ${data.session.access_token}`,
             "Content-Type": "application/json",
@@ -33,7 +34,8 @@ export default function AuthCallbackPage() {
         const result = await response.json();
         if (!response.ok) throw new Error(typeof result.detail === "string" ? result.detail : "Unable to finish Google sign-in.");
         localStorage.setItem("access_token", result.access_token);
-        localStorage.setItem("refresh_token", result.refresh_token);
+
+    localStorage.removeItem("refresh_token");
         sessionStorage.removeItem("shielded_return_url");
         window.location.replace(result.profile_complete ? next : `/complete-profile?next=${encodeURIComponent(next)}`);
       } catch (err) {

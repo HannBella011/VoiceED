@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, Header
 from fastapi.security import OAuth2PasswordBearer
 from gotrue.errors import AuthApiError
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, EmailStr
-from datetime import timedelta, datetime
+from pydantic import BaseModel, EmailStr, Field
+from datetime import timedelta, datetime, timezone
+import hashlib
+import hmac
 from typing import Optional
 import uuid
 
 from app.database import get_db
 from app.services import auth_service, profile_service
 from app.config import settings
-from app.models import Profile, UserRole
+from app.models import Profile, UserRole, ApiSession
 from app.schemas import UserResponse, Token, RegisterRequest, CompleteProfileRequest, Gender
 
 router = APIRouter()
@@ -27,7 +29,6 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    refresh_token: str
     user: UserResponse
     profile_complete: bool = True
 
@@ -44,25 +45,28 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db)
 ) -> Profile:
-    """Get current user from JWT token (Supabase JWT)."""
+    """Validate the API session established after Supabase authentication."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        # Decode Supabase JWT
+        # Decode the API access token
         payload = auth_service.decode_token(token)
         user_id: str = payload.get("sub")
-        if user_id is None:
+        if user_id is None or payload.get("type") != "access":
             raise credentials_exception
-    except ValueError:
+        identity = uuid.UUID(user_id)
+    except (ValueError, TypeError, AttributeError):
         raise credentials_exception
     
+    await auth_service.active_api_session(db, payload)
     # Get profile from local database
-    profile = await profile_service.get_by_id(db, uuid.UUID(user_id))
+    profile = await profile_service.get_by_id(db, identity)
     if profile is None:
         raise credentials_exception
+    profile._email_verified = payload.get("email_verified")
     return profile
 
 
@@ -125,23 +129,21 @@ async def login(
     await db.refresh(profile)
     
     # Create tokens (local JWT for API access)
-    access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
-    refresh_token = auth_service.create_refresh_token(data={"sub": str(profile.id)})
+    access_token, refresh_token = await auth_service.issue_api_session(db, profile, bool(supabase_user.email_confirmed_at))
     
     # Set refresh token in httpOnly cookie
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=not settings.DEBUG,
-        samesite="lax",
+        secure=settings.REFRESH_COOKIE_SECURE,
+        samesite=settings.REFRESH_COOKIE_SAMESITE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     )
     
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
-        refresh_token=refresh_token,
         user=UserResponse(
             id=str(profile.id),
             username=profile.username,
@@ -150,6 +152,7 @@ async def login(
             role=profile.role,
             is_active=profile.is_active,
             is_verified=bool(supabase_user.email_confirmed_at),
+            theme=getattr(profile, "theme", "blue"),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -236,6 +239,7 @@ async def register(
             role=profile.role,
             is_active=profile.is_active,
             is_verified=bool(supabase_user.email_confirmed_at),
+            theme=getattr(profile, "theme", "blue"),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -250,9 +254,14 @@ async def register(
 @router.post("/logout")
 async def logout(
     response: Response,
-    current_user: Profile = Depends(get_current_active_user)
+    current_user: Profile = Depends(get_current_active_user),
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db)
 ):
-    """Logout endpoint - clears refresh token cookie."""
+    """Revoke this API session and clear its refresh cookie."""
+    session = await auth_service.active_api_session(db, auth_service.decode_token(token), lock=True)
+    session.revoked_at = datetime.now(timezone.utc)
+    await db.commit()
     # Sign out from Supabase (optional - would need access token)
     response.delete_cookie(key="refresh_token")
     return {"message": "Successfully logged out"}
@@ -293,9 +302,12 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    session = await auth_service.active_api_session(db, payload, lock=True)
+    if not hmac.compare_digest(session.refresh_hash, hashlib.sha256(refresh_token.encode()).hexdigest()):
+        raise HTTPException(401, "Refresh token already used or revoked")
     # Verify profile exists
-    profile = await profile_service.get_by_id(db, uuid.UUID(user_id))
-    if not profile:
+    profile = await profile_service.get_by_id(db, session.user_id)
+    if not profile or not profile.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
@@ -303,16 +315,19 @@ async def refresh_token(
         )
     
     # Create new tokens
-    new_access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
-    new_refresh_token = auth_service.create_refresh_token(data={"sub": str(profile.id)})
+    claims = {"sub": str(profile.id), "sid": str(session.id), "email_verified": payload.get("email_verified")}
+    new_access_token = auth_service.create_access_token(data=claims)
+    new_refresh_token = auth_service.create_refresh_token(data={**claims, "jti": uuid.uuid4().hex})
+    session.refresh_hash = hashlib.sha256(new_refresh_token.encode()).hexdigest()
+    await db.commit()
     
     # Set new refresh token in httpOnly cookie
     response.set_cookie(
         key="refresh_token",
         value=new_refresh_token,
         httponly=True,
-        secure=not settings.DEBUG,
-        samesite="lax",
+        secure=settings.REFRESH_COOKIE_SECURE,
+        samesite=settings.REFRESH_COOKIE_SAMESITE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     )
     
@@ -332,7 +347,8 @@ async def get_me(current_user: Profile = Depends(get_current_active_user)):
         full_name=current_user.full_name,
         role=current_user.role,
         is_active=current_user.is_active,
-        is_verified=False,
+        is_verified=getattr(current_user, "_email_verified", None),
+        theme=current_user.theme,
         created_at=current_user.created_at,
         updated_at=current_user.updated_at,
         gender=current_user.gender,
@@ -344,13 +360,15 @@ async def get_me(current_user: Profile = Depends(get_current_active_user)):
 
 
 class ProfileUpdateRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    theme: Optional[str] = None
     """Request model for updating profile fields."""
-    full_name: Optional[str] = None
-    username: Optional[str] = None
+    full_name: Optional[str] = Field(None, max_length=255)
+    username: Optional[str] = Field(None, min_length=1, max_length=50)
     gender: Optional[Gender] = None
     birthday: Optional[str] = None
-    school_id: Optional[str] = None
-    avatar_url: Optional[str] = None
+    school_id: Optional[str] = Field(None, min_length=1, max_length=50)
+    avatar_url: Optional[str] = Field(None, max_length=500)
 
 
 @router.patch("/me", response_model=UserResponse)
@@ -361,6 +379,10 @@ async def update_me(
     current_user: Profile = Depends(get_current_active_user)
 ):
     """Update current user's profile."""
+    if "theme" in profile_data.model_fields_set:
+        if profile_data.theme not in {"blue", "purple", "red", "green", "orange", "pink"}:
+            raise HTTPException(status_code=422, detail="Invalid theme")
+        current_user.theme = profile_data.theme
     # Check if username is being changed and if it's already taken
     if profile_data.username and profile_data.username != current_user.username:
         existing_user = await profile_service.get_by_username(db, profile_data.username)
@@ -375,12 +397,12 @@ async def update_me(
     if profile_data.full_name is not None:
         current_user.full_name = profile_data.full_name
     
-    if profile_data.gender is not None:
+    if "gender" in profile_data.model_fields_set:
         current_user.gender = profile_data.gender
     
     if profile_data.birthday is not None:
         try:
-            current_user.birthday = datetime.fromisoformat(profile_data.birthday.replace("Z", "+00:00"))
+            current_user.birthday = datetime.fromisoformat(profile_data.birthday.replace("Z", "+00:00")).replace(tzinfo=None)
         except (ValueError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -392,7 +414,8 @@ async def update_me(
         existing_school_id = await db.execute(
             select(Profile).where(Profile.school_id == profile_data.school_id)
         )
-        if existing_school_id.scalar_one_or_none() and existing_school_id.scalar_one_or_none().id != current_user.id:
+        school_profile = existing_school_id.scalar_one_or_none()
+        if school_profile and school_profile.id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="School ID already registered"
@@ -413,7 +436,8 @@ async def update_me(
         full_name=current_user.full_name,
         role=current_user.role,
         is_active=current_user.is_active,
-        is_verified=False,
+        is_verified=getattr(current_user, "_email_verified", None),
+        theme=current_user.theme,
         created_at=current_user.created_at,
         updated_at=current_user.updated_at,
         gender=current_user.gender,
@@ -424,29 +448,31 @@ async def update_me(
     )
 
 
-@router.post("/forgot-password")
-async def forgot_password(email: EmailStr):
-    """Send password reset email via Supabase Auth."""
-    success = await auth_service.reset_password_email(email)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send reset email"
-        )
-    return {"message": "If the email exists, a reset link will be sent"}
+class RecoveryRequest(BaseModel):
+    email: EmailStr
 
+class ResetRequest(BaseModel):
+    token_hash: str
+    new_password: str
+
+@router.post("/forgot-password")
+async def forgot_password(data: RecoveryRequest):
+    success = await auth_service.reset_password_email(data.email)
+    if not success:
+        raise HTTPException(503, "Unable to request recovery right now")
+    return {"message": "If that email is registered, a password reset link will be sent"}
 
 @router.post("/reset-password")
-async def reset_password(access_token: str, new_password: str):
-    """Reset password via Supabase Auth."""
+async def reset_password(data: ResetRequest, db: AsyncSession = Depends(get_db)):
+    if len(data.new_password) < 8:
+        raise HTTPException(422, "Password must be at least 8 characters long")
     try:
-        await auth_service.update_password(access_token, new_password)
-        return {"message": "Password updated successfully"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        recovered = await auth_service.recover_password(data.token_hash, data.new_password)
+        await db.execute(update(ApiSession).where(ApiSession.user_id == uuid.UUID(recovered.id), ApiSession.revoked_at.is_(None)).values(revoked_at=datetime.now(timezone.utc)))
+        await db.commit()
+    except Exception:
+        raise HTTPException(400, "Invalid or expired recovery link")
+    return {"message": "Password updated successfully"}
 
 
 class OAuthCallbackRequest(BaseModel):
@@ -498,23 +524,21 @@ async def oauth_callback(
     await db.refresh(profile)
     
     # Create tokens (local JWT for API access)
-    access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
-    refresh_token = auth_service.create_refresh_token(data={"sub": str(profile.id)})
+    access_token, refresh_token = await auth_service.issue_api_session(db, profile, bool(supabase_user.email_confirmed_at))
     
     # Set refresh token in httpOnly cookie
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=not settings.DEBUG,
-        samesite="lax",
+        secure=settings.REFRESH_COOKIE_SECURE,
+        samesite=settings.REFRESH_COOKIE_SAMESITE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     )
     
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
-        refresh_token=refresh_token,
         user=UserResponse(
             id=str(profile.id),
             username=profile.username,
@@ -523,6 +547,7 @@ async def oauth_callback(
             role=profile.role,
             is_active=profile.is_active,
             is_verified=bool(supabase_user.email_confirmed_at),
+            theme=getattr(profile, "theme", "blue"),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -615,23 +640,21 @@ async def complete_profile(
     await db.refresh(profile)
     
     # Create tokens
-    access_token = auth_service.create_access_token(data={"sub": str(profile.id)})
-    refresh_token = auth_service.create_refresh_token(data={"sub": str(profile.id)})
+    access_token, refresh_token = await auth_service.issue_api_session(db, profile, bool(supabase_user.email_confirmed_at))
     
     # Set refresh token in httpOnly cookie
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=not settings.DEBUG,
-        samesite="lax",
+        secure=settings.REFRESH_COOKIE_SECURE,
+        samesite=settings.REFRESH_COOKIE_SAMESITE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     )
     
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
-        refresh_token=refresh_token,
         user=UserResponse(
             id=str(profile.id),
             username=profile.username,
@@ -640,6 +663,7 @@ async def complete_profile(
             role=profile.role,
             is_active=profile.is_active,
             is_verified=bool(supabase_user.email_confirmed_at),
+            theme=getattr(profile, "theme", "blue"),
             created_at=profile.created_at,
             updated_at=profile.updated_at,
             gender=profile.gender,
@@ -650,3 +674,13 @@ async def complete_profile(
         ),
         profile_complete=True
     )
+
+
+@router.post('/revoke-sessions')
+async def revoke_sessions(authorization: Optional[str] = Header(None), db: AsyncSession = Depends(get_db)):
+    if not authorization or not authorization.startswith('Bearer '): raise HTTPException(401, 'Supabase session required')
+    identity = await auth_service.get_user(authorization[7:])
+    if identity is None: raise HTTPException(401, 'Invalid Supabase session')
+    await db.execute(update(ApiSession).where(ApiSession.user_id == uuid.UUID(identity.id), ApiSession.revoked_at.is_(None)).values(revoked_at=datetime.now(timezone.utc)))
+    await db.commit()
+    return {'message': 'API sessions revoked'}

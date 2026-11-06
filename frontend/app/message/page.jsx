@@ -3,16 +3,20 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, LoginModal } from '@/components/shared';
+import { accountRequest } from '@/services/account';
+import { useAuthContext } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
 function MessageContent() {
   const pathname = usePathname();
+  const { currentUser } = useAuthContext();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const handleLoginClick = () => {
-    const currentUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('shielded_current_user') || 'null') : null;
     if (currentUser) {
       window.location.href = '/profile';
     } else {
@@ -24,15 +28,14 @@ function MessageContent() {
     setSettingsOpen(true);
   };
 
-  const loadMessages = () => {
-    const stored = localStorage.getItem('shielded_messages');
-    if (stored) {
-      try {
-        setMessages(JSON.parse(stored));
-      } catch (e) {
-        setMessages([]);
-      }
-    }
+  const loadMessages = async () => {
+    setLoading(true); setError('');
+    try {
+      const rows = [];
+      for (let page=1; ; page++) { const batch = await accountRequest(`/messages?limit=100&page=${page}`); rows.push(...batch); if(batch.length<100) break; }
+      setMessages(rows);
+    } catch(err) { setError(err.message); }
+    finally { setLoading(false); }
   };
 
   const formatDate = (timestamp) => {
@@ -52,24 +55,17 @@ function MessageContent() {
     }
   };
 
-  const deleteMessage = (id) => {
-    if (confirm('Are you sure you want to delete this message?')) {
-      const newMessages = messages.filter(msg => msg.id !== id);
-      setMessages(newMessages);
-      localStorage.setItem('shielded_messages', JSON.stringify(newMessages));
+  const deleteMessage = async id => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      try { await accountRequest(`/messages/${id}`, 'DELETE'); await loadMessages(); } catch(err) { setError(err.message); }
     }
   };
-
-  const clearAll = () => {
-    if (confirm('Are you sure you want to delete all messages?')) {
-      setMessages([]);
-      localStorage.setItem('shielded_messages', JSON.stringify([]));
+  const clearAll = async () => {
+    if (window.confirm('Are you sure you want to delete all received messages?')) {
+      try { await accountRequest('/messages','DELETE'); await loadMessages(); } catch(err) { setError(err.message); }
     }
   };
-
-  const refreshMessages = () => {
-    loadMessages();
-  };
+  const refreshMessages = () => loadMessages();
 
   const totalMessages = messages.length;
   const weekAgo = new Date();
@@ -78,7 +74,7 @@ function MessageContent() {
 
   useEffect(() => {
     loadMessages();
-  }, []);
+  }, [currentUser?.id]);
 
   return (
     <>
@@ -126,6 +122,8 @@ function MessageContent() {
                   </div>
                 </div>
 
+                {error && <p role="alert">{error}</p>}
+                {loading && <p role="status">Loading messages...</p>}
                 <div id="messagesList" className="messages-list">
                   {messages.length === 0 ? (
                     <div className="no-messages">
@@ -143,7 +141,7 @@ function MessageContent() {
                           </div>
                           <div className="message-meta">
                             <span className="message-date">{formatDate(msg.timestamp)}</span>
-                            <button className="delete-btn" onClick={() => deleteMessage(msg.id)}>
+                            <button className="delete-btn" disabled={!msg.can_delete} onClick={() => deleteMessage(msg.id)}>
                               <i className="fas fa-trash"></i>
                             </button>
                           </div>

@@ -1,5 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { accountRequest } from '@/services/account';
+import { localDate } from '@/lib/wellness';
 import { useRouter, usePathname } from 'next/navigation';
 import { Navbar, Footer } from '@/components/shared';
 import { ProtectedRoute } from '@/lib/routeProtection';
@@ -12,6 +15,13 @@ function DashboardContent() {
   const router = useRouter();
   const { currentUser } = useAuthContext();
   const { setSettingsOpen, setUserMenuOpen } = useModals();
+  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let active = true;
+    accountRequest(`/dashboard?day=${localDate()}`).then(data => { if(active) setSummary(data); }).catch(err => { if(active) setError(err.message); });
+    return () => { active = false; };
+  }, [currentUser?.id]);
   return (
     <>
       <Navbar currentPage={pathname} variant="dashboard"
@@ -48,26 +58,7 @@ function DashboardContent() {
                     <div className="upcoming-events-card">
                         <h3>Upcoming Events</h3>
                         <div className="events-list">
-                            <div className="event-item">
-                                <div className="event-date">
-                                    <span className="date">15</span>
-                                    <span className="month">MAR</span>
-                                </div>
-                                <div className="event-info">
-                                    <h4>Safety Workshop</h4>
-                                    <p>Learn about online safety and digital citizenship</p>
-                                </div>
-                            </div>
-                            <div className="event-item">
-                                <div className="event-date">
-                                    <span className="date">22</span>
-                                    <span className="month">MAR</span>
-                                </div>
-                                <div className="event-info">
-                                    <h4>Wellness Wednesday</h4>
-                                    <p>Join us for mindfulness and stress management</p>
-                                </div>
-                            </div>
+                            <p>No upcoming events available.</p>
                         </div>
                     </div>
                 </div>
@@ -78,10 +69,7 @@ function DashboardContent() {
                         <div className="welcome-content">
                             <h1>Welcome back, <span id="dashboardUsername">{currentUser?.username || "Student"}</span>!</h1>
                             <p>Thanks for signing in—VoiceED is ready to be your hub for safety, wellness, and collaboration, where every student's voice matters.</p>
-                            <div className="quote-box">
-                                <p><em>"Education is not the filling of a pail, but the lighting of a fire."</em></p>
-                                <span>- William Butler Yeats</span>
-                            </div>
+                            <div className="quote-box"><p>{summary ? `${Object.values(summary.reports).reduce((sum, count) => sum + count, 0)} reports ? ${summary.materials} materials shared ? ${summary.inspire_posts} InspireED posts` : 'Loading your summary...'}</p></div>
                         </div>
                     </div>
 
@@ -93,33 +81,8 @@ function DashboardContent() {
                                 <a href="/dashboard/reports" className="view-all">View All</a>
                             </div>
                             <div className="activity-feed">
-                                <div className="activity-item">
-                                    <div className="activity-icon">
-                                        <i className="fas fa-sign-in-alt"></i>
-                                    </div>
-                                    <div className="activity-content">
-                                        <p className="activity-text">Logged in to your account</p>
-                                        <span className="activity-time">Just now</span>
-                                    </div>
-                                </div>
-                                <div className="activity-item">
-                                    <div className="activity-icon">
-                                        <i className="fas fa-user-plus"></i>
-                                    </div>
-                                    <div className="activity-content">
-                                        <p className="activity-text">Account created successfully</p>
-                                        <span className="activity-time">Today</span>
-                                    </div>
-                                </div>
-                                <div className="activity-item">
-                                    <div className="activity-icon">
-                                        <i className="fas fa-shield-alt"></i>
-                                    </div>
-                                    <div className="activity-content">
-                                        <p className="activity-text">Profile secured with VoiceED</p>
-                                        <span className="activity-time">Today</span>
-                                    </div>
-                                </div>
+                                {error && <p role="alert">{error}</p>}
+                                {!summary ? <p>Loading activity...</p> : summary.activity.length === 0 ? <p>No activity yet.</p> : summary.activity.map(item => <div className="activity-item" key={item.id}><div className="activity-icon"><i className="fas fa-history" /></div><div className="activity-content"><p className="activity-text">{item.action}</p><time className="activity-time">{new Date(item.created_at).toLocaleString()}</time></div></div>)}
                             </div>
                         </div>
 
@@ -131,28 +94,28 @@ function DashboardContent() {
                                 <div className="progress-item">
                                     <div className="progress-info">
                                         <span className="progress-title">Profile Completion</span>
-                                        <span className="progress-percentage">75%</span>
+                                        <span className="progress-percentage">{summary ? `${summary.profile_completion}%` : '?'}</span>
                                     </div>
                                     <div className="progress-bar">
-                                        <div className="progress-fill" style={{ width: '75%' }}></div>
+                                        <div className="progress-fill" style={{ width: `${summary?.profile_completion || 0}%` }}></div>
                                     </div>
                                 </div>
                                 <div className="progress-item">
                                     <div className="progress-info">
                                         <span className="progress-title">Safety Training</span>
-                                        <span className="progress-percentage">60%</span>
+                                        <span className="progress-percentage">No training data</span>
                                     </div>
                                     <div className="progress-bar">
-                                        <div className="progress-fill" style={{ width: '60%' }}></div>
+                                        <div className="progress-fill" style={{ width: '0%' }}></div>
                                     </div>
                                 </div>
                                 <div className="progress-item">
                                     <div className="progress-info">
-                                        <span className="progress-title">Wellness Activities</span>
-                                        <span className="progress-percentage">85%</span>
+                                        <span className="progress-title">Daily Wellness Goals</span>
+                                        <span className="progress-percentage">{summary ? `${summary.wellness_progress}%` : '?'}</span>
                                     </div>
                                     <div className="progress-bar">
-                                        <div className="progress-fill" style={{ width: '85%' }}></div>
+                                        <div className="progress-fill" style={{ width: `${summary?.wellness_progress || 0}%` }}></div>
                                     </div>
                                 </div>
                             </div>

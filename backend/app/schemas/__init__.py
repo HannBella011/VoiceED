@@ -1,7 +1,17 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel as PydanticBaseModel, EmailStr, Field, field_validator
 from enum import Enum
+
+
+class BaseModel(PydanticBaseModel):
+    model_config = {"coerce_numbers_to_str": True}
+
+    @field_validator('*', mode='before', check_fields=False)
+    @classmethod
+    def uuid_strings(cls, value):
+        from uuid import UUID
+        return str(value) if isinstance(value, UUID) else value
 
 
 class UserRole(str, Enum):
@@ -75,17 +85,17 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    full_name: Optional[str] = None
-    avatar_url: Optional[str] = None
-    role: Optional[UserRole] = None
-    is_active: Optional[bool] = None
+    model_config = {"extra": "forbid"}
+    full_name: Optional[str] = Field(None, max_length=255)
+    avatar_url: Optional[str] = Field(None, max_length=500)
+
 
 
 class UserResponse(UserBase):
     id: str
     is_active: bool
-    is_verified: bool
+    is_verified: Optional[bool] = None
+    theme: str = "blue"
     role: UserRole
     gender: Optional[Gender] = None
     birthday: Optional[datetime] = None
@@ -120,6 +130,7 @@ class ReportAttachmentCreate(ReportAttachmentBase):
 
 
 class ReportAttachmentResponse(ReportAttachmentBase):
+    url: str = ""
     id: str
     report_id: str
     stored_filename: str
@@ -200,7 +211,7 @@ class ReportUpdate(BaseModel):
 
 class ReportStatusUpdate(BaseModel):
     status: ReportStatus
-    remarks: Optional[str] = Field(None, max_length=1500)  # ~250 words
+    remarks: Optional[str] = Field(None, max_length=50000)
     attachment_ids: Optional[List[int]] = None
 
 
@@ -235,6 +246,32 @@ class ReportListResponse(BaseModel):
     total_pages: int
 
 
+class PublicEvidence(BaseModel):
+    id: str
+    mime_type: str
+    file_size: int
+    filename: str
+    url: str
+    class Config:
+        from_attributes = True
+
+class PublicTimelineAttachment(BaseModel):
+    id: str
+    attachment: PublicEvidence
+    class Config:
+        from_attributes = True
+
+class PublicTimeline(BaseModel):
+    id: str
+    status: ReportStatus
+    remarks: Optional[str] = None
+    created_at: datetime
+    created_by_name: Optional[str] = None
+    attachments: List[PublicTimelineAttachment] = []
+    class Config:
+        from_attributes = True
+
+
 class ReportPublicResponse(BaseModel):
     """Public tracking response - no user identity info for anonymous reports"""
     id: str
@@ -247,7 +284,7 @@ class ReportPublicResponse(BaseModel):
     incident_date: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    timeline: List[ReportTimelineResponse] = []
+    timeline: List[PublicTimeline] = []
 
     class Config:
         from_attributes = True
@@ -297,7 +334,7 @@ class FileUploadError(BaseModel):
 
 
 class FileUploadResult(BaseModel):
-    uploaded: List[FileUploadResponse]
+    uploaded: List[ReportAttachmentResponse]
     errors: List[FileUploadError]
 
 

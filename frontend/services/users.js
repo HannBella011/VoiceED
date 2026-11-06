@@ -1,3 +1,4 @@
+import { authFetch } from '@/lib/authFetch';
 // Users Service - VoiceED
 // Placeholder functions for user profile API calls
 
@@ -15,7 +16,7 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await authFetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });
@@ -65,7 +66,7 @@ export const usersService = {
       headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await fetch(`${API_BASE_URL}/users/me/avatar`, {
+    const response = await authFetch(`${API_BASE_URL}/users/me/avatar`, {
       method: 'POST',
       headers,
       body: formData,

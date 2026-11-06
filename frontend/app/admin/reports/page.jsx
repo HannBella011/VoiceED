@@ -52,7 +52,9 @@ export default function AdminReportsPage() {
         getAdminStats(),
         getAvailableAssignees(),
       ]);
-      setReports(reportsData);
+      setReports(reportsData.items);
+      setTotal(reportsData.total);
+      setTotalPages(reportsData.total_pages);
       setStats(statsData);
       setAssignees(assigneesData);
     } catch (err) {
@@ -95,7 +97,7 @@ export default function AdminReportsPage() {
     { value: 'harassment', label: 'Harassment or Bullying' },
     { value: 'safety', label: 'Facility/Safety Hazard' },
     { value: 'discrimination', label: 'Discrimination' },
-    { value: 'mental-health', label: 'Mental Health Concern' },
+    { value: 'mental_health', label: 'Mental Health Concern' },
     { value: 'violence', label: 'Violence or Threat' },
     { value: 'other', label: 'Other' },
   ];

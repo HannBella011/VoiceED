@@ -1,10 +1,11 @@
 # VoiceED Backend - Database Models
 # Compatible with Supabase Auth (auth.users) and Session Pooler
 
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, UUID as SQLUUID
+from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, CheckConstraint, UUID as SQLUUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
+from .references import auth_users
 import enum
 import uuid
 
@@ -51,7 +52,7 @@ class Profile(Base):
     """
     __tablename__ = "profiles"
 
-    id = Column(SQLUUID(as_uuid=True), primary_key=True, index=True)  # Matches auth.users.id
+    id = Column(SQLUUID(as_uuid=True), ForeignKey(auth_users.c.id, name="fk_profiles_auth_user", ondelete="RESTRICT"), primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     full_name = Column(String(255), nullable=True)
@@ -64,6 +65,11 @@ class Profile(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
+    theme = Column(String(20), nullable=False, default="blue", server_default="blue")
+
+    __table_args__ = (
+        CheckConstraint("theme IN ('blue', 'purple', 'red', 'green', 'orange', 'pink')", name="ck_profiles_theme"),
+    )
 
     # Relationships
     reports = relationship("Report", back_populates="user", cascade="all, delete-orphan", foreign_keys="Report.user_id")
@@ -73,13 +79,19 @@ class Profile(Base):
     assigned_reports = relationship("Report", back_populates="assignee", foreign_keys="Report.assignee_id")
     uploaded_attachments = relationship("ReportAttachment", back_populates="uploaded_by", foreign_keys="ReportAttachment.uploaded_by_user_id")
     created_timeline_entries = relationship("ReportTimeline", back_populates="created_by", foreign_keys="ReportTimeline.created_by_user_id")
+    moods = relationship("MoodRecord", back_populates="user", passive_deletes=True)
+    wellness_goals = relationship("WellnessGoal", back_populates="user", passive_deletes=True)
+    quotes = relationship("InspireQuote", back_populates="user")
+    activity = relationship("UserActivity", back_populates="user", passive_deletes=True)
+    sent_contact_messages = relationship("ContactMessage", back_populates="sender", foreign_keys="ContactMessage.sender_id")
+    received_contact_messages = relationship("ContactMessage", back_populates="recipient", foreign_keys="ContactMessage.recipient_id", passive_deletes="all")
 
     def __repr__(self):
         return f"<Profile(id={self.id}, username={self.username}, email={self.email}, role={self.role})>"
 
     @property
     def is_admin(self) -> bool:
-        return self.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
+        return self.role in (UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN)
 
     @property
     def is_super_admin(self) -> bool:
@@ -90,7 +102,7 @@ class Report(Base):
     __tablename__ = "reports"
 
     id = Column(Integer, primary_key=True, index=True)
-    tracking_code = Column(String(20), unique=True, index=True, nullable=False)
+    tracking_code = Column(String(20), nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=False)
     category = Column(Enum(ReportCategory), nullable=False)
@@ -116,9 +128,15 @@ class Report(Base):
     __table_args__ = (
         Index("ix_reports_status_category", "status", "category"),
         Index("ix_reports_user_created", "user_id", "created_at"),
-        Index("ix_reports_tracking_code", "tracking_code"),
+        Index("ix_reports_tracking_code", "tracking_code", unique=True),
         Index("ix_reports_assignee_status", "assignee_id", "status"),
     )
+
+    @property
+    def timeline(self): return self.timeline_entries
+
+    @property
+    def assignee_name(self): return (self.assignee.full_name or self.assignee.username) if self.assignee else None
 
     def __repr__(self):
         return f"<Report(id={self.id}, tracking_code={self.tracking_code}, title={self.title}, status={self.status})>"
@@ -142,6 +160,11 @@ class ReportAttachment(Base):
     report = relationship("Report", back_populates="attachments")
     uploaded_by = relationship("Profile", back_populates="uploaded_attachments", foreign_keys=[uploaded_by_user_id])
 
+    @property
+    def url(self):
+        from app.services import report_service
+        return report_service.file_storage.get_signed_url(self.file_path)
+
     def __repr__(self):
         return f"<ReportAttachment(id={self.id}, report_id={self.report_id}, filename={self.filename})>"
 
@@ -160,6 +183,18 @@ class ReportTimeline(Base):
     report = relationship("Report", back_populates="timeline_entries")
     created_by = relationship("Profile", back_populates="created_timeline_entries", foreign_keys=[created_by_user_id])
 
+    attachments = relationship("ReportTimelineAttachment", cascade="all, delete-orphan")
+
+    @property
+    def created_by_name(self): return (self.created_by.full_name or self.created_by.username) if self.created_by else None
+
+    __table_args__ = (
+        CheckConstraint(
+            "remarks IS NULL OR btrim(remarks) = '' OR cardinality(regexp_split_to_array(btrim(remarks), E'\\\\s+')) <= 250",
+            name="ck_report_timeline_remarks_words",
+        ).ddl_if(dialect="postgresql"),
+    )
+
     def __repr__(self):
         return f"<ReportTimeline(id={self.id}, report_id={self.report_id}, status={self.status})>"
 
@@ -172,6 +207,8 @@ class ReportTimelineAttachment(Base):
     timeline_id = Column(Integer, ForeignKey("report_timeline.id", ondelete="CASCADE"), nullable=False)
     attachment_id = Column(Integer, ForeignKey("report_attachments.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    attachment = relationship("ReportAttachment")
 
     __table_args__ = (
         UniqueConstraint("timeline_id", "attachment_id", name="uq_timeline_attachment"),
@@ -191,9 +228,12 @@ class JournalEntry(Base):
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    entry_date = Column(Date, nullable=False, server_default=func.current_date())
 
     # Relationships
     user = relationship("Profile", back_populates="journal_entries")
+
+    __table_args__ = (Index("ix_journal_entries_user_date", "user_id", "entry_date", "created_at"),)
 
     def __repr__(self):
         return f"<JournalEntry(id={self.id}, title={self.title})>"
@@ -222,9 +262,21 @@ class InspireStory(Base):
     is_anonymous = Column(Boolean, default=False, nullable=False)
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+    post_type = Column(String(20), nullable=False, default="story", server_default="story")
+    recipient_label = Column(String(255), nullable=True)
 
     # Relationships
     user = relationship("Profile", back_populates="stories")
+    reactions = relationship("InspireReaction", back_populates="story", passive_deletes=True)
+    comments = relationship("InspireComment", back_populates="story", passive_deletes=True)
+    shares = relationship("InspireShare", back_populates="story", passive_deletes=True)
+
+    __table_args__ = (
+        CheckConstraint("post_type IN ('post', 'story', 'kudos', 'milestone')", name="ck_inspire_stories_type"),
+        CheckConstraint("post_type <> 'kudos' OR (recipient_label IS NOT NULL AND length(trim(recipient_label)) > 0)", name="ck_inspire_stories_recipient"),
+        Index("ix_inspire_stories_user_created", "user_id", "created_at"),
+    )
 
     def __repr__(self):
         return f"<InspireStory(id={self.id}, title={self.title})>"
@@ -237,6 +289,15 @@ class InspireQuote(Base):
     quote = Column(Text, nullable=False)
     author = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id", ondelete="RESTRICT"), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
+
+    user = relationship("Profile", back_populates="quotes")
+    reactions = relationship("InspireReaction", back_populates="quote", passive_deletes=True)
+    comments = relationship("InspireComment", back_populates="quote", passive_deletes=True)
+    shares = relationship("InspireShare", back_populates="quote", passive_deletes=True)
+
+    __table_args__ = (Index("ix_inspire_quotes_user_created", "user_id", "created_at"),)
 
     def __repr__(self):
         return f"<InspireQuote(id={self.id}, quote={self.quote[:50]}...)>"
@@ -250,7 +311,7 @@ class SharedMaterial(Base):
     description = Column(Text, nullable=True)
     subject = Column(String(100), nullable=False, index=True)
     file_url = Column(String(500), nullable=False)  # Supabase Storage public URL
-    file_type = Column(String(50), nullable=False)
+    file_type = Column(String(100), nullable=False)
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     is_anonymous = Column(Boolean, default=False, nullable=False)
     download_count = Column(Integer, default=0, nullable=False)
@@ -266,3 +327,10 @@ class SharedMaterial(Base):
 
     def __repr__(self):
         return f"<SharedMaterial(id={self.id}, title={self.title})>"
+
+
+# Keep these imports last so existing model names remain available to services.
+from .persistence import (  # noqa: E402,F401
+    MoodRecord, WellnessGoal, WellnessGoalProgress, InspireReaction,
+    InspireComment, InspireShare, ContactMessage, UserActivity, ApiSession,
+)

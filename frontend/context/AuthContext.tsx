@@ -6,6 +6,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import { authFetch } from "@/lib/authFetch";
 import { supabase } from "@/lib/supabaseClient";
 
 interface Profile {
@@ -15,7 +16,8 @@ interface Profile {
   full_name: string | null;
   role: string;
   is_active: boolean;
-  is_verified: boolean;
+  is_verified: boolean | null;
+  theme: string;
   created_at: string;
   updated_at: string | null;
   last_login: string | null;
@@ -48,6 +50,7 @@ interface AuthContextType {
     termsAccepted: boolean;
   }) => Promise<Profile>;
   logout: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => void;
   isLoading: boolean;
 }
@@ -66,23 +69,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loginStats, setLoginStats] = useState<LoginStats>({ counts: {}, lastLogin: undefined });
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const themes = ['blue', 'purple', 'red', 'green', 'orange', 'pink'];
+    document.body.classList.remove(...themes.map(color => `${color}-theme`));
+    document.body.classList.add(`${currentUser?.theme || 'blue'}-theme`);
+  }, [currentUser?.id, currentUser?.theme]);
+
   const fetchProfile = useCallback(async (accessToken: string) => {
     try {
-      const response = await fetch(`${API_BASE}/auth/me`, {
+      const response = await authFetch(`${API_BASE}/auth/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!response.ok) throw new Error("Unable to load profile");
       const profile = await response.json();
       setCurrentUser(profile);
       setIsLoggedIn(true);
-      setLoginStats((previous) => {
-        const updated = {
-          counts: { ...previous.counts, [profile.username]: (previous.counts[profile.username] || 0) + 1 },
-          lastLogin: new Date().toISOString(),
-        };
-        localStorage.setItem("shielded_login_stats", JSON.stringify(updated));
-        return updated;
-      });
+
     } catch {
       setCurrentUser(null);
       setIsLoggedIn(false);
@@ -117,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const response = await fetch(`${API_BASE}/auth/login`, {
+    const response = await authFetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Store tokens in localStorage for API calls
     localStorage.setItem("access_token", data.access_token);
-    localStorage.setItem("refresh_token", data.refresh_token);
+
+    localStorage.removeItem("refresh_token");
     
     await fetchProfile(data.access_token);
 
@@ -168,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error("Please accept the Terms of Service and Privacy Policy");
     }
 
-    const response = await fetch(`${API_BASE}/auth/register`, {
+    const response = await authFetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -194,8 +197,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data.user;
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } });
+    if (error) throw error;
+  }, []);
+
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      await authFetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include', headers: { Authorization: `Bearer ${localStorage.getItem('access_token') || ''}` } });
+    } catch {
+      // Local logout must still complete if the API is unreachable.
+    } finally {
+      await supabase.auth.signOut().catch(() => undefined);
+    }
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     setCurrentUser(null);
@@ -223,6 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        signInWithGoogle,
         updateProfile,
         isLoading,
       }}

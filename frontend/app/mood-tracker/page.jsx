@@ -7,7 +7,7 @@ import { MOODS } from '@/lib/wellness';
 
 export function Activity() {
   const [moods, setMoods, error, ready] = useWellnessStorage('moods', []);
-  const logMood = (mood, emoji) => setMoods(previous => [{ id: crypto.randomUUID(), mood, emoji, timestamp: new Date().toISOString() }, ...previous].slice(0, 10));
+  const logMood = (mood, emoji) => setMoods(previous => [{ id: crypto.randomUUID(), mood, emoji, timestamp: new Date().toISOString() }, ...previous]);
   return (
 <main className="wellness-main">
         <div className="container">

@@ -4,8 +4,10 @@
 'use client';
 
 import { useState, useContext, createContext, useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
 import { SettingsModal } from './SettingsModal';
 import { UserMenuModal } from './UserMenuModal';
+import { LoginModal } from './LoginModal';
 import { LoginRequiredPopup } from './LoginRequiredPopup';
 
 // Context for controlling modals from anywhere
@@ -23,6 +25,8 @@ export function useModals() {
 export { ModalContext };
 
 export function ModalProvider({ children }) {
+  const { logout } = useAuthContext();
+  const [loginOpen, setLoginOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [loginRequiredOpen, setLoginRequiredOpen] = useState(false);
@@ -31,6 +35,7 @@ export function ModalProvider({ children }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        setLoginOpen(false);
         setSettingsOpen(false);
         setUserMenuOpen(false);
         setLoginRequiredOpen(false);
@@ -41,6 +46,8 @@ export function ModalProvider({ children }) {
   }, []);
 
   const value = {
+    loginOpen,
+    setLoginOpen,
     settingsOpen,
     setSettingsOpen,
     userMenuOpen,
@@ -52,6 +59,12 @@ export function ModalProvider({ children }) {
   return (
     <ModalContext.Provider value={value}>
       {children}
+      <LoginModal
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSwitchToRegister={() => { window.location.href = '/register'; }}
+        onSwitchToForgotPassword={() => { window.location.href = '/forgot-password'; }}
+      />
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <UserMenuModal
         isOpen={userMenuOpen}
@@ -62,9 +75,7 @@ export function ModalProvider({ children }) {
         }}
         onLogoutClick={() => {
           setUserMenuOpen(false);
-          localStorage.removeItem('shielded_current_user');
-          localStorage.removeItem('shielded_access_token');
-          window.location.href = '/';
+          logout();
         }}
       />
       <LoginRequiredPopup
