@@ -8,7 +8,7 @@ import { useModals } from '@/components/shared/GlobalModals';
 
 export default function ForgotPassword() {
   const pathname = usePathname();
-  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen } = useModals();
+  const { setSettingsOpen } = useModals();
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);

@@ -1,12 +1,13 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 
 export default function LoginPage() {
   const pathname = usePathname();
+  const router = useRouter();
   const { login } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,9 +56,9 @@ export default function LoginPage() {
       const returnUrl = sessionStorage.getItem("shielded_return_url");
       if (returnUrl) {
         sessionStorage.removeItem("shielded_return_url");
-        window.location.href = returnUrl;
+        router.replace(returnUrl.startsWith('/') && !returnUrl.startsWith('//') && !returnUrl.includes('\\') ? returnUrl : '/dashboard');
       } else {
-        window.location.href = "/dashboard";
+        router.replace("/dashboard");
       }
     } catch (err) {
       setError(err.message);

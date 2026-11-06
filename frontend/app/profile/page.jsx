@@ -18,10 +18,10 @@ function ProfileContent() {
   const [draft, setDraft] = useState({});
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const edit = () => { setDraft({ full_name: user.full_name || '', username: user.username || '', birthday: user.birthday?.slice(0,10) || '', school_id: user.school_id || '' }); setError(''); setEditing(true); };
+  const edit = () => { setDraft({ full_name: user.full_name || '', username: user.username || '', birthday: user.birthday?.slice(0,10) || '', school_id: user.school_id || '', gender: user.gender || '' }); setError(''); setEditing(true); };
   const save = async event => {
     event.preventDefault(); if (saving) return; setSaving(true); setError('');
-    try { const profile = await accountRequest('/auth/me', 'PATCH', draft); updateProfile(profile); setEditing(false); }
+    try { const profile = await accountRequest('/auth/me', 'PATCH', { ...draft, gender: draft.gender || null }); updateProfile(profile); setEditing(false); }
     catch(err) { setError(err.message); } finally { setSaving(false); }
   };
 
@@ -153,6 +153,12 @@ function ProfileContent() {
                   <input id={`edit-${field}`} type={field === 'birthday' ? 'date' : 'text'} required maxLength={['school_id','username'].includes(field) ? 50 : 255} value={draft[field]} onChange={event => setDraft({...draft,[field]:event.target.value})} />
                 </div>
               ))}
+              <div className={styles.editField}>
+                <label htmlFor="edit-gender">Gender (optional)</label>
+                <select id="edit-gender" value={draft.gender} onChange={event => setDraft({...draft, gender:event.target.value})}>
+                  <option value="">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option><option value="lgbtq+">LGBTQ+</option>
+                </select>
+              </div>
               <div className={styles.editActions}>
                 <button type="button" className={styles.cancelButton} disabled={saving} onClick={() => setEditing(false)}>Cancel</button>
                 <button className={styles.editButton} disabled={saving}>{saving ? 'Saving...' : 'Save Profile'}</button>

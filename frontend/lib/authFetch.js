@@ -3,7 +3,13 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 let renewal;
 export async function refreshApiSession() {
   if (!renewal) renewal = fetch(`${API}/auth/refresh`, { method: 'POST', credentials: 'include' }).then(async response => {
-    if (!response.ok) throw new Error('Your session expired. Please sign in again.');
+    if (!response.ok) {
+      if ([401, 403].includes(response.status)) {
+        localStorage.removeItem('access_token');
+        if (typeof window !== 'undefined') window.dispatchEvent?.(new Event('voiceed:session-expired'));
+      }
+      throw new Error('Your session expired. Please sign in again.');
+    }
     const data = await response.json(); localStorage.setItem('access_token', data.access_token); return data.access_token;
   }).finally(() => { renewal = null; });
   return renewal;

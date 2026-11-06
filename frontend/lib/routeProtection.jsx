@@ -100,17 +100,19 @@ export function clearReturnUrl() {
  */
 export function useProtectedNavigation() {
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
+  const { isLoggedIn, isLoading } = useAuthContext();
   const { setLoginRequiredOpen } = useContext(ModalContext);
 
   const navigateToService = useCallback((href) => {
-    if (isLoggedIn) {
+    const publicRoutes = new Set(['/', '/about', '/services', '/contacts', '/report', '/login', '/register', '/forgot-password']);
+    if (isLoading && !publicRoutes.has(href)) return;
+    if (publicRoutes.has(href) || isLoggedIn) {
       router.push(href);
     } else {
       sessionStorage.setItem('shielded_return_url', href);
       setLoginRequiredOpen(true);
     }
-  }, [isLoggedIn, router, setLoginRequiredOpen]);
+  }, [isLoggedIn, isLoading, router, setLoginRequiredOpen]);
 
   return { navigateToService };
 }

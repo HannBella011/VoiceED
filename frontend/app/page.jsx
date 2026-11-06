@@ -1,40 +1,16 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import { Navbar, Footer } from '@/components/shared';
 import { useModals } from '@/components/shared/GlobalModals';
-import { useAuthContext } from '@/context/AuthContext';
+import { useProtectedNavigation } from '@/lib/routeProtection';
 
 export default function HomePage() {
   const pathname = usePathname();
-  const { loginOpen, setLoginOpen, userMenuOpen, setUserMenuOpen, settingsOpen, setSettingsOpen } = useModals();
-  const { currentUser, isLoggedIn } = useAuthContext();
-
-  const handleSettingsClick = () => {
-    setSettingsOpen(true);
-  };
-
-  const handleLoginClick = () => {
-    if (isLoggedIn && currentUser) {
-      setUserMenuOpen(true);
-    } else {
-      setLoginOpen(true);
-    }
-  };
-
-  const handleGetStarted = () => {
-    setLoginOpen(true);
-  };
-
-  const handleLogout = () => {
-    setUserMenuOpen(false);
-  };
-
-  const handleProfileClick = () => {
-    window.location.href = '/profile';
-    setUserMenuOpen(false);
-  };
+  const { setSettingsOpen } = useModals();
+  const { navigateToService } = useProtectedNavigation();
+  const handleSettingsClick = () => setSettingsOpen(true);
+  const handleGetStarted = () => navigateToService('/dashboard');
 
   return (
     <>
@@ -42,7 +18,6 @@ export default function HomePage() {
         currentPage={pathname}
         variant="public"
         onSettingsClick={handleSettingsClick}
-        onLoginClick={handleLoginClick}
       />
 
       <main className="dashboard-main">
@@ -60,7 +35,7 @@ export default function HomePage() {
           <div className="dashboard-grid">
             <div
               className="dashboard-card"
-              onClick={() => window.location.href = '/report'}
+              onClick={() => navigateToService('/report')}
               style={{ cursor: 'pointer' }}
             >
               <div className="card-icon">
@@ -74,7 +49,7 @@ export default function HomePage() {
 
             <div
               className="dashboard-card"
-              onClick={() => window.location.href = '/wellness-ed'}
+              onClick={() => navigateToService('/wellness-ed')}
               style={{ cursor: 'pointer' }}
             >
               <div className="card-icon">
@@ -88,7 +63,7 @@ export default function HomePage() {
 
             <div
               className="dashboard-card"
-              onClick={() => window.location.href = '/inspire-ed'}
+              onClick={() => navigateToService('/inspire-ed')}
               style={{ cursor: 'pointer' }}
             >
               <div className="card-icon">
@@ -102,7 +77,7 @@ export default function HomePage() {
 
             <div
               className="dashboard-card"
-              onClick={() => window.location.href = '/share-ed'}
+              onClick={() => navigateToService('/share-ed')}
               style={{ cursor: 'pointer' }}
             >
               <div className="card-icon">
@@ -115,44 +90,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* User Profile Section (shown when logged in) */}
-          {isLoggedIn && (
-            <div id="userProfileSection" className="user-profile-section">
-              <div className="profile-card">
-                <div className="profile-header">
-                  <div className="profile-avatar">
-                    <i className="fas fa-user"></i>
-                  </div>
-                  <div className="profile-info">
-                    <h3 id="profileUsername">{currentUser?.username || 'Student'}</h3>
-                    <p id="profileEmail">{currentUser?.username || 'student'}@voiceed.com</p>
-                  </div>
-                </div>
-                <div className="profile-stats">
-                  <div className="stat-item">
-                    <span className="stat-number" id="loginCount">1</span>
-                    <span className="stat-label">Logins</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-number" id="lastLogin">Today</span>
-                    <span className="stat-label">Last Login</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-number" id="accountAge">New</span>
-                    <span className="stat-label">Account Age</span>
-                  </div>
-                </div>
-                <div className="profile-actions">
-                  <button className="profile-btn" id="editProfileBtn" onClick={handleProfileClick}>
-                    <i className="fas fa-edit"></i> Edit Profile
-                  </button>
-                  <button className="profile-btn" id="settingsBtn2" onClick={handleSettingsClick}>
-                    <i className="fas fa-cog"></i> Settings
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </main>
 

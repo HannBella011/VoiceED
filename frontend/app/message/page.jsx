@@ -1,26 +1,26 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Navbar, Footer, SettingsModal, LoginModal } from '@/components/shared';
+import { Navbar, Footer, SettingsModal } from '@/components/shared';
 import { accountRequest } from '@/services/account';
 import { useAuthContext } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/lib/routeProtection';
 
 function MessageContent() {
   const pathname = usePathname();
+  const router = useRouter();
   const { currentUser } = useAuthContext();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const handleLoginClick = () => {
     if (currentUser) {
       window.location.href = '/profile';
     } else {
-      setLoginOpen(true);
+      router.push('/login');
     }
   };
 
@@ -166,12 +166,7 @@ function MessageContent() {
 
       {/* Modals */}
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => window.location.href = '/register'}
-        onSwitchToForgotPassword={() => window.location.href = '/forgot-password'}
-      />
+
     </>
   );
 }

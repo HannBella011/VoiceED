@@ -601,7 +601,8 @@
     font-weight: 600;
 }
 
-.editField input {
+.editField input,
+.editField select {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
@@ -615,7 +616,8 @@
     font-size: 1rem;
 }
 
-.editField input:focus {
+.editField input:focus,
+.editField select:focus {
     outline: 2px solid var(--accent-cyan);
     outline-offset: 1px;
 }

@@ -2,7 +2,6 @@
 export { Navbar } from './Navbar';
 export { Footer } from './Footer';
 export { SettingsModal } from './SettingsModal';
-export { LoginModal } from './LoginModal';
 export { UserMenuModal } from './UserMenuModal';
 export { Button } from './Button';
 export { Card } from './Card';

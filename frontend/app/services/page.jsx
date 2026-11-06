@@ -3,32 +3,25 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer } from '@/components/shared';
-import { useAuth } from '@/hooks';
+import { useProtectedNavigation } from '@/lib/routeProtection';
 import { useModals } from '@/components/shared/GlobalModals';
 
 export default function Services() {
   const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
+  const { navigateToService } = useProtectedNavigation();
   const { settingsOpen, setSettingsOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
   };
 
-  const handleNavigation = (href) => {
-    if (isLoggedIn) {
-      window.location.href = href;
-    } else {
-      setLoginRequiredOpen(true);
-    }
-  };
+  const handleNavigation = navigateToService;
 
   return (
     <>
       <Navbar
         currentPage={pathname}
         variant="public"
-        onLoginClick={() => {}} // No-op on services page
         onSettingsClick={handleSettingsClick}
       />
 

@@ -3,20 +3,10 @@
 import { usePathname } from 'next/navigation';
 import { Navbar, Footer } from '@/components/shared';
 import { useModals } from '@/components/shared/GlobalModals';
-import { useAuthContext } from '@/context/AuthContext';
 
 export default function AboutPage() {
   const pathname = usePathname();
-  const { settingsOpen, setSettingsOpen, loginOpen, setLoginOpen, userMenuOpen, setUserMenuOpen } = useModals();
-  const { currentUser, isLoggedIn } = useAuthContext();
-
-  const handleLoginClick = () => {
-    if (isLoggedIn && currentUser) {
-      setUserMenuOpen(true);
-    } else {
-      setLoginOpen(true);
-    }
-  };
+  const { setSettingsOpen } = useModals();
 
   const handleSettingsClick = () => {
     setSettingsOpen(true);
@@ -27,7 +17,6 @@ export default function AboutPage() {
       <Navbar
         currentPage={pathname}
         variant="public"
-        onLoginClick={handleLoginClick}
         onSettingsClick={handleSettingsClick}
       />
 

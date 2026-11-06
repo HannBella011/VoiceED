@@ -1,7 +1,8 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { authFetch } from '@/lib/authFetch';
 import { Navbar, Footer } from '@/components/shared';
 import { useModals } from '@/components/shared/GlobalModals';
 import { useAuthContext } from '@/context/AuthContext';
@@ -33,7 +34,7 @@ export default function ContactsPage() {
     setSending(true); setSubmitState('');
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/messages/contact`, {
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/messages/contact`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify(Object.fromEntries(data)),
       });
@@ -61,6 +62,36 @@ export default function ContactsPage() {
           </div>
 
           <div className="services-container">
+                <div className="service-box">
+                  <div className="service-header">
+                    <div className="service-icon"><i className="fas fa-envelope"></i></div>
+                    <h3>Contact Us</h3>
+                  </div>
+                  <div className="service-details">
+                    <p>Send us a message and we'll get back to you as soon as possible. Whether you're a student, educator, or potential partner, we're here to help.</p>
+                    {submitState && <p role="status">{submitState}</p>}
+                <form className="contact-form" id="contactForm" onSubmit={handleSubmit}>
+                      <div className="form-group">
+                        <label htmlFor="name">Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email address" required />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="message">Message</label>
+                        <textarea id="message" name="message" placeholder="Tell us more about your inquiry..." rows="5" required></textarea>
+                      </div>
+                      <button disabled={sending} type="submit" className="cta-button">Send Message</button>
+                    </form>
+                  </div>
+                </div>
+
             {/* Emergency Support */}
             <div className="service-box">
               <div className="service-header">
@@ -141,36 +172,6 @@ export default function ContactsPage() {
                   </div>
                 </div>
 
-                {/* Message Us */}
-                <div className="emergency-sub-container">
-                  <div className="emergency-header">
-                    <div className="emergency-icon"><i className="fas fa-envelope"></i></div>
-                    <h4>Message Us</h4>
-                  </div>
-                  <div className="emergency-content">
-                    <p>Send us a message and we'll get back to you as soon as possible. Whether you're a student, educator, or potential partner, we're here to help.</p>
-                    {submitState && <p role="status">{submitState}</p>}
-                <form className="contact-form" id="contactForm" onSubmit={handleSubmit}>
-                      <div className="form-group">
-                        <label htmlFor="name">Full Name</label>
-                        <input type="text" id="name" name="name" placeholder="Enter your full name" required />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="Enter your email address" required />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="subject">Subject</label>
-                        <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="message">Message</label>
-                        <textarea id="message" name="message" placeholder="Tell us more about your inquiry..." rows="5" required></textarea>
-                      </div>
-                      <button disabled={sending} type="submit" className="cta-button">Send Message</button>
-                    </form>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

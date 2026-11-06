@@ -3,10 +3,10 @@
 
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
-import { authFetch } from "@/lib/authFetch";
+import { authFetch, refreshApiSession } from "@/lib/authFetch";
 import { supabase } from "@/lib/supabaseClient";
 
 interface Profile {
@@ -65,7 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const authEpoch = useRef(0);
+  const isLoggedIn = Boolean(currentUser);
   const [loginStats, setLoginStats] = useState<LoginStats>({ counts: {}, lastLogin: undefined });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -76,29 +77,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [currentUser?.id, currentUser?.theme]);
 
   const fetchProfile = useCallback(async (accessToken: string) => {
+    const epoch = authEpoch.current;
     try {
       const response = await authFetch(`${API_BASE}/auth/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!response.ok) throw new Error("Unable to load profile");
       const profile = await response.json();
+      if (epoch !== authEpoch.current) return null;
       setCurrentUser(profile);
-      setIsLoggedIn(true);
+      return profile;
 
-    } catch {
-      setCurrentUser(null);
-      setIsLoggedIn(false);
+    } catch (error) {
+      if (epoch === authEpoch.current) setCurrentUser(null);
+      throw error;
     }
   }, []);
 
   useEffect(() => {
     const initAuth = async () => {
+      const epoch = authEpoch.current;
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setSupabaseUser(session?.user ?? null);
-        const accessToken = localStorage.getItem("access_token");
-        if (accessToken) await fetchProfile(accessToken);
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (epoch !== authEpoch.current) return;
+          setSession(session);
+          setSupabaseUser(session?.user ?? null);
+        } catch { /* API sessions are verified independently of the OAuth cache. */ }
+        const accessToken = localStorage.getItem("access_token") || await refreshApiSession();
+        if (epoch === authEpoch.current) await fetchProfile(accessToken);
+      } catch {
+        // No verified API session: leave protected navigation unavailable.
       } finally {
         setIsLoading(false);
       }
@@ -111,14 +120,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event === "SIGNED_OUT") {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        authEpoch.current++;
         setCurrentUser(null);
-        setIsLoggedIn(false);
       }
     });
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
+  useEffect(() => {
+    const expired = () => {
+      authEpoch.current++;
+      setCurrentUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+    };
+    window.addEventListener('voiceed:session-expired', expired);
+    return () => window.removeEventListener('voiceed:session-expired', expired);
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
+    const epoch = ++authEpoch.current;
     const response = await authFetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: {
@@ -134,14 +155,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await response.json();
     
+    if (epoch !== authEpoch.current) throw new Error("Sign-in was interrupted. Please try again.");
     // Store tokens in localStorage for API calls
     localStorage.setItem("access_token", data.access_token);
 
     localStorage.removeItem("refresh_token");
     
-    await fetchProfile(data.access_token);
-
-    return data.user;
+    const profile = await fetchProfile(data.access_token);
+    if (!profile) throw new Error("Sign-in was interrupted. Please try again.");
+    return profile;
   }, [fetchProfile]);
 
   const register = useCallback(async (userData: {
@@ -203,6 +225,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    authEpoch.current++;
+    setCurrentUser(null);
+    setSupabaseUser(null);
+    setSession(null);
     try {
       await authFetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include', headers: { Authorization: `Bearer ${localStorage.getItem('access_token') || ''}` } });
     } catch {
@@ -215,16 +241,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(null);
     setSupabaseUser(null);
     setSession(null);
-    setIsLoggedIn(false);
     router.push("/");
   }, [router]);
 
   const updateProfile = useCallback((updates: Partial<Profile>) => {
-    if (currentUser) {
-      const updatedUser = { ...currentUser, ...updates };
-      setCurrentUser(updatedUser);
-    }
-  }, [currentUser]);
+    const owner = currentUser?.id;
+    setCurrentUser(previous => previous && previous.id === owner ? { ...previous, ...updates } : previous);
+  }, [currentUser?.id]);
 
   return (
     <AuthContext.Provider

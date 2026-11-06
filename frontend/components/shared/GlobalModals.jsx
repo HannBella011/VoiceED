@@ -4,10 +4,10 @@
 'use client';
 
 import { useState, useContext, createContext, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
 import { SettingsModal } from './SettingsModal';
 import { UserMenuModal } from './UserMenuModal';
-import { LoginModal } from './LoginModal';
 import { LoginRequiredPopup } from './LoginRequiredPopup';
 
 // Context for controlling modals from anywhere
@@ -26,7 +26,7 @@ export { ModalContext };
 
 export function ModalProvider({ children }) {
   const { logout } = useAuthContext();
-  const [loginOpen, setLoginOpen] = useState(false);
+  const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [loginRequiredOpen, setLoginRequiredOpen] = useState(false);
@@ -35,7 +35,6 @@ export function ModalProvider({ children }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setLoginOpen(false);
         setSettingsOpen(false);
         setUserMenuOpen(false);
         setLoginRequiredOpen(false);
@@ -46,8 +45,6 @@ export function ModalProvider({ children }) {
   }, []);
 
   const value = {
-    loginOpen,
-    setLoginOpen,
     settingsOpen,
     setSettingsOpen,
     userMenuOpen,
@@ -59,19 +56,13 @@ export function ModalProvider({ children }) {
   return (
     <ModalContext.Provider value={value}>
       {children}
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={() => { window.location.href = '/register'; }}
-        onSwitchToForgotPassword={() => { window.location.href = '/forgot-password'; }}
-      />
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <UserMenuModal
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
         onProfileClick={() => {
           setUserMenuOpen(false);
-          window.location.href = '/profile';
+          router.push('/profile');
         }}
         onLogoutClick={() => {
           setUserMenuOpen(false);
@@ -83,8 +74,9 @@ export function ModalProvider({ children }) {
         onClose={() => setLoginRequiredOpen(false)}
         onGoToLogin={() => {
           const returnUrl = window.location.pathname + window.location.search;
-          sessionStorage.setItem('shielded_return_url', returnUrl);
-          window.location.href = '/login';
+          if (!sessionStorage.getItem('shielded_return_url')) sessionStorage.setItem('shielded_return_url', returnUrl);
+          setLoginRequiredOpen(false);
+          router.push('/login');
         }}
       />
     </ModalContext.Provider>
