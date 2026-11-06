@@ -66,7 +66,7 @@ export function Navbar({ currentPage='', onSettingsClick }) {
     }
   };
   const nav = <nav className={`navbar${isOpen ? ' active' : ''}`} id="navbar" aria-label="Main navigation">
-    <ul className={`nav-links${isOpen ? ' show' : ''}`} ref={list}>
+    <ul className={`nav-links ${styles.links}${isOpen ? ' show' : ''}`} ref={list}>
       <><li><Link href="/" className={currentPage==='/' ? 'active' : ''} onClick={close}>Home</Link></li><li><Link href="/about" onClick={close}>About</Link></li></>
       {authenticated && <li><Link href="/dashboard" className={currentPage==='/dashboard' ? 'active' : ''} onClick={event=>navigate(event,'/dashboard')}>Dashboard</Link></li>}
       <li className={styles.dropdown} onBlur={event=>{ if(!event.currentTarget.contains(event.relatedTarget)) setMenu(previous=>previous==='services' ? null : previous); }}>
@@ -85,7 +85,7 @@ export function Navbar({ currentPage='', onSettingsClick }) {
           <li role="none"><button type="button" role="menuitem" onClick={settings}>Settings</button></li>
           <li role="none"><button type="button" role="menuitem" onClick={()=>{close(); logout();}}>Logout</button></li>
         </ul>}
-      </li> : <li><Link id="loginBtn" className="login-nav-btn" href="/login" onClick={close}>Login</Link></li>}
+      </li> : <li><Link id="loginBtn" className={`login-nav-btn ${styles.pill}`} href="/login" onClick={close}>Login</Link></li>}
     </ul>
   </nav>;
   return <header className="header"><div className="container"><div className="header-content">

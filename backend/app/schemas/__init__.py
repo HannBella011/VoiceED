@@ -227,6 +227,7 @@ class ReportResponse(ReportBase):
     assignee_id: Optional[str] = None
     assignee_name: Optional[str] = None
     reporter_email: Optional[str] = None
+    reporter_details: Optional[dict] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     resolved_at: Optional[datetime] = None
@@ -236,6 +237,12 @@ class ReportResponse(ReportBase):
 
     class Config:
         from_attributes = True
+
+
+class ReportSubmissionResponse(ReportResponse):
+    success: bool = True
+    tracking_access_token: str
+    email_notification: str
 
 
 class ReportListResponse(BaseModel):
@@ -273,6 +280,7 @@ class PublicTimeline(BaseModel):
 
 
 class ReportPublicResponse(BaseModel):
+    access_required: bool = False
     """Public tracking response - no user identity info for anonymous reports"""
     id: str
     tracking_code: str

@@ -1,142 +1,32 @@
-'use client';
-
+ 'use client';
 import { usePathname } from 'next/navigation';
-import { useState, useRef } from 'react';
-import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
-import { submitReportAuthenticated, submitReportAnonymous } from '@/services/reports';
+import { useState, useEffect } from 'react';
+import { Navbar, Footer } from '@/components/shared';
+import { useModals } from '@/components/shared/GlobalModals';
 import { useAuthContext } from '@/context/AuthContext';
-import { ProtectedRoute } from '@/lib/routeProtection';
+import { ReportSubmission } from '@/components/features/report/ReportSubmission';
+import styles from './report.module.css';
 
 export function ReportEDContent() {
-  const pathname = usePathname();
-  const { logout } = useAuthContext();
-  const fileInputRef = useRef(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [trackingCode, setTrackingCode] = useState('');
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const [rightNow, setRightNow] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    category: '',
-    date: '',
-    location: '',
-    description: ''
-  });
-
-  const handleUserMenuClick = () => {
-    setUserMenuOpen(true);
+  const pathname=usePathname();
+  const {setSettingsOpen}=useModals();
+  const {currentUser,isLoading}=useAuthContext();
+  const [headerHeight,setHeaderHeight]=useState(128);
+  useEffect(()=>{
+    const header=document.querySelector('.header');if(!header)return;
+    const measure=()=>setHeaderHeight(header.getBoundingClientRect().height);measure();
+    const observer=new ResizeObserver(measure);observer.observe(header);return()=>observer.disconnect();
+  },[]);
+  const handleMapSearch=event=>{
+    event.preventDefault();
+    const term=event.currentTarget.searchTerm.value.trim();
+    if(term)window.open(`https://www.google.com/maps/search/${encodeURIComponent(term+' near me')}`,'_blank','noopener,noreferrer');
   };
-
-  const handleSettingsClick = () => {
-    setSettingsOpen(true);
-  };
-
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleAnonymousChange = (checked) => {
-    setIsAnonymous(checked);
-    if (checked) {
-      setFormData(prev => ({ ...prev, name: '', email: '' }));
-    }
-  };
-
-  const handleRightNowChange = (checked) => {
-    setRightNow(checked);
-    if (checked) {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      setFormData(prev => ({ ...prev, date: `${year}-${month}-${day}T${hours}:${minutes}` }));
-    } else {
-      setFormData(prev => ({ ...prev, date: '' }));
-    }
-  };
-
-  const handleFilesChange = (files) => {
-    const newFiles = Array.from(files);
-    setSelectedFiles(prev => {
-      const existingNames = new Set(prev.map(f => f.name));
-      const uniqueFiles = newFiles.filter(f => !existingNames.has(f.name));
-      return [...prev, ...uniqueFiles];
-    });
-  };
-
-  const removeFile = (index) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setTrackingCode('');
-    setSubmitting(true);
-    try {
-      const reportData = {
-        title: `${formData.category.replaceAll('_', ' ')} incident`,
-        description: formData.description,
-        category: formData.category,
-        incident_date: formData.date ? new Date(formData.date).toISOString() : undefined,
-        location: formData.location,
-      };
-      const result = isAnonymous
-        ? await submitReportAnonymous(reportData, selectedFiles)
-        : await submitReportAuthenticated(reportData, selectedFiles);
-      setTrackingCode(result.tracking_code);
-      setFormData({ name: '', email: '', category: '', date: '', location: '', description: '' });
-      setIsAnonymous(false);
-      setRightNow(false);
-      setSelectedFiles([]);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to submit your report.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleMapSearch = (e) => {
-    e.preventDefault();
-    const searchTerm = e.target.searchTerm.value.trim();
-    if (searchTerm) {
-      const encodedSearch = encodeURIComponent(searchTerm + ' near me');
-      window.open(`https://www.google.com/maps/search/${encodedSearch}`, '_blank');
-    } else {
-      alert('Please enter a location or organization to search for.');
-    }
-  };
-
-  return (
-    <>
-      <Navbar
-        currentPage={pathname}
-        variant="dashboard"
-        onUserMenuClick={handleUserMenuClick}
-        onSettingsClick={handleSettingsClick}
-      />
-
-      <main className="wellness-main">
-        <div className="container">
-          <div className="wellness-hero">
-            <h2>ReportED</h2>
-            <p>A secure channel for reporting campus safety issues, incidents, and student concerns without fear of retaliation.</p>
-          </div>
-
+  return <>
+    <Navbar currentPage={pathname} onSettingsClick={()=>setSettingsOpen(true)} />
+    <main className={`wellness-main ${styles.page}`} style={{'--report-header-height':`${headerHeight}px`}}><div className="container">
+      <div className="wellness-hero"><h2>ReportED</h2><p>A secure channel for reporting campus safety issues, incidents, and student concerns without fear of retaliation.</p></div>
+      <ReportSubmission key={isLoading?'loading':currentUser?.id||'guest'} />
           {/* Immediate Help Section */}
           <div className="immediate-help-section">
             <div className="wellness-card">
@@ -228,8 +118,6 @@ export function ReportEDContent() {
                     referrerPolicy="no-referrer-when-downgrade"
                   ></iframe>
                 </div>
-                {error && <p className="error-message" role="alert">{error}</p>}
-                {trackingCode && <p className="success-message" role="status">Report submitted. Tracking code: <a href={`/track/${trackingCode}`}>{trackingCode}</a></p>}
                 <form className="map-search" onSubmit={handleMapSearch}>
                   <input
                     type="text"
@@ -322,223 +210,8 @@ export function ReportEDContent() {
             </div>
           </div>
 
-          {/* Reporting Form Section */}
-          <div className="report-form-section">
-            <div className="wellness-card">
-              <div className="card-header">
-                <div className="card-icon">
-                  <i className="fas fa-shield-alt"></i>
-                </div>
-                <h3>Submit a Report</h3>
-              </div>
-              <div className="card-body">
-                <form id="reportForm" className="report-form" onSubmit={handleSubmit}>
-                  {/* Anonymity Toggle */}
-                  <div className="form-group anonymity-group">
-                    <label className="anonymity-toggle">
-                      <input
-                        type="checkbox"
-                        id="anonymousToggle"
-                        name="anonymous"
-                        checked={isAnonymous}
-                        onChange={(e) => handleAnonymousChange(e.target.checked)}
-                      />
-                      <span className="toggle-slider"></span>
-                      <span className="toggle-text">Keep my identity anonymous</span>
-                    </label>
-                    <p className="anonymity-note">If checked, your name and email will not be shared with anyone.</p>
-                  </div>
 
-                  {/* Name and Email (hidden if anonymous) */}
-                  {!isAnonymous && (
-                    <>
-                      <div className="form-group identity-group" id="identityGroup">
-                        <label htmlFor="reporterName">Your Name</label>
-                        <input
-                          type="text"
-                          id="reporterName"
-                          className="report-input"
-                          placeholder="Enter your name"
-                          value={formData.name}
-                          onChange={(e) => handleChange('name', e.target.value)}
-                        />
-                      </div>
-
-                      <div className="form-group identity-group" id="emailGroup">
-                        <label htmlFor="reporterEmail">Your Email</label>
-                        <input
-                          type="email"
-                          id="reporterEmail"
-                          className="report-input"
-                          placeholder="Enter your email"
-                          value={formData.email}
-                          onChange={(e) => handleChange('email', e.target.value)}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {/* Incident Category */}
-                  <div className="form-group">
-                    <label htmlFor="incidentCategory">Incident Category</label>
-                    <select
-                      id="incidentCategory"
-                      className="report-input"
-                      value={formData.category}
-                      onChange={(e) => handleChange('category', e.target.value)}
-                      required
-                    >
-                      <option value="">Select category...</option>
-                      <option value="academic">Academic Concern</option>
-                      <option value="harassment">Harassment or Bullying</option>
-                      <option value="safety">Facility/Safety Hazard</option>
-                      <option value="discrimination">Discrimination</option>
-                      <option value="mental_health">Mental Health Concern</option>
-                      <option value="violence">Violence or Threat</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Date & Time */}
-                  <div className="form-group">
-                    <label htmlFor="incidentDate">Date & Time of Incident</label>
-                    <input
-                      type="datetime-local"
-                      id="incidentDate"
-                      className="report-input"
-                      value={formData.date}
-                      onChange={(e) => handleChange('date', e.target.value)}
-                      disabled={rightNow}
-                    />
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        id="rightNowToggle"
-                        checked={rightNow}
-                        onChange={(e) => handleRightNowChange(e.target.checked)}
-                      />
-                      <span>Right Now (current time)</span>
-                    </label>
-                  </div>
-
-                  {/* Location */}
-                  <div className="form-group">
-                    <label htmlFor="incidentLocation">Location</label>
-                    <input
-                      type="text"
-                      id="incidentLocation"
-                      className="report-input"
-                      placeholder="Where did this happen?"
-                      value={formData.location}
-                      onChange={(e) => handleChange('location', e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {/* Description */}
-                  <div className="form-group">
-                    <label htmlFor="incidentDescription">Description</label>
-                    <textarea
-                      id="incidentDescription"
-                      className="report-input report-textarea"
-                      rows={6}
-                      placeholder="Please describe what happened in detail..."
-                      value={formData.description}
-                      onChange={(e) => handleChange('description', e.target.value)}
-                      required
-                    ></textarea>
-                  </div>
-
-                  {/* Evidence Upload */}
-                  <div className="form-group">
-                    <label htmlFor="evidenceUpload">Evidence (Optional)</label>
-                    <div
-                      className="file-upload-area"
-                      id="dropZone"
-                      onClick={() => fileInputRef.current?.click()}
-                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (e.dataTransfer.files.length > 0) {
-                          handleFilesChange(e.dataTransfer.files);
-                        }
-                      }}
-                    >
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        id="evidenceUpload"
-                        className="file-input"
-                        multiple
-                        accept=".png,.jpg,.jpeg,.pdf"
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => e.target.files && handleFilesChange(e.target.files)}
-                        style={{ display: 'none' }}
-                      />
-                      <div className="file-upload-label">
-                        <i className="fas fa-cloud-upload-alt"></i>
-                        <p>Drag and drop files here or click to browse</p>
-                        <span className="file-types">Supports: PNG, JPEG and PDF, up to 25 MB per file</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="selectedFiles" className="selected-files">
-                    {selectedFiles.map((file, index) => (
-                      <div key={index} className="selected-file">
-                        <i className="fas fa-file"></i>
-                        <span>{file.name}</span>
-                        <span className="file-size">({formatFileSize(file.size)})</span>
-                        <button
-                          type="button" className="remove-file"
-                          onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                        >
-                          <i className="fas fa-times"></i>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="form-submit">
-                    <button type="submit" className="submit-btn" disabled={submitting}>
-                      <i className="fas fa-paper-plane"></i>
-                      {submitting ? 'Submitting...' : 'Submit Report'}
-                    </button>
-                  </div>
-
-                  <p className="data-handling-statement">
-                    <i className="fas fa-shield-alt"></i>
-                    Your safety is our priority. All reports are encrypted, and if you choose to remain anonymous, your identity will never be disclosed or tracked.
-                  </p>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-
-      {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <UserMenuModal
-        isOpen={userMenuOpen}
-        onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
-        onLogoutClick={() => {
-          logout();
-        }}
-      />
-    </>
-  );
+    </div></main><Footer />
+  </>;
 }
-
-export default function ReportED() {
-  return (
-    <ProtectedRoute fallback={null}>
-      <ReportEDContent />
-    </ProtectedRoute>
-  );
-}
+export default ReportEDContent;

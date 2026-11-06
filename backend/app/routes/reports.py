@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Response, UploadFile, File, Form, Query, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
 import uuid
 from datetime import datetime
+from pydantic import EmailStr, TypeAdapter, ValidationError
 
 from app.database import get_db
 from app.schemas import (
-    ReportCreate, ReportCreateAnonymous, ReportUpdate, ReportResponse, ReportListResponse,
+    ReportCreate, ReportCreateAnonymous, ReportUpdate, ReportResponse, ReportSubmissionResponse, ReportListResponse,
     ReportPublicResponse, ReportStatusUpdate, ReportAssignment,
     ReportAttachmentResponse, FileUploadResult, FileUploadError,
     TrackingCodeRequest, TrackingCodeResponse,
@@ -16,6 +17,8 @@ from app.schemas import (
 from app.services import report_service, profile_service, auth_service
 from app.models import Profile, UserRole as UserRoleModel, ReportStatus as ReportStatusModel, ReportCategory as ReportCategoryModel
 import aiofiles
+
+from app.services.report_submission import submit as submit_receipt, parse_reporter, parse_incident, public_tracking
 
 router = APIRouter()
 
@@ -31,114 +34,63 @@ from app.routes.auth import get_current_active_user, get_current_admin_user, get
 # Report Submission (Public - Anonymous & Authenticated)
 # ============================================================================
 
-async def submit_with_files(db, data, files, owner=None, anonymous=False, email=None):
-    # Validate before writing either database records or storage objects.
-    prepared = []
-    for file in files:
-        if not file.filename: continue
-        content = await file.read(report_service.file_storage.MAX_FILE_SIZE + 1)
-        mime = file.content_type or 'application/octet-stream'
-        valid, error = report_service.file_storage.validate_file(file.filename, mime, len(content))
-        if not valid: raise HTTPException(400, error)
-        prepared.append((file.filename, mime, content))
-    paths = []
-    try:
-        report = await report_service.create_report(db, data, user_id=owner, is_anonymous=anonymous, reporter_email=email, commit=False)
-        for filename, mime, content in prepared:
-            attachment = await report_service.add_attachment(db, report.id, content, filename, mime, uploaded_by_user_id=None if anonymous else owner, commit=False)
-            paths.append(attachment.file_path)
-        await db.commit()
-    except Exception as exc:
-        await db.rollback()
-        for path in paths: await report_service.file_storage.delete_file(path)
-        if isinstance(exc, HTTPException): raise
-        raise HTTPException(503, 'Report could not be saved. Please try again.') from exc
-    report = await report_service.get_by_id(db, report.id)
-    await report_service.notify_submission(db, report)
-    return report
+def notification_email(value):
+    if not value:return None
+    try:return str(TypeAdapter(EmailStr).validate_python(value))
+    except ValidationError:raise HTTPException(422,'Enter a valid contact email')
 
-
-@router.post("/submit", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
+@router.post('/submit', response_model=ReportSubmissionResponse, status_code=201)
 async def submit_report_authenticated(
-    title: str = Form(..., min_length=1, max_length=200),
-    description: str = Form(..., min_length=1),
-    category: ReportCategory = Form(...),
-    location: Optional[str] = Form(None),
-    incident_date: Optional[str] = Form(None),
-    is_anonymous: bool = Form(False),
-    files: List[UploadFile] = File(default=[]),
-    db: AsyncSession = Depends(get_db),
-    current_user: Profile = Depends(get_current_active_user)
+    response: Response,
+    title: str=Form(...,min_length=1,max_length=200),
+    description: str=Form(...,min_length=1,max_length=50000),
+    category: ReportCategory=Form(...),
+    incident_date: str=Form(...), location: Optional[str]=Form(None,max_length=255),
+    is_anonymous: bool=Form(False),reporter_details: Optional[str]=Form(None),reporter_email: Optional[str]=Form(None),
+    files: List[UploadFile]=File(default=[]), idempotency_key: uuid.UUID=Header(...),
+    db: AsyncSession=Depends(get_db),current_user: Profile=Depends(get_current_active_user)
 ):
-    """Submit a report as an authenticated user."""
-    # Parse incident_date if provided
-    parsed_incident_date = None
-    if incident_date:
-        try:
-            parsed_incident_date = datetime.fromisoformat(incident_date.replace('Z', '+00:00'))
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid incident_date format. Use ISO 8601.")
-    
-    data = {
-        "title": title,
-        "description": description,
-        "category": category,
-        "location": location,
-        "incident_date": parsed_incident_date,
-    }
-    
-    return await submit_with_files(db, data, files, current_user.id, is_anonymous)
+    response.headers['Cache-Control']='no-store'
+    reporter=None if is_anonymous else parse_reporter(reporter_details,current_user)
+    if is_anonymous and reporter_details:raise HTTPException(422,'Anonymous reports must not include reporter information')
+    data=dict(title=title,description=description,category=category.value,incident_date=parse_incident(incident_date),location=location)
+    email=notification_email(reporter_email) if is_anonymous else current_user.email
+    return await submit_receipt(db,data,files,idempotency_key,owner=None if is_anonymous else current_user.id,anonymous=is_anonymous,email=email,reporter=reporter)
 
+@router.post('/submit/guest',response_model=ReportSubmissionResponse,status_code=201)
+async def submit_report_guest(
+    response: Response,
+    title: str=Form(...,min_length=1,max_length=200),description: str=Form(...,min_length=1,max_length=50000),
+    category: ReportCategory=Form(...),incident_date: str=Form(...),location: Optional[str]=Form(None,max_length=255),
+    reporter_details: str=Form(...),files: List[UploadFile]=File(default=[]),idempotency_key: uuid.UUID=Header(...),db: AsyncSession=Depends(get_db)
+):
+    response.headers['Cache-Control']='no-store'
+    reporter=parse_reporter(reporter_details)
+    data=dict(title=title,description=description,category=category.value,incident_date=parse_incident(incident_date),location=location)
+    return await submit_receipt(db,data,files,idempotency_key,email=reporter['email'],reporter=reporter)
 
-
-@router.post("/submit/anonymous", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
+@router.post('/submit/anonymous',response_model=ReportSubmissionResponse,status_code=201)
 async def submit_report_anonymous(
-    title: str = Form(..., min_length=1, max_length=200),
-    description: str = Form(..., min_length=1),
-    category: ReportCategory = Form(...),
-    location: Optional[str] = Form(None),
-    incident_date: Optional[str] = Form(None),
-    reporter_email: Optional[str] = Form(None),
-    files: List[UploadFile] = File(default=[]),
-    db: AsyncSession = Depends(get_db)
+    response: Response,
+    title: str=Form(...,min_length=1,max_length=200),description: str=Form(...,min_length=1,max_length=50000),
+    category: ReportCategory=Form(...),incident_date: str=Form(...),location: Optional[str]=Form(None,max_length=255),
+    reporter_email: Optional[str]=Form(None),reporter_details: Optional[str]=Form(None),files: List[UploadFile]=File(default=[]),
+    idempotency_key: uuid.UUID=Header(...),db: AsyncSession=Depends(get_db)
 ):
-    """Submit a report anonymously (no authentication required)."""
-    # Parse incident_date if provided
-    parsed_incident_date = None
-    if incident_date:
-        try:
-            parsed_incident_date = datetime.fromisoformat(incident_date.replace('Z', '+00:00'))
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid incident_date format. Use ISO 8601.")
-    
-    data = {
-        "title": title,
-        "description": description,
-        "category": category,
-        "location": location,
-        "incident_date": parsed_incident_date,
-    }
-    
-    return await submit_with_files(db, data, files, anonymous=True, email=reporter_email)
-
+    response.headers['Cache-Control']='no-store'
+    if reporter_details:raise HTTPException(422,'Anonymous reports must not include reporter information')
+    data=dict(title=title,description=description,category=category.value,incident_date=parse_incident(incident_date),location=location)
+    return await submit_receipt(db,data,files,idempotency_key,anonymous=True,email=notification_email(reporter_email))
 
 
 # ============================================================================
 # Report Tracking (Public)
 # ============================================================================
 
-@router.get("/track/{tracking_code}", response_model=ReportPublicResponse)
-async def track_report(
-    tracking_code: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Track a report by tracking code (public access)."""
-    report = await report_service.get_by_tracking_code(db, tracking_code)
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    # For public tracking, we don't expose user identity for anonymous reports
-    return report
+@router.get('/track/{tracking_code}',response_model=ReportPublicResponse)
+async def track_report(tracking_code: str,request: Request,response: Response,db: AsyncSession=Depends(get_db),x_report_access: Optional[str]=Header(None,max_length=256),authorization: Optional[str]=Header(None)):
+    response.headers['Cache-Control']='no-store'
+    return await public_tracking(db,tracking_code,x_report_access,authorization,request)
 
 
 # ============================================================================

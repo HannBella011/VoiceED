@@ -6,6 +6,7 @@ export {
   reportsService, 
   submitReportAuthenticated,
   submitReportAnonymous,
+  submitReportGuest,
   trackReport,
   getMyReports,
   getReport,

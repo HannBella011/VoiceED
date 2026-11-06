@@ -22,7 +22,20 @@ export default function TrackingPage() {
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const data = await trackReport(params.code);
+        setIsLoading(true);
+        setError(null);
+        const fragment = new URLSearchParams(window.location.hash.slice(1));
+        let access = fragment.get('access');
+        try {
+          access ||= sessionStorage.getItem(`voiceed:report-access:${params.code}`);
+          if (fragment.has('access')) {
+            sessionStorage.setItem(`voiceed:report-access:${params.code}`, access);
+            window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+          }
+        } catch {
+          // Private browsing can block storage; the fragment still authorizes this request.
+        }
+        const data = await trackReport(params.code, access);
         setReport(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load report');
@@ -136,6 +149,7 @@ export default function TrackingPage() {
             </div>
           </div>
 
+          {report.access_required && <p role="status">This code shows limited status only. Open the private tracking link saved after submission for detailed updates and shared evidence. Account owners and authorized staff can also view their reports while signed in.</p>}
           {/* Report Summary Card */}
           <ReportCard 
             report={report} 

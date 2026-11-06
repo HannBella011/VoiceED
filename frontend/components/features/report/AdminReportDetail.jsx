@@ -140,7 +140,7 @@ export function AdminReportDetail({
           <h4>Type</h4>
           <p>
             <span className={`type-badge ${report.is_anonymous ? 'anonymous' : 'authenticated'}`}>
-              {report.is_anonymous ? 'Anonymous' : 'Authenticated'}
+              {report.is_anonymous ? 'Anonymous' : report.user_id ? 'Authenticated' : 'Named (guest)'}
             </span>
           </p>
         </div>
@@ -155,6 +155,13 @@ export function AdminReportDetail({
           <p>{report.incident_date ? new Date(report.incident_date).toLocaleString() : 'Not specified'}</p>
         </div>
         
+        {!report.is_anonymous && report.reporter_details && (
+          <div className="info-card"><h4>Submitted Reporter Information</h4>
+            <p>{report.reporter_details.full_name} ({report.reporter_details.display_name})</p>
+            <p>{report.reporter_details.email}</p><p>School ID: {report.reporter_details.school_id}</p>
+            <p>Birthday: {report.reporter_details.birthday}</p>
+          </div>
+        )}
         {!report.is_anonymous && report.user_id && (
           <div className="info-card">
             <h4>Reporter</h4>

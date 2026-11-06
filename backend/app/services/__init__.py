@@ -28,6 +28,7 @@ from gotrue.types import User as SupabaseUser
 from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from starlette.concurrency import run_in_threadpool
@@ -431,13 +432,7 @@ class TrackingService:
             )
             if not result.scalar_one_or_none():
                 return code
-        # Fallback: add timestamp-based uniqueness
-        timestamp = datetime.utcnow().strftime("%H%M%S")
-        alphabet = string.ascii_uppercase + string.digits
-        alphabet = ''.join(c for c in alphabet if c not in 'O0I1L')
-        part1 = ''.join(secrets.choice(alphabet) for _ in range(3))
-        part2 = ''.join(secrets.choice(alphabet) for _ in range(3))
-        return f"{self.TRACKING_CODE_PREFIX}-{part1}{timestamp[:2]}-{part2}{timestamp[2:]}"
+        raise HTTPException(503, 'Could not allocate a tracking code; retry this submission')
 
 
 # ============================================================================
@@ -591,6 +586,10 @@ class EmailService:
     
     def _get_email_template(self, tracking_code: str, report_title: str, submission_date: datetime, tracking_url: str, is_anonymous: bool) -> str:
         """Generate HTML email template for report submission."""
+        from html import escape
+        report_title = escape(report_title)
+        tracking_url = escape(tracking_url, quote=True)
+        logo_url = escape(f"{settings.FRONTEND_URL.rstrip('/')}/logo%20for%20blue.png", quote=True)
         anonymity_note = ""
         if is_anonymous:
             anonymity_note = """
@@ -609,8 +608,9 @@ class EmailService:
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <!-- Header -->
             <div style="text-align: center; padding: 30px 0; border-bottom: 2px solid #e0e0e0;">
+                <img src="{logo_url}" width="72" height="72" alt="VoiceED logo" />
                 <h1 style="margin: 0; color: #2c3e50; font-size: 28px;">VoiceED</h1>
-                <p style="margin: 10px 0 0; color: #7f8c8d; font-size: 16px;">Your Voice, Your Safety, Our Priority</p>
+                <p style="margin: 10px 0 0; color: #7f8c8d; font-size: 16px;">Where Every Student's Voice Matters</p>
             </div>
             
             <!-- Body -->
@@ -761,7 +761,7 @@ class EmailService:
     ) -> bool:
         """Send report submission confirmation email."""
         if not self.is_configured():
-            print(f"[Email] Not configured, would send confirmation to {to_email}")
+            print("[Email] Notification delivery is not configured")
             return False
         
         html_content = self._get_email_template(
@@ -781,7 +781,7 @@ class EmailService:
     ) -> bool:
         """Send report status update email."""
         if not self.is_configured():
-            print(f"[Email] Not configured, would send status update to {to_email}")
+            print("[Email] Notification delivery is not configured")
             return False
         
         html_content = self._get_status_update_template(
@@ -789,30 +789,32 @@ class EmailService:
         )
         
         return await self._send_email(to_email, f"VoiceED Report Update - {tracking_code}", html_content)
-    
+
     async def _send_email(self, to: str, subject: str, html_content: str) -> bool:
-        """Send email via SMTP."""
-        try:
-            import smtplib
-            from email.mime.text import MIMEText
-            from email.mime.multipart import MIMEMultipart
-            
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{self.from_name} <{self.from_email}>"
-            msg["To"] = to
-            
-            msg.attach(MIMEText(html_content, "html"))
-            
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                server.starttls()
-                server.login(self.smtp_user, self.smtp_password)
-                server.send_message(msg)
-            
-            return True
-        except Exception as e:
-            print(f"[Email] Failed to send email: {e}")
-            return False
+        def send():
+            """Send email via SMTP."""
+            try:
+                import smtplib
+                from email.mime.text import MIMEText
+                from email.mime.multipart import MIMEMultipart
+
+                msg = MIMEMultipart("alternative")
+                msg["Subject"] = subject
+                msg["From"] = f"{self.from_name} <{self.from_email}>"
+                msg["To"] = to
+
+                msg.attach(MIMEText(html_content, "html"))
+
+                with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=10) as server:
+                    server.starttls()
+                    server.login(self.smtp_user, self.smtp_password)
+                    server.send_message(msg)
+
+                return True
+            except Exception as e:
+                print(f"[Email] Notification failed ({type(e).__name__})")
+                return False
+        return await run_in_threadpool(send)
 
 
 # ============================================================================
@@ -870,13 +872,29 @@ class ReportService:
             "location": data.get("location"),
             "incident_date": data.get("incident_date"),
             "user_id": user_id if not is_anonymous else None,
-            "reporter_email": reporter_email if is_anonymous else None,
+            "reporter_email": reporter_email,
+            "reporter_details": None if is_anonymous else data.get('reporter_details'),
+            "submission_key": data.get('submission_key'),
+            "submission_fingerprint": data.get('submission_fingerprint'),
+            "tracking_access_hash": data.get('tracking_access_hash'),
+            "notification_status": data.get('notification_status', 'not_requested'),
         }
         
-        report = Report(**report_data)
-        db.add(report)
-        await db.flush()  # Get the ID without committing
-        
+        for attempt in range(10):
+            try:
+                async with db.begin_nested():
+                    report = Report(**report_data)
+                    db.add(report)
+                    await db.flush()
+                break
+            except IntegrityError as exc:
+                message = str(exc.orig)
+                if 'ix_reports_tracking_code' not in message and 'reports.tracking_code' not in message:
+                    raise
+                report_data['tracking_code'] = self.tracking_service.generate_tracking_code()
+        else:
+            raise HTTPException(503, 'Could not allocate a tracking code; retry this submission')
+
         # Create initial timeline entry
         timeline = ReportTimeline(
             report_id=report.id,

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, Response, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
 import uuid
@@ -20,19 +20,11 @@ router = APIRouter()
 # Public Tracking (No Auth Required)
 # ============================================================================
 
-@router.get("/track/{tracking_code}", response_model=ReportPublicResponse, tags=["tracking"])
-async def track_report_public(
-    tracking_code: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """Track a report by tracking code (public access, no auth required)."""
-    report = await report_service.get_by_tracking_code(db, tracking_code)
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    # For public tracking, we don't expose user identity for anonymous reports
-    # The ReportPublicResponse schema handles this
-    return report
+@router.get('/track/{tracking_code}',response_model=ReportPublicResponse,tags=['tracking'])
+async def track_report_public(tracking_code: str,request: Request,response: Response,db: AsyncSession=Depends(get_db),x_report_access: Optional[str]=Header(None,max_length=256),authorization: Optional[str]=Header(None)):
+    from app.services.report_submission import public_tracking
+    response.headers['Cache-Control']='no-store'
+    return await public_tracking(db,tracking_code,x_report_access,authorization,request)
 
 
 # ============================================================================

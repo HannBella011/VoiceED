@@ -1,4 +1,5 @@
 import { authFetch } from '@/lib/authFetch';
+import { submissionKey } from '@/lib/reportSubmission';
 // Reports Service - VoiceED
 // API calls for ReportED functionality
 
@@ -63,44 +64,39 @@ async function requestFormData(endpoint, formData, options = {}) {
 // Public Report Submission (Anonymous & Authenticated)
 // ============================================================================
 
-export async function submitReportAuthenticated(data, files = []) {
-  const formData = new FormData();
-  formData.append('title', data.title);
-  formData.append('description', data.description);
-  formData.append('category', data.category ?? '');
-  if (data.location) formData.append('location', data.location);
-  if (data.incident_date) formData.append('incident_date', data.incident_date);
-  if (data.is_anonymous) formData.append('is_anonymous', 'true');
-  
-  files.forEach(file => {
-    formData.append('files', file);
-  });
-  
-  return requestFormData('/reports/submit', formData);
+async function submitWizardReport(path, data, files, key, publicSubmission) {
+  if (!key) key=await submissionKey(data,files,path);
+  if (data.incident_date) data={...data,incident_date:new Date(data.incident_date).toISOString()};
+  const form = new FormData();
+  for (const field of ['title','description','category','location','incident_date','reporter_email']) if(data[field]!=null) form.append(field,data[field]);
+  if(data.reporter_details) form.append('reporter_details',JSON.stringify(data.reporter_details));
+  files.forEach(file=>form.append('files',file));
+  if(publicSubmission) {
+    // Anonymous/guest submissions do not transmit an account token or session cookie.
+    const response=await fetch(`${API_BASE_URL}${path}`,{method:'POST',credentials:'omit',headers:{'Idempotency-Key':key},body:form});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(typeof result.detail==='string'?result.detail:'Unable to submit. Check your entries and try again.');
+    return result;
+  }
+  return requestFormData(path,form,{headers:{'Idempotency-Key':key}});
 }
-
-export async function submitReportAnonymous(data, files = []) {
-  const formData = new FormData();
-  formData.append('title', data.title);
-  formData.append('description', data.description);
-  formData.append('category', data.category ?? '');
-  if (data.location) formData.append('location', data.location);
-  if (data.incident_date) formData.append('incident_date', data.incident_date);
-  if (data.reporter_email) formData.append('reporter_email', data.reporter_email);
-  
-  files.forEach(file => {
-    formData.append('files', file);
-  });
-  
-  return requestFormData('/reports/submit/anonymous', formData);
+export async function submitReportAuthenticated(data,files=[],key) {
+  return submitWizardReport('/reports/submit',data,files,key,false);
+}
+export async function submitReportAnonymous(data,files=[],key) {
+  const { reporter_details, ...anonymousData }=data;
+  return submitWizardReport('/reports/submit/anonymous',anonymousData,files,key,true);
+}
+export async function submitReportGuest(data,files=[],key) {
+  return submitWizardReport('/reports/submit/guest',data,files,key,true);
 }
 
 // ============================================================================
 // Public Tracking (No Auth Required)
 // ============================================================================
 
-export async function trackReport(trackingCode) {
-  return request(`/tracking/track/${encodeURIComponent(trackingCode)}`);
+export async function trackReport(trackingCode, accessToken) {
+  return request(`/tracking/track/${encodeURIComponent(trackingCode)}`, { headers: accessToken ? { "X-Report-Access": accessToken } : {} });
 }
 
 // ============================================================================

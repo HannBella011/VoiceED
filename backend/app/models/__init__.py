@@ -1,7 +1,8 @@
 # VoiceED Backend - Database Models
 # Compatible with Supabase Auth (auth.users) and Session Pooler
 
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, CheckConstraint, UUID as SQLUUID
+from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, CheckConstraint, JSON, UUID as SQLUUID
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -112,7 +113,12 @@ class Report(Base):
     incident_date = Column(DateTime(timezone=True), nullable=True)
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
     assignee_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
-    reporter_email = Column(String(255), nullable=True)  # For anonymous reports with email
+    reporter_email = Column(String(255), nullable=True)  # Private notification destination
+    reporter_details = Column(JSON(none_as_null=True).with_variant(JSONB(none_as_null=True), 'postgresql'), nullable=True)
+    submission_key = Column(String(64), nullable=True)
+    submission_fingerprint = Column(String(64), nullable=True)
+    tracking_access_hash = Column(String(64), nullable=True)
+    notification_status = Column(String(20), nullable=False, default='not_requested', server_default='not_requested')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
     resolved_at = Column(DateTime(timezone=True), nullable=True)
@@ -129,6 +135,9 @@ class Report(Base):
         Index("ix_reports_status_category", "status", "category"),
         Index("ix_reports_user_created", "user_id", "created_at"),
         Index("ix_reports_tracking_code", "tracking_code", unique=True),
+        UniqueConstraint('submission_key', name='uq_reports_submission_key'),
+        CheckConstraint('NOT is_anonymous OR reporter_details IS NULL', name='ck_reports_anonymous_identity'),
+        CheckConstraint("notification_status IN ('not_requested','pending','sending','accepted','failed')", name='ck_reports_notification_status'),
         Index("ix_reports_assignee_status", "assignee_id", "status"),
     )
 
@@ -334,3 +343,5 @@ from .persistence import (  # noqa: E402,F401
     MoodRecord, WellnessGoal, WellnessGoalProgress, InspireReaction,
     InspireComment, InspireShare, ContactMessage, UserActivity, ApiSession,
 )
+
+from .reporting import TrackingRateLimit  # noqa: E402,F401
