@@ -17,6 +17,7 @@ interface Profile {
   role: string;
   is_active: boolean;
   is_verified: boolean | null;
+  email_verified?: boolean | null;
   theme: string;
   created_at: string;
   updated_at: string | null;

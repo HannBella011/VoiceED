@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.routes import auth, users, reports, wellness, inspire, share, tracking, messages, dashboard, admin
+from app.routes import auth, users, reports, wellness, inspire, share, tracking, messages, dashboard, admin, super_admin
 
 api_router = APIRouter()
 
@@ -16,3 +16,4 @@ api_router.include_router(messages.router, prefix="/messages", tags=["messages"]
 
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(super_admin.router, prefix="/super", tags=["superadministrator"])

@@ -18,6 +18,12 @@ function ProfileContent() {
   const [draft, setDraft] = useState({});
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    let active = true;
+    accountRequest('/auth/me').then(profile => { if (active) updateProfile(profile); }).catch(error => { if (active) setError(error.message); });
+    return () => { active = false; };
+  }, [user?.id]);
   const edit = () => { setDraft({ full_name: user.full_name || '', username: user.username || '', birthday: user.birthday?.slice(0,10) || '', school_id: user.school_id || '', gender: user.gender || '' }); setError(''); setEditing(true); };
   const save = async event => {
     event.preventDefault(); if (saving) return; setSaving(true); setError('');
@@ -98,7 +104,7 @@ function ProfileContent() {
                   <img src={user.avatar_url || "/pfp.jpg"} alt="User Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                 </div>
                 <div className="profile-info">
-                  <h3 id="profileUsername">{user.username}</h3>
+                  <h3 id="profileUsername">{user.username}{user.is_verified && <span aria-label="Verified student" title="Verified student"> ✓</span>}</h3>
                   <p id="profileEmail">{user.email}</p>
                   <p id="profileMember">Member since <span id="memberSince">{memberSince}</span></p>
                   <button className={styles.editButton} onClick={edit}><i className="fas fa-edit" /> Edit Profile</button>

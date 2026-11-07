@@ -93,7 +93,8 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: str
     is_active: bool
-    is_verified: Optional[bool] = None
+    is_verified: bool = False
+    email_verified: Optional[bool] = None
     theme: str = "blue"
     role: UserRole
     gender: Optional[Gender] = None

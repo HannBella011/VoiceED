@@ -350,21 +350,7 @@ class ProfileService:
                 if profile.email != supabase_user.email:
                     profile.email = supabase_user.email
                     updated = True
-                if metadata and metadata.get("username") and profile.username != metadata["username"]:
-                    profile.username = metadata["username"]
-                    updated = True
-                if metadata and metadata.get("full_name") and profile.full_name != metadata["full_name"]:
-                    profile.full_name = metadata["full_name"]
-                    updated = True
-                if metadata and metadata.get("birthday") and profile.birthday != metadata["birthday"]:
-                    profile.birthday = metadata["birthday"]
-                    updated = True
-                if metadata and metadata.get("school_id") and profile.school_id != metadata["school_id"]:
-                    profile.school_id = metadata["school_id"]
-                    updated = True
-                if metadata and metadata.get("gender") and profile.gender != metadata["gender"]:
-                    profile.gender = metadata["gender"]
-                    updated = True
+                # Existing application profile fields are authoritative; Auth metadata is onboarding input only.
                 if updated:
                     profile.updated_at = datetime.utcnow()
                     await db.commit()

@@ -46,6 +46,8 @@ def statements(filename, direction):
 
 if __name__ == "__main__":
     definitions = {
+        "accounts": render("upgrade", "c96e1f427ab3:da7f20538bc4"),
+        "downAccounts": render("downgrade", "da7f20538bc4:c96e1f427ab3"),
         "userContent": render("upgrade", "b85d0e316fa2:c96e1f427ab3"),
         "downUsercontent": render("downgrade", "c96e1f427ab3:b85d0e316fa2"),
         "shareSearch": render("upgrade", "a74c9d205ef1:b85d0e316fa2"),
@@ -86,6 +88,7 @@ if __name__ == "__main__":
         },
     }
     revisions = {
+        "accounts": "da7f20538bc4_account_administration.py",
         "userContent": "c96e1f427ab3_owned_resources_index.py",
         "shareSearch": "b85d0e316fa2_share_search_indexes.py",
         "content": "a74c9d205ef1_content_and_verification.py",

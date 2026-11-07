@@ -237,8 +237,9 @@ def audit_response(row, administrator=None):
     }
 
 
-async def audit(db, page=1, limit=20, kind=None, content_id=None, search=""):
+async def audit(db, page=1, limit=20, kind=None, content_id=None, search="", actor_id=None):
     query = select(ModerationAction)
+    if actor_id: query = query.where(ModerationAction.administrator_id == actor_id)
     if kind:
         query = query.where(ModerationAction.content_type == kind)
     if content_id:
