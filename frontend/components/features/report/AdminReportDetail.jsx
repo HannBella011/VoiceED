@@ -320,7 +320,7 @@ export function AdminReportDetail({
                   value={selectedAssignee}
                   onChange={(e) => setSelectedAssignee(Number(e.target.value) || '')}
                 >
-                  <option value="">Select an admin/moderator...</option>
+                  <option value="">Select an admin...</option>
                   {availableAssignees.map(user => (
                     <option key={user.id} value={user.id}>
                       {user.full_name || user.username} ({user.role})
@@ -331,7 +331,7 @@ export function AdminReportDetail({
 
               {availableAssignees.length === 0 && (
                 <p className="form-hint" style={{ color: '#e74c3c' }}>
-                  No admins or moderators available for assignment.
+                  No admins available for assignment.
                 </p>
               )}
             </div>

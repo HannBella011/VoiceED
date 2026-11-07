@@ -94,6 +94,7 @@ class InspireComment(Base):
     story_id = Column(Integer, ForeignKey("inspire_stories.id", ondelete="CASCADE"), nullable=True)
     quote_id = Column(Integer, ForeignKey("inspire_quotes.id", ondelete="CASCADE"), nullable=True)
     content = Column(Text, nullable=False)
+    removed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
     story = relationship("InspireStory", back_populates="comments")

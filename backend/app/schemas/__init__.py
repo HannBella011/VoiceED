@@ -17,7 +17,6 @@ class BaseModel(PydanticBaseModel):
 class UserRole(str, Enum):
     STUDENT = "student"
     ADMIN = "admin"
-    MODERATOR = "moderator"
     SUPER_ADMIN = "super_admin"
 
 

@@ -14,7 +14,6 @@ import uuid
 class UserRole(str, enum.Enum):
     STUDENT = "student"
     ADMIN = "admin"
-    MODERATOR = "moderator"
     SUPER_ADMIN = "super_admin"
 
 
@@ -63,6 +62,10 @@ class Profile(Base):
     school_id = Column(String(50), unique=True, index=True, nullable=True)
     avatar_url = Column(String(500), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
+    # Student verification is independent of Supabase email confirmation.
+    is_verified = Column(Boolean, default=False, server_default="false", nullable=False)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
+    verified_by = Column(SQLUUID(as_uuid=True), ForeignKey('profiles.id', ondelete='RESTRICT'), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
@@ -70,6 +73,8 @@ class Profile(Base):
 
     __table_args__ = (
         CheckConstraint("theme IN ('blue', 'purple', 'red', 'green', 'orange', 'pink')", name="ck_profiles_theme"),
+        CheckConstraint("role IN ('STUDENT', 'ADMIN', 'SUPER_ADMIN')", name="ck_profiles_supported_role"),
+        CheckConstraint('(is_verified AND verified_at IS NOT NULL AND verified_by IS NOT NULL) OR (NOT is_verified AND verified_at IS NULL AND verified_by IS NULL)', name='ck_profiles_verification'),
     )
 
     # Relationships
@@ -92,7 +97,7 @@ class Profile(Base):
 
     @property
     def is_admin(self) -> bool:
-        return self.role in (UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN)
+        return self.role in (UserRole.ADMIN, UserRole.SUPER_ADMIN)
 
     @property
     def is_super_admin(self) -> bool:
@@ -267,6 +272,8 @@ class InspireStory(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=False)
+    body = Column(JSON().with_variant(JSONB(), 'postgresql'), nullable=True)
+    removed_at = Column(DateTime(timezone=True), nullable=True)
     author_name = Column(String(255), nullable=True)
     is_anonymous = Column(Boolean, default=False, nullable=False)
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True)
@@ -280,9 +287,11 @@ class InspireStory(Base):
     reactions = relationship("InspireReaction", back_populates="story", passive_deletes=True)
     comments = relationship("InspireComment", back_populates="story", passive_deletes=True)
     shares = relationship("InspireShare", back_populates="story", passive_deletes=True)
+    attachments = relationship('InspireAttachment', back_populates='story', passive_deletes='all')
 
     __table_args__ = (
         CheckConstraint("post_type IN ('post', 'story', 'kudos', 'milestone')", name="ck_inspire_stories_type"),
+        CheckConstraint("body IS NULL OR (jsonb_typeof(body) = 'object' AND body @> jsonb_build_object('version',1) AND body ? 'blocks' AND jsonb_typeof(body->'blocks') = 'array')", name='ck_inspire_stories_body').ddl_if(dialect='postgresql'),
         CheckConstraint("post_type <> 'kudos' OR (recipient_label IS NOT NULL AND length(trim(recipient_label)) > 0)", name="ck_inspire_stories_recipient"),
         Index("ix_inspire_stories_user_created", "user_id", "created_at"),
     )
@@ -296,6 +305,8 @@ class InspireQuote(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     quote = Column(Text, nullable=False)
+    body = Column(JSON().with_variant(JSONB(), 'postgresql'), nullable=True)
+    removed_at = Column(DateTime(timezone=True), nullable=True)
     author = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id", ondelete="RESTRICT"), nullable=True)
@@ -305,8 +316,12 @@ class InspireQuote(Base):
     reactions = relationship("InspireReaction", back_populates="quote", passive_deletes=True)
     comments = relationship("InspireComment", back_populates="quote", passive_deletes=True)
     shares = relationship("InspireShare", back_populates="quote", passive_deletes=True)
+    attachments = relationship('InspireAttachment', back_populates='quote', passive_deletes='all')
 
-    __table_args__ = (Index("ix_inspire_quotes_user_created", "user_id", "created_at"),)
+    __table_args__ = (
+        Index("ix_inspire_quotes_user_created", "user_id", "created_at"),
+        CheckConstraint("body IS NULL OR (jsonb_typeof(body) = 'object' AND body @> jsonb_build_object('version',1) AND body ? 'blocks' AND jsonb_typeof(body->'blocks') = 'array')", name='ck_inspire_quotes_body').ddl_if(dialect='postgresql'),
+    )
 
     def __repr__(self):
         return f"<InspireQuote(id={self.id}, quote={self.quote[:50]}...)>"
@@ -320,6 +335,11 @@ class SharedMaterial(Base):
     description = Column(Text, nullable=True)
     subject = Column(String(100), nullable=False, index=True)
     file_url = Column(String(500), nullable=False)  # Supabase Storage public URL
+    storage_bucket = Column(String(100), nullable=True)
+    storage_path = Column(String(500), nullable=True)
+    filename = Column(String(255), nullable=True)
+    file_size = Column(Integer, nullable=True)
+    removed_at = Column(DateTime(timezone=True), nullable=True)
     file_type = Column(String(100), nullable=False)
     user_id = Column(SQLUUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False)
     is_anonymous = Column(Boolean, default=False, nullable=False)
@@ -345,3 +365,4 @@ from .persistence import (  # noqa: E402,F401
 )
 
 from .reporting import TrackingRateLimit  # noqa: E402,F401
+from .content import InspireAttachment, ModerationAction, VerificationAction  # noqa: E402,F401

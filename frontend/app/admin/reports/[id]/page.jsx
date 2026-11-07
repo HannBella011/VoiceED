@@ -75,7 +75,7 @@ export default function AdminReportDetailPage() {
   };
 
   // Check admin access
-  if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'moderator' && currentUser.role !== 'super_admin')) {
+  if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'super_admin')) {
     return (
       <>
         <Navbar

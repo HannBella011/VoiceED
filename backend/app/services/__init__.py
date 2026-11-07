@@ -845,7 +845,7 @@ class ReportService:
             ReportStatus.RESOLVED: {ReportStatus.CLOSED}, ReportStatus.CLOSED: set(),
         }
         if new != old and new not in allowed[old]: raise HTTPException(409, 'Invalid report status transition')
-        if new in (ReportStatus.ASSIGNED, ReportStatus.IN_PROGRESS) and not assigned: raise HTTPException(409, 'Assign an administrator or moderator first')
+        if new in (ReportStatus.ASSIGNED, ReportStatus.IN_PROGRESS) and not assigned: raise HTTPException(409, 'Assign an administrator first')
 
     # --- Report Creation ---
     
@@ -1019,7 +1019,7 @@ class ReportService:
                 try: assignment = uuid.UUID(str(assignment))
                 except ValueError: raise HTTPException(422, 'Invalid assignee')
             assignee = await profile_service.get_by_id(db, assignment)
-            if not assignee or not assignee.is_active or not assignee.is_admin: raise HTTPException(422, 'Assignee must be an active administrator or moderator')
+            if not assignee or not assignee.is_active or not assignee.is_admin: raise HTTPException(422, 'Assignee must be an active administrator')
         new_status = ReportStatus(data.get('status', report.status))
         self.validate_transition(report.status, new_status, assignment)
         ids = list(dict.fromkeys(data.get('attachment_ids') or []))
@@ -1137,7 +1137,7 @@ class ReportService:
         anonymous = (await db.execute(select(func.count(Report.id)).where(Report.is_anonymous == True))).scalar_one()
         authenticated = (await db.execute(select(func.count(Report.id)).where(Report.is_anonymous == False))).scalar_one()
         total_users = (await db.execute(select(func.count(Profile.id)))).scalar_one()
-        total_admins = (await db.execute(select(func.count(Profile.id)).where(Profile.role.in_([UserRole.ADMIN, UserRole.MODERATOR, UserRole.SUPER_ADMIN])))).scalar_one()
+        total_admins = (await db.execute(select(func.count(Profile.id)).where(Profile.role.in_([UserRole.ADMIN, UserRole.SUPER_ADMIN])))).scalar_one()
         
         return {
             "total_reports": total,

@@ -221,7 +221,7 @@ async def admin_assign_report(
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_admin_user)
 ):
-    """Assign a report to an admin/moderator (admin only)."""
+    """Assign a report to an admin (admin only)."""
     try:
         assignee_uuid = uuid.UUID(assignment.assignee_id)
         report = await report_service.assign_report(db, report_id, assignee_uuid, current_user)

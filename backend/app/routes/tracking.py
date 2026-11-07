@@ -249,7 +249,7 @@ async def admin_assign_report(
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_admin_user)
 ):
-    """Assign a report to an admin/moderator (admin only)."""
+    """Assign a report to an admin (admin only)."""
     try:
         assignee_uuid = uuid.UUID(assignee_id)
         report = await report_service.assign_report(db, report_id, assignee_uuid, current_user)
@@ -300,22 +300,18 @@ async def get_available_assignees(
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_admin_user)
 ):
-    """Get list of admins/moderators available for report assignment."""
+    """Get list of admins available for report assignment."""
     users, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
         role=UserRoleModel.ADMIN, is_active=True
     )
-    # Also include moderators and super_admins
-    moderators, _ = await profile_service.list_profiles(
-        db, page=1, limit=100, 
-        role=UserRoleModel.MODERATOR, is_active=True
-    )
+    # Super admins can also be assigned reports.
     super_admins, _ = await profile_service.list_profiles(
         db, page=1, limit=100, 
         role=UserRoleModel.SUPER_ADMIN, is_active=True
     )
     
-    all_assignees = users + moderators + super_admins
+    all_assignees = users + super_admins
     return [
         UserResponse(
             id=str(u.id),
