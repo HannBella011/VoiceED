@@ -31,6 +31,7 @@ function InspireEDContent() {
   const [total, setTotal] = useState(0);
   const [revision, setRevision] = useState(0);
   const [directId, setDirectId] = useState(null);
+  const [mine, setMine] = useState(false);
   const [commentTarget, setCommentTarget] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -57,6 +58,9 @@ function InspireEDContent() {
   useEffect(() => {
     const readLocation = () => {
     const query = new URLSearchParams(window.location.search);
+    setMine(query.get('mine') === '1');
+    const type = { story: 'stories', quote: 'quotes' }[query.get('post_type')];
+    if (type) setActiveTab(type);
     const value = query.get('post');
     if (value) {
       if (/^(stories|quotes):[1-9][0-9]*$/.test(value)) setDirectId(value);
@@ -86,6 +90,10 @@ function InspireEDContent() {
           data = { items: [await inspireRequest(`/${kind}/${id}`, { signal: controller.signal })], total: 1, has_more: false };
         } else {
           const query = new URLSearchParams({ page: String(page), limit: '12', envelope: 'true', search: searchTerm });
+          if (mine) {
+            if (!isLoggedIn) { setLoginRequiredOpen(true); setTotal(0); return; }
+            query.set('mine', 'true');
+          }
           if (['quotes','stories','kudos','milestones'].includes(activeTab)) query.set('post_type', { quotes:'quote',stories:'story',kudos:'kudos',milestones:'milestone' }[activeTab]);
           if (activeTab === 'activity') {
             if (!isLoggedIn) { setPosts([]); setTotal(0); return; }
@@ -100,7 +108,7 @@ function InspireEDContent() {
       finally { if (sequence === feedSequence.current && !controller.signal.aborted) setLoading(false); }
     }, searchTerm ? 300 : 0);
     return () => { controller.abort(); clearTimeout(timer); feedSequence.current++; };
-  }, [currentUser?.id, isLoggedIn, authLoading, activeTab, searchTerm, page, directId, revision]);
+  }, [currentUser?.id, isLoggedIn, authLoading, activeTab, searchTerm, page, directId, revision, mine]);
   const updatePost = updated => setPosts(previous => previous.map(post => post.id === updated.id ? updated : post));
   const act = async callback => {
     if (!requireLogin() || mutation.current) return;
@@ -205,7 +213,7 @@ function InspireEDContent() {
                   <button
                     key={tab.id}
                     className={`sidebar-tab ${activeTab === tab.id ? 'active' : ''}`}
-                    onClick={() => { setActiveTab(tab.id); setPage(1); setSearchTerm(''); setDirectId(null); window.history.replaceState({}, '', '/inspire-ed'); }}
+                    onClick={() => { setActiveTab(tab.id); setPage(1); setSearchTerm(''); setDirectId(null); window.history.replaceState({}, '', mine ? '/inspire-ed?mine=1' : '/inspire-ed'); }}
                     data-tab={tab.id}
                   >
                     <i className={tab.icon}></i>
@@ -216,6 +224,7 @@ function InspireEDContent() {
             </aside>
 
             <div className="inspireED-content">
+              {mine && <p>Your published content. <a href="/inspire-ed" onClick={event => { event.preventDefault(); setMine(false); setPage(1); window.history.replaceState({}, '', '/inspire-ed'); }}>Browse all posts</a></p>}
               {error && <p role="alert">{error} <button type="button" onClick={() => setRevision(value => value + 1)}>Retry</button></p>}
               {notice && <p role="status">{notice}</p>}
               {loading && <p role="status">Loading posts…</p>}

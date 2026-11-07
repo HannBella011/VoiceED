@@ -31,6 +31,8 @@ export default function ShareEd() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [mine, setMine] = useState(false);
+  const [locationReady, setLocationReady] = useState(false);
   const [subjects, setSubjects] = useState([]);
   const [subjectError, setSubjectError] = useState('');
   const [sort, setSort] = useState('newest');
@@ -45,20 +47,27 @@ export default function ShareEd() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    const readLocation = () => { setMine(typeof window !== 'undefined' && new URLSearchParams(window.location?.search || '').get('mine') === '1'); setPage(1); setLocationReady(true); };
+    readLocation();
+    if (typeof window !== 'undefined') window.addEventListener?.('popstate', readLocation);
+    return () => { if (typeof window !== 'undefined') window.removeEventListener?.('popstate', readLocation); };
+  }, []);
+
+  useEffect(() => {
     if (search.trim() === debouncedSearch) return;
     const timer = setTimeout(() => { setDebouncedSearch(search.trim()); setPage(1); }, 300);
     return () => clearTimeout(timer);
   }, [search, debouncedSearch]);
   useEffect(() => {
     const controller = new AbortController();
-    if (isLoading) return () => controller.abort();
+    if (isLoading || !locationReady) return () => controller.abort();
     setMaterials([]); setTotal(0); setHasMore(false); setLoading(isLoggedIn); setError('');
     if (!isLoggedIn) return () => controller.abort();
     const load = async () => {
       try {
         const data = await shareService.getMaterials({ page, limit: PAGE_SIZE, envelope: true,
           search: debouncedSearch, subject: subject || undefined, resource_type: type || undefined,
-          file_format: format || undefined, sort }, { signal: controller.signal });
+          file_format: format || undefined, sort, ...(mine ? { mine: true } : {}) }, { signal: controller.signal });
         if (!data || !Array.isArray(data.items)) throw new Error('Unable to read study materials.');
         if (!controller.signal.aborted) {
           setMaterials(data.items); setTotal(data.total); setHasMore(data.has_more);
@@ -70,7 +79,7 @@ export default function ShareEd() {
     };
     load();
     return () => controller.abort();
-  }, [isLoggedIn, isLoading, currentUser?.id, revision, page, debouncedSearch, subject, type, format, sort]);
+  }, [isLoggedIn, isLoading, currentUser?.id, revision, page, debouncedSearch, subject, type, format, sort, mine, locationReady]);
   useEffect(() => {
     const controller = new AbortController();
     setSubjects([]); setSubjectError('');
@@ -157,6 +166,7 @@ export default function ShareEd() {
             <p>A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.</p>
           </div>
           <div className="share-upload-action"><button type="button" className="submit-btn" onClick={() => { if (!isLoggedIn) { setLoginRequiredOpen(true); return; } setUploadOpen(true); setSuccess(''); }}><i className="fas fa-upload" /> Upload</button></div>
+          {mine && <p>Your shared resources. <a href="/share-ed" onClick={event => { event.preventDefault(); setMine(false); setPage(1); window.history.replaceState({}, '', '/share-ed'); }}>Browse all resources</a></p>}
           {success && <p className="success-message" role="status">{success}</p>}
           <section className="search-quick-access-section" aria-label="Resource search controls">
             <div className="wellness-card">

@@ -1186,10 +1186,10 @@ class ShareService:
         ".jpeg": {"image/jpeg", "image/jpg"},
     }
 
-    async def get_materials(self, db, subject=None, pagination=None, search='', resource_type=None, file_format=None, sort='newest'):
+    async def get_materials(self, db, subject=None, pagination=None, search='', resource_type=None, file_format=None, sort='newest', owner_id=None):
         from app.services.share_search import query_materials, is_postgres
         pagination = pagination or {"page": 1, "limit": 20}
-        query = query_materials(subject, search, resource_type, file_format, sort, is_postgres(db))
+        query = query_materials(subject, search, resource_type, file_format, sort, is_postgres(db), owner_id)
         count = await db.scalar(select(func.count()).select_from(query.order_by(None).subquery()))
         result = await db.execute(
             query

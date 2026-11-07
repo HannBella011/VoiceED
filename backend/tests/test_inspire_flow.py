@@ -73,6 +73,21 @@ class InspireFlowTests(unittest.IsolatedAsyncioTestCase):
     async def test_empty_feed_has_no_demo_data(self):
         self.assertEqual((await self.client.get("/inspire/feed")).json(), [])
 
+    async def test_mine_is_owned_only_and_requires_authentication(self):
+        await self.client.post(
+            "/inspire/stories", json={"content": "Owned", "is_anonymous": True}
+        )
+        self.current = self.other
+        await self.client.post("/inspire/stories", json={"content": "Other"})
+        self.current = self.owner
+        response = await self.client.get("/inspire/feed?mine=true&envelope=true")
+        self.assertEqual(response.json()["total"], 1)
+        self.assertEqual(response.json()["items"][0]["content"]["text"], "Owned")
+        self.current = None
+        self.assertEqual(
+            (await self.client.get("/inspire/feed?mine=true")).status_code, 401
+        )
+
     async def test_anonymous_author_hidden_and_ownership_enforced(self):
         data = {
             "content": "Encouragement",

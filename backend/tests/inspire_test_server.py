@@ -22,8 +22,13 @@ from app.models import (
     InspireAttachment,
     UserActivity,
     SharedMaterial,
+    Report,
+    JournalEntry,
+    MoodRecord,
+    WellnessGoal,
+    WellnessGoalProgress,
 )
-from app.routes import inspire, share
+from app.routes import inspire, share, dashboard
 from app.services import supabase_service
 from app.services import inspire_storage
 
@@ -46,6 +51,11 @@ for model in [
     InspireAttachment,
     UserActivity,
     SharedMaterial,
+    Report,
+    JournalEntry,
+    MoodRecord,
+    WellnessGoal,
+    WellnessGoalProgress,
 ]:
     model.__table__.create(engine)
 owner = uuid.uuid4()
@@ -118,6 +128,7 @@ async def required_user(authorization: str | None = Header(None)):
 app = FastAPI()
 app.include_router(inspire.router, prefix="/api/v1/inspire")
 app.include_router(share.router, prefix="/api/v1/share")
+app.include_router(dashboard.router, prefix="/api/v1/dashboard")
 app.dependency_overrides[inspire.get_db] = database
 app.dependency_overrides[inspire.optional_user] = optional_user
 app.dependency_overrides[inspire.get_current_active_user] = required_user

@@ -59,6 +59,7 @@ async def get_shared_materials(
     ] = None,
     sort: Literal["newest", "oldest", "title", "downloads"] = "newest",
     envelope: bool = False,
+    mine: bool = False,
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_active_user),
 ):
@@ -71,6 +72,7 @@ async def get_shared_materials(
         resource_type,
         file_format,
         sort,
+        current_user.id if mine else None,
     )
     items = [material_response(material) for material in materials]
     if not envelope:

@@ -353,6 +353,7 @@ class SharedMaterial(Base):
     __table_args__ = (
         Index("ix_shared_materials_subject_created", "subject", "created_at"),
         Index('ix_shared_materials_visible_created', 'created_at', 'id', postgresql_where=text('removed_at IS NULL')),
+        Index('ix_shared_materials_owner_created', 'user_id', 'created_at', 'id', postgresql_where=text('removed_at IS NULL')),
         Index('ix_shared_materials_search', text("to_tsvector('simple'::regconfig, coalesce(title, '') || ' ' || coalesce(subject, '') || ' ' || coalesce(description, ''))"), postgresql_using='gin', postgresql_where=text('removed_at IS NULL')).ddl_if(dialect='postgresql'),
     )
 

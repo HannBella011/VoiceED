@@ -46,6 +46,8 @@ def statements(filename, direction):
 
 if __name__ == "__main__":
     definitions = {
+        "userContent": render("upgrade", "b85d0e316fa2:c96e1f427ab3"),
+        "downUsercontent": render("downgrade", "c96e1f427ab3:b85d0e316fa2"),
         "shareSearch": render("upgrade", "a74c9d205ef1:b85d0e316fa2"),
         "downSharesearch": render("downgrade", "b85d0e316fa2:a74c9d205ef1"),
         "base": render("upgrade", "129e9b18f7ce"),
@@ -84,6 +86,7 @@ if __name__ == "__main__":
         },
     }
     revisions = {
+        "userContent": "c96e1f427ab3_owned_resources_index.py",
         "shareSearch": "b85d0e316fa2_share_search_indexes.py",
         "content": "a74c9d205ef1_content_and_verification.py",
         "core": "8c6f2a1d4e90_preferences_and_integrity.py",

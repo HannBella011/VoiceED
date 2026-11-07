@@ -67,8 +67,9 @@ export function Navbar({ currentPage='', onSettingsClick }) {
   };
   const nav = <nav className={`navbar${isOpen ? ' active' : ''}`} id="navbar" aria-label="Main navigation">
     <ul className={`nav-links ${styles.links}${isOpen ? ' show' : ''}`} ref={list}>
-      <><li><Link href="/" className={currentPage==='/' ? 'active' : ''} onClick={close}>Home</Link></li><li><Link href="/about" onClick={close}>About</Link></li></>
+      <li><Link href="/" className={currentPage==='/' ? 'active' : ''} onClick={close}>Home</Link></li>
       {authenticated && <li><Link href="/dashboard" className={currentPage==='/dashboard' ? 'active' : ''} onClick={event=>navigate(event,'/dashboard')}>Dashboard</Link></li>}
+      <li><Link href="/about" onClick={close}>About</Link></li>
       <li className={styles.dropdown} onBlur={event=>{ if(!event.currentTarget.contains(event.relatedTarget)) setMenu(previous=>previous==='services' ? null : previous); }}>
         <button type="button" className={styles.trigger} ref={servicesButton} aria-haspopup="menu" aria-expanded={menu==='services'} aria-controls="services-navigation" onClick={()=>toggle('services')} onKeyDown={event=>triggerKey(event,'services')}>Services <i className="fas fa-chevron-down" aria-hidden="true" /></button>
         {menu==='services' && <ul className={styles.menu} id="services-navigation" role="menu" aria-label="Services" ref={servicesMenu} onKeyDown={event=>menuKey(event,'services')}>
@@ -78,7 +79,7 @@ export function Navbar({ currentPage='', onSettingsClick }) {
       <li><Link href="/contacts" onClick={close}>Contact</Link></li>
       <li><button type="button" id="settingsBtn" className={`settings-nav-btn ${styles.pill}`} onClick={settings}>Settings</button></li>
       {authenticated ? <li className={styles.dropdown} onBlur={event=>{ if(!event.currentTarget.contains(event.relatedTarget)) setMenu(previous=>previous==='profile' ? null : previous); }}>
-        <button type="button" id="userMenuBtn" className={`login-nav-btn ${styles.pill}`} ref={profileButton} aria-haspopup="menu" aria-expanded={menu==='profile'} aria-controls="profile-navigation" onClick={()=>toggle('profile')} onKeyDown={event=>triggerKey(event,'profile')}>Profile</button>
+        <button type="button" id="userMenuBtn" className={`login-nav-btn ${styles.pill}`} ref={profileButton} aria-label="Profile" aria-haspopup="menu" aria-expanded={menu==='profile'} aria-controls="profile-navigation" onClick={()=>toggle('profile')} onKeyDown={event=>triggerKey(event,'profile')}><i className="fas fa-user" aria-hidden="true" /></button>
         {menu==='profile' && <ul className={styles.menu} id="profile-navigation" role="menu" aria-label="Profile" ref={profileMenu} onKeyDown={event=>menuKey(event,'profile')}>
           <li role="none"><Link role="menuitem" href="/profile" onClick={event=>navigate(event,'/profile')}>My Profile</Link></li>
           <li role="none"><Link role="menuitem" href="/dashboard" onClick={event=>navigate(event,'/dashboard')}>Dashboard</Link></li>

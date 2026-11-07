@@ -144,6 +144,28 @@ class ShareFlowTests(unittest.IsolatedAsyncioTestCase):
         response = await self.client.get("/share/materials?page=0")
         self.assertEqual(response.status_code, 422)
 
+    async def test_mine_filters_by_authenticated_owner_before_counting(self):
+        self.material(anonymous=True)
+        other = Profile(id=uuid.uuid4(), username="other", email="other@example.test")
+        self.session.add(other)
+        self.session.flush()
+        self.session.add(
+            SharedMaterial(
+                title="Other notes",
+                subject="CS101",
+                file_url="https://example.test/other.pdf",
+                file_type="application/pdf",
+                user_id=other.id,
+            )
+        )
+        self.session.commit()
+        response = await self.client.get(
+            "/share/materials?mine=true&envelope=true&limit=1"
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["total"], 1)
+        self.assertEqual(response.json()["items"][0]["title"], "Database study notes")
+
     async def test_filters_apply_before_pagination_and_counts_match(self):
         for index in range(15):
             item = self.material()

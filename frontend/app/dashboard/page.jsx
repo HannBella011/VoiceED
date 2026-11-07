@@ -15,13 +15,26 @@ function DashboardContent() {
   const router = useRouter();
   const { currentUser } = useAuthContext();
   const { setSettingsOpen, setUserMenuOpen } = useModals();
-  const [summary, setSummary] = useState(null);
-  const [error, setError] = useState('');
+  const [result, setResult] = useState(null);
+  const [failure, setFailure] = useState(null);
+  const [revision, setRevision] = useState(0);
+  const summary = result?.owner === currentUser?.id ? result?.data : null;
+  const error = failure?.owner === currentUser?.id ? failure?.message : '';
   useEffect(() => {
     let active = true;
-    accountRequest(`/dashboard?day=${localDate()}`).then(data => { if(active) setSummary(data); }).catch(err => { if(active) setError(err.message); });
+    setResult(null); setFailure(null);
+    if (!currentUser?.id) return;
+    accountRequest(`/dashboard?day=${localDate()}`).then(data => { if(active) setResult({ owner: currentUser.id, data }); }).catch(err => { if(active) setFailure({ owner: currentUser.id, message: err.message || 'Unable to load your dashboard.' }); });
     return () => { active = false; };
-  }, [currentUser?.id]);
+  }, [currentUser?.id, revision]);
+  const statistics = [
+    ['materials', 'Total Resources Shared', 'fas fa-book', '/share-ed?mine=1'],
+    ['stories', 'Total Stories Published', 'fas fa-pen', '/inspire-ed?mine=1&post_type=story'],
+    ['quotes', 'Total Quotes Published', 'fas fa-quote-left', '/inspire-ed?mine=1&post_type=quote'],
+    ['reactions_received', 'Total Reactions Received', 'fas fa-heart', '/inspire-ed?mine=1'],
+    ['comments_received', 'Total Comments Received', 'fas fa-comment', '/inspire-ed?mine=1'],
+    ['reports_submitted', 'Total Reports Submitted', 'fas fa-flag', '/dashboard/reports'],
+  ];
   return (
     <>
       <Navbar currentPage={pathname} variant="dashboard"
@@ -69,10 +82,20 @@ function DashboardContent() {
                         <div className="welcome-content">
                             <h1>Welcome back, <span id="dashboardUsername">{currentUser?.username || "Student"}</span>!</h1>
                             <p>Thanks for signing in—VoiceED is ready to be your hub for safety, wellness, and collaboration, where every student's voice matters.</p>
-                            <div className="quote-box"><p>{summary ? `${Object.values(summary.reports).reduce((sum, count) => sum + count, 0)} reports ? ${summary.materials} materials shared ? ${summary.inspire_posts} InspireED posts` : 'Loading your summary...'}</p></div>
+                            <div className="quote-box"><p>{summary ? `${summary.reports_submitted} reports | ${summary.materials} materials shared | ${summary.inspire_posts} InspireED posts` : error ? 'Your summary is unavailable.' : 'Loading your summary...'}</p></div>
                         </div>
                     </div>
 
+                    {error && <p role="alert">{error} <button type="button" className="view-all" onClick={() => setRevision(value => value + 1)}>Retry</button></p>}
+                    <section aria-label="Your shared content" aria-busy={!summary && !error}>
+                        <h2 className="content-summary-heading">Your Content</h2>
+                        <div className="stats-grid">
+                            {statistics.map(([key, label, icon, href]) => <a className="stat-card" href={href} key={key}>
+                                <div className="stat-icon" aria-hidden="true"><i className={icon} /></div>
+                                <div className="stat-info"><h3>{label}</h3><span className="stat-number">{summary ? summary[key] : '\u2014'}</span></div>
+                            </a>)}
+                        </div>
+                    </section>
                     <div className="content-grid">
 
                         <div className="content-card">
@@ -81,8 +104,7 @@ function DashboardContent() {
                                 <a href="/dashboard/reports" className="view-all">View All</a>
                             </div>
                             <div className="activity-feed">
-                                {error && <p role="alert">{error}</p>}
-                                {!summary ? <p>Loading activity...</p> : summary.activity.length === 0 ? <p>No activity yet.</p> : summary.activity.map(item => <div className="activity-item" key={item.id}><div className="activity-icon"><i className="fas fa-history" /></div><div className="activity-content"><p className="activity-text">{item.action}</p><time className="activity-time">{new Date(item.created_at).toLocaleString()}</time></div></div>)}
+                                {!summary ? <p>{error ? 'Activity is unavailable.' : 'Loading activity...'}</p> : summary.activity.length === 0 ? <p>No activity yet.</p> : summary.activity.map(item => <div className="activity-item" key={item.id}><div className="activity-icon"><i className="fas fa-history" /></div><div className="activity-content"><p className="activity-text">{item.action}</p><time className="activity-time">{new Date(item.created_at).toLocaleString()}</time></div></div>)}
                             </div>
                         </div>
 

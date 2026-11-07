@@ -69,3 +69,4 @@ tests/*
 !tests/inspire_test_server.py
 !tests/migration_sql.py
 !tests/phase2_postgres.test.cjs
+!tests/test_dashboard_flow.py

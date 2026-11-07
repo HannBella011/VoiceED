@@ -40,3 +40,4 @@ next-env.d.ts
 tests/*
 !tests/inspire-flow.test.cjs
 !tests/share-flow.test.cjs
+!tests/dashboard-flow.test.cjs

@@ -30,6 +30,7 @@ def query_materials(
     file_format=None,
     sort="newest",
     postgres=False,
+    owner_id=None,
 ):
     query = (
         select(SharedMaterial)
@@ -52,6 +53,8 @@ def query_materials(
     )
     if subject:
         query = query.where(SharedMaterial.subject == subject)
+    if owner_id is not None:
+        query = query.where(SharedMaterial.user_id == owner_id)
     tokens = re.findall(r"[^\W_]+", search, re.UNICODE)
     if search.strip():
         if not tokens:

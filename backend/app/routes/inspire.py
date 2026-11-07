@@ -252,13 +252,14 @@ async def feed(
     search: str = Query("", max_length=200),
     post_type: str | None = None,
     activity: bool = False,
+    mine: bool = False,
     envelope: bool = False,
     db=Depends(get_db),
     user=Depends(optional_user),
 ):
     if post_type not in (None, "post", "story", "quote", "kudos", "milestone"):
         raise HTTPException(422, "Unknown post type")
-    if activity and user is None:
+    if (activity or mine) and user is None:
         raise HTTPException(401, "Sign in to view your activity")
     queries = []
     for kind, model in MODELS.items():
@@ -310,6 +311,8 @@ async def feed(
                     author_match,
                 )
             )
+        if mine:
+            query = query.where(model.user_id == user.id)
         if activity:
             query = query.where(
                 or_(
