@@ -78,26 +78,20 @@ async def unique_fields(db, values, identity=None):
 
 
 async def statistics(db):
-    def count(*conditions):
-        return (
-            select(func.count())
-            .select_from(Profile)
-            .where(*conditions)
-            .scalar_subquery()
-        )
-
     row = (
         await db.execute(
             select(
-                count().label("total"),
-                count(Profile.is_verified.is_(True)).label("verified"),
-                count(Profile.is_verified.is_(False)).label("unverified"),
-                count(Profile.role == UserRole.ADMIN).label("administrators"),
-                count(Profile.role == UserRole.SUPER_ADMIN).label(
-                    "superadministrators"
-                ),
-                count(Profile.is_active.is_(False)).label("suspended"),
-            )
+                func.count().label("total"),
+                func.count().filter(Profile.is_verified.is_(True)).label("verified"),
+                func.count().filter(Profile.is_verified.is_(False)).label("unverified"),
+                func.count()
+                .filter(Profile.role == UserRole.ADMIN)
+                .label("administrators"),
+                func.count()
+                .filter(Profile.role == UserRole.SUPER_ADMIN)
+                .label("superadministrators"),
+                func.count().filter(Profile.is_active.is_(False)).label("suspended"),
+            ).select_from(Profile)
         )
     ).one()
     return dict(row._mapping)

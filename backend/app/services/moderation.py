@@ -1,7 +1,7 @@
 """Accountable moderation of existing content; no role-management operations."""
 
 from datetime import datetime, timezone
-from sqlalchemy import select, func, literal, union_all, or_
+from sqlalchemy import select, func, literal, union_all, or_, true
 from fastapi import HTTPException
 from app.models import (
     Profile,
@@ -43,30 +43,45 @@ async def report_statistics(db):
 
 
 async def statistics(db):
-    def count(model, *where):
-        return select(func.count()).select_from(model).where(*where).scalar_subquery()
-
+    # One aggregate scan per source, rather than rescanning for every metric.
+    aggregates = {}
+    for kind, model in MODELS.items():
+        fields = [
+            func.count().label("total"),
+            func.count().filter(model.removed_at.is_not(None)).label("removed"),
+        ]
+        if kind == "story":
+            fields.extend(
+                [
+                    func.count().filter(model.post_type == "story").label("stories"),
+                    func.count()
+                    .filter(model.post_type != "story")
+                    .label("other_posts"),
+                ]
+            )
+        aggregates[kind] = select(*fields).select_from(model).subquery()
+    resource, story, quote, comment = [aggregates[key].c for key in MODELS]
     values = (
         (
             await db.execute(
                 select(
-                    count(SharedMaterial).label("resources"),
-                    count(InspireStory, InspireStory.post_type == "story").label(
-                        "stories"
+                    resource.total.label("resources"),
+                    story.stories,
+                    quote.total.label("quotes"),
+                    comment.total.label("comments"),
+                    story.other_posts,
+                    select(func.count())
+                    .select_from(ModerationAction)
+                    .scalar_subquery()
+                    .label("moderation_actions"),
+                    sum((item.c.removed for item in aggregates.values()), 0).label(
+                        "removed_content"
                     ),
-                    count(InspireQuote).label("quotes"),
-                    count(InspireComment).label("comments"),
-                    count(InspireStory, InspireStory.post_type != "story").label(
-                        "other_posts"
-                    ),
-                    count(ModerationAction).label("moderation_actions"),
-                    sum(
-                        (
-                            count(model, model.removed_at.is_not(None))
-                            for model in MODELS.values()
-                        ),
-                        0,
-                    ).label("removed_content"),
+                ).select_from(
+                    aggregates["resource"]
+                    .join(aggregates["story"], true())
+                    .join(aggregates["quote"], true())
+                    .join(aggregates["comment"], true())
                 )
             )
         )
@@ -237,9 +252,12 @@ def audit_response(row, administrator=None):
     }
 
 
-async def audit(db, page=1, limit=20, kind=None, content_id=None, search="", actor_id=None):
+async def audit(
+    db, page=1, limit=20, kind=None, content_id=None, search="", actor_id=None
+):
     query = select(ModerationAction)
-    if actor_id: query = query.where(ModerationAction.administrator_id == actor_id)
+    if actor_id:
+        query = query.where(ModerationAction.administrator_id == actor_id)
     if kind:
         query = query.where(ModerationAction.content_type == kind)
     if content_id:

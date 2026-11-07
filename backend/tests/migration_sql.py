@@ -46,6 +46,8 @@ def statements(filename, direction):
 
 if __name__ == "__main__":
     definitions = {
+        "optimization": render("upgrade", "da7f20538bc4:eb8031649cd5"),
+        "downOptimization": render("downgrade", "eb8031649cd5:da7f20538bc4"),
         "accounts": render("upgrade", "c96e1f427ab3:da7f20538bc4"),
         "downAccounts": render("downgrade", "da7f20538bc4:c96e1f427ab3"),
         "userContent": render("upgrade", "b85d0e316fa2:c96e1f427ab3"),
@@ -75,7 +77,7 @@ if __name__ == "__main__":
                         "nullable": column.nullable,
                     } for column in table.columns
                 },
-                "indexes": {index.name: {"columns": [column.name for column in index.columns], "unique": index.unique} for index in table.indexes},
+                "indexes": {index.name: {"columns": [column.name for column in index.expressions if getattr(column, "table", None) is table], "unique": index.unique} for index in table.indexes},
                 "checks": sorted(constraint.name for constraint in table.constraints if constraint.__class__.__name__ == "CheckConstraint"),
                 "unique": sorted(sorted(column.name for column in constraint.columns) for constraint in table.constraints if constraint.__class__.__name__ == "UniqueConstraint"),
                 "foreign_keys": sorted([{
@@ -88,6 +90,7 @@ if __name__ == "__main__":
         },
     }
     revisions = {
+        "optimization": "eb8031649cd5_listing_order_indexes.py",
         "accounts": "da7f20538bc4_account_administration.py",
         "userContent": "c96e1f427ab3_owned_resources_index.py",
         "shareSearch": "b85d0e316fa2_share_search_indexes.py",

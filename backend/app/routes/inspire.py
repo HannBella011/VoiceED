@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Header, UploadFile
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, func, delete, literal, union_all, or_, exists
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import load_only
 from starlette.concurrency import run_in_threadpool
 from app.database import get_db
 from app.models import (
@@ -87,7 +88,7 @@ async def serialize_many(db, pairs, viewer):
     profiles = (
         {
             p.id: p
-            for p in await db.scalars(select(Profile).where(Profile.id.in_(authors)))
+            for p in await db.scalars(select(Profile).options(load_only(Profile.id, Profile.username, Profile.full_name, Profile.is_verified)).where(Profile.id.in_(authors)))
         }
         if authors
         else {}

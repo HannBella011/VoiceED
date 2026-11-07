@@ -952,7 +952,7 @@ class ReportService:
         count_query = select(func.count()).select_from(query.subquery())
         total = (await db.execute(count_query)).scalar_one()
         
-        query = query.offset((page - 1) * limit).limit(limit).order_by(Report.created_at.desc())
+        query = query.offset((page - 1) * limit).limit(limit).order_by(Report.created_at.desc(), Report.id.desc())
         result = await db.execute(query)
         reports = result.scalars().all()
         

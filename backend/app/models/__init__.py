@@ -72,6 +72,8 @@ class Profile(Base):
     theme = Column(String(20), nullable=False, default="blue", server_default="blue")
 
     __table_args__ = (
+        Index("ix_profiles_created_id", "created_at", "id"),
+        Index("ix_profiles_username_id", func.lower(username), "id"),
         CheckConstraint("theme IN ('blue', 'purple', 'red', 'green', 'orange', 'pink')", name="ck_profiles_theme"),
         CheckConstraint("role IN ('STUDENT', 'ADMIN', 'SUPER_ADMIN')", name="ck_profiles_supported_role"),
         CheckConstraint('(is_verified AND verified_at IS NOT NULL AND verified_by IS NOT NULL) OR (NOT is_verified AND verified_at IS NULL AND verified_by IS NULL)', name='ck_profiles_verification'),
@@ -138,6 +140,8 @@ class Report(Base):
     # Indexes
     __table_args__ = (
         Index("ix_reports_status_category", "status", "category"),
+        Index("ix_reports_created_id", "created_at", "id"),
+        Index("ix_reports_status_created_id", "status", "created_at", "id"),
         Index("ix_reports_user_created", "user_id", "created_at"),
         Index("ix_reports_tracking_code", "tracking_code", unique=True),
         UniqueConstraint('submission_key', name='uq_reports_submission_key'),
@@ -294,6 +298,7 @@ class InspireStory(Base):
         CheckConstraint("body IS NULL OR (jsonb_typeof(body) = 'object' AND body @> jsonb_build_object('version',1) AND body ? 'blocks' AND jsonb_typeof(body->'blocks') = 'array')", name='ck_inspire_stories_body').ddl_if(dialect='postgresql'),
         CheckConstraint("post_type <> 'kudos' OR (recipient_label IS NOT NULL AND length(trim(recipient_label)) > 0)", name="ck_inspire_stories_recipient"),
         Index("ix_inspire_stories_user_created", "user_id", "created_at"),
+        Index("ix_inspire_stories_visible_created", "created_at", "id", postgresql_where=text("removed_at IS NULL")),
     )
 
     def __repr__(self):
@@ -320,6 +325,7 @@ class InspireQuote(Base):
 
     __table_args__ = (
         Index("ix_inspire_quotes_user_created", "user_id", "created_at"),
+        Index("ix_inspire_quotes_visible_created", "created_at", "id", postgresql_where=text("removed_at IS NULL")),
         CheckConstraint("body IS NULL OR (jsonb_typeof(body) = 'object' AND body @> jsonb_build_object('version',1) AND body ? 'blocks' AND jsonb_typeof(body->'blocks') = 'array')", name='ck_inspire_quotes_body').ddl_if(dialect='postgresql'),
     )
 
