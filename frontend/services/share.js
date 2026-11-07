@@ -46,6 +46,10 @@ export const shareService = {
     return request(`/share/materials/${materialId}`);
   },
 
+  async getSubjects(options = {}) {
+    return request('/share/subjects', options);
+  },
+
   async uploadMaterial(data) {
     return request('/share/materials', {
       method: 'POST',

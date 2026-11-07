@@ -1,0 +1,36 @@
+/* Only the requested editor, attachment previews and compact InspireED actions. */
+.inspire-page .post-interactions,
+.inspire-page .quote-interactions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem;
+}
+.inspire-page .post-interaction-btn,
+.inspire-page .interaction-btn {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 0;
+  padding: .35rem .6rem;
+  font-size: .8rem;
+  gap: .3rem;
+}
+.inspire-page .post-interaction-btn span,
+.inspire-page .interaction-btn span { font-size: inherit; }
+.inspire-dialog { z-index: 1100; padding: 1rem; align-items: center; justify-content: center; }
+.inspire-dialog .modal-content { position: relative; width: 100%; max-width: 680px; max-height: 90dvh; overflow-y: auto; }
+.inspire-dialog input:not([type=checkbox]),
+.inspire-dialog textarea,
+.inspire-dialog select { box-sizing: border-box; max-width: 100%; width: 100%; }
+.inspire-dialog label { display: block; margin-top: .75rem; }
+.inspire-toolbar { display: flex; flex-wrap: wrap; gap: .3rem; margin: .75rem 0; }
+.inspire-toolbar button { padding: .3rem .5rem; color: var(--text-primary); background: rgba(0,0,0,.25); border: 1px solid var(--accent-cyan); border-radius: 5px; cursor: pointer; }
+.inspire-editor-preview { margin-top: .5rem; padding: .75rem; border: 1px solid rgba(128,128,128,.4); border-radius: 6px; }
+.inspire-rich-body ul, .inspire-rich-body ol { padding-left: 1.5rem; }
+.inspire-rich-body p { min-height: 1em; margin: .5rem 0; }
+.inspire-attachment-previews > div { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; overflow-wrap: anywhere; }
+.inspire-attachment-previews img { width: 70px; height: 70px; object-fit: contain; }
+.inspire-attachments, .inspire-pagination { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: 1rem; }
+.inspire-pagination { justify-content: center; }
+.inspire-dialog button:disabled, .inspire-page button:disabled { opacity: .5; cursor: default; }

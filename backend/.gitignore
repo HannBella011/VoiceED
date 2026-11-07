@@ -64,4 +64,8 @@ dmypy.json
 # Misc
 *.pem
 
-tests
+tests/*
+!tests/test_inspire_flow.py
+!tests/inspire_test_server.py
+!tests/migration_sql.py
+!tests/phase2_postgres.test.cjs

@@ -73,6 +73,9 @@ export default function HomePage() {
               <p className="stat-label">
                 Motivational stories, student achievements, and encouraging quotes designed to inspire persistence and hope among learners.
               </p>
+              <button type="button" className="create-post-btn" onClick={event => { event.stopPropagation(); navigateToService('/inspire-ed?compose=1'); }}>
+                <i className="fas fa-plus" /> Create Post
+              </button>
             </div>
 
             <div

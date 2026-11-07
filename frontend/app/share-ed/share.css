@@ -1,0 +1,8 @@
+/* Reuse the existing form/card styles inside the requested upload modal. */
+.share-page .share-upload-action { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+.share-page .share-upload-action .submit-btn { width: auto; }
+.share-upload-modal { align-items: center; justify-content: center; padding: 1rem; }
+.share-upload-modal .modal-content { position: relative; width: 100%; max-width: 850px; max-height: 90dvh; overflow-y: auto; }
+.share-upload-modal .upload-section { margin: 0; }
+.share-upload-modal .wellness-card { margin: 0; }
+.share-upload-modal input, .share-upload-modal textarea { box-sizing: border-box; max-width: 100%; }

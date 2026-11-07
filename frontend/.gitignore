@@ -37,4 +37,6 @@ next-env.d.ts
 *.pem
 .vercel
 
-tests
+tests/*
+!tests/inspire-flow.test.cjs
+!tests/share-flow.test.cjs

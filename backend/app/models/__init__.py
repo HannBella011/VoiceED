@@ -1,7 +1,7 @@
 # VoiceED Backend - Database Models
 # Compatible with Supabase Auth (auth.users) and Session Pooler
 
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, CheckConstraint, JSON, UUID as SQLUUID
+from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, Index, UniqueConstraint, CheckConstraint, JSON, UUID as SQLUUID, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -352,6 +352,8 @@ class SharedMaterial(Base):
     # Indexes
     __table_args__ = (
         Index("ix_shared_materials_subject_created", "subject", "created_at"),
+        Index('ix_shared_materials_visible_created', 'created_at', 'id', postgresql_where=text('removed_at IS NULL')),
+        Index('ix_shared_materials_search', text("to_tsvector('simple'::regconfig, coalesce(title, '') || ' ' || coalesce(subject, '') || ' ' || coalesce(description, ''))"), postgresql_using='gin', postgresql_where=text('removed_at IS NULL')).ddl_if(dialect='postgresql'),
     )
 
     def __repr__(self):

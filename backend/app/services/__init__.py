@@ -1186,14 +1186,13 @@ class ShareService:
         ".jpeg": {"image/jpeg", "image/jpg"},
     }
 
-    async def get_materials(self, db, subject=None, pagination=None):
+    async def get_materials(self, db, subject=None, pagination=None, search='', resource_type=None, file_format=None, sort='newest'):
+        from app.services.share_search import query_materials, is_postgres
         pagination = pagination or {"page": 1, "limit": 20}
-        query = select(SharedMaterial).options(selectinload(SharedMaterial.user))
-        if subject:
-            query = query.where(SharedMaterial.subject == subject)
-        count = await db.scalar(select(func.count()).select_from(query.subquery()))
+        query = query_materials(subject, search, resource_type, file_format, sort, is_postgres(db))
+        count = await db.scalar(select(func.count()).select_from(query.order_by(None).subquery()))
         result = await db.execute(
-            query.order_by(SharedMaterial.created_at.desc(), SharedMaterial.id.desc())
+            query
             .offset((pagination["page"] - 1) * pagination["limit"])
             .limit(pagination["limit"])
         )
@@ -1202,13 +1201,13 @@ class ShareService:
     async def get_material(self, db, material_id):
         result = await db.execute(
             select(SharedMaterial).options(selectinload(SharedMaterial.user))
-            .where(SharedMaterial.id == material_id)
+            .where(SharedMaterial.id == material_id, SharedMaterial.removed_at.is_(None))
         )
         return result.scalar_one_or_none()
 
     async def increment_download_count(self, db, material_id):
         await db.execute(
-            update(SharedMaterial).where(SharedMaterial.id == material_id)
+            update(SharedMaterial).where(SharedMaterial.id == material_id, SharedMaterial.removed_at.is_(None))
             .values(download_count=SharedMaterial.download_count + 1)
         )
         await db.commit()
@@ -1252,11 +1251,11 @@ class ShareService:
         return True
 
     async def get_subjects(self, db):
-        result = await db.execute(select(SharedMaterial.subject).distinct().order_by(SharedMaterial.subject))
+        result = await db.execute(select(SharedMaterial.subject).where(SharedMaterial.removed_at.is_(None)).distinct().order_by(SharedMaterial.subject))
         return list(result.scalars().all())
 
     async def get_file_types(self, db):
-        result = await db.execute(select(SharedMaterial.file_type).distinct().order_by(SharedMaterial.file_type))
+        result = await db.execute(select(SharedMaterial.file_type).where(SharedMaterial.removed_at.is_(None)).distinct().order_by(SharedMaterial.file_type))
         return list(result.scalars().all())
 
 

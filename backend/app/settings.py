@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     # Supabase Storage
     SUPABASE_STORAGE_BUCKET: str = "voiceed-uploads"
     REPORT_STORAGE_BUCKET: str = "voiceed-reports"
+    INSPIRE_STORAGE_BUCKET: str = "voiceed-inspire"
     
     # Firebase (legacy)
     FIREBASE_CREDENTIALS_PATH: Optional[str] = None
