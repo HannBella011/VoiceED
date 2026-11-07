@@ -4,7 +4,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { ReportCard } from '@/components/features/report';
 import { adminListReports, getAdminStats, getAvailableAssignees } from '@/services';
@@ -29,6 +29,19 @@ export default function AdminReportsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [assignees, setAssignees] = useState([]);
+  const [search, setSearch] = useState('');
+  const requestSequence = useRef(0);
+  const allowed = isLoggedIn && ['admin', 'super_admin'].includes(currentUser?.role);
+
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get('status');
+    if (['submitted','under_review','assigned','in_progress','awaiting_additional_info','resolved','closed'].includes(value)) setFilters(previous => ({ ...previous, status: value, page: 1 }));
+  }, []);
+  useEffect(() => {
+    if (search.trim() === (filters.search || '')) return;
+    const timer = setTimeout(() => setFilters(previous => ({ ...previous, search: search.trim() || undefined, page: 1 })), 300);
+    return () => clearTimeout(timer);
+  }, [search, filters.search]);
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -44,6 +57,8 @@ export default function AdminReportsPage() {
   };
 
   const fetchData = async () => {
+    if (!allowed) return;
+    const sequence = ++requestSequence.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -52,21 +67,23 @@ export default function AdminReportsPage() {
         getAdminStats(),
         getAvailableAssignees(),
       ]);
+      if (sequence !== requestSequence.current) return;
       setReports(reportsData.items);
       setTotal(reportsData.total);
       setTotalPages(reportsData.total_pages);
       setStats(statsData);
       setAssignees(assigneesData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      if (sequence === requestSequence.current) setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
-      setIsLoading(false);
+      if (sequence === requestSequence.current) setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, [filters.page, filters.status, filters.category, filters.is_anonymous]);
+    return () => { requestSequence.current++; };
+  }, [allowed, currentUser?.id, filters.page, filters.status, filters.category, filters.is_anonymous, filters.search]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
@@ -109,7 +126,7 @@ export default function AdminReportsPage() {
   ];
 
   // Check admin access
-  if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'super_admin')) {
+  if (!allowed) {
     return (
       <>
         <Navbar
@@ -139,7 +156,7 @@ export default function AdminReportsPage() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading && !stats) {
     return (
       <>
         <Navbar
@@ -183,6 +200,7 @@ export default function AdminReportsPage() {
           <div className="dashboard-header">
             <div className="dashboard-header-left">
               <h1>Admin Dashboard</h1>
+              <a href="/admin">Platform statistics and content moderation</a>
               <p className="dashboard-subtitle">
                 Manage and review all submitted reports
               </p>
@@ -221,6 +239,7 @@ export default function AdminReportsPage() {
 
           {/* Filters */}
           <div className="dashboard-filters admin-filters">
+            <div className="filter-group"><label htmlFor="adminReportSearch" className="filter-label">Search reports</label><input id="adminReportSearch" className="search-input" maxLength={200} value={search} onChange={event => setSearch(event.target.value)} placeholder="Title, description or tracking code" /></div>
             <div className="filter-group">
               <label htmlFor="statusFilter" className="filter-label">Status</label>
               <select
@@ -262,7 +281,7 @@ export default function AdminReportsPage() {
             </div>
             <button 
               className="btn btn--secondary btn--sm filter-reset"
-              onClick={() => setFilters({ page: 1, limit: 20 })}
+              onClick={() => { setSearch(''); setFilters({ page: 1, limit: 20 }); }}
             >
               <i className="fas fa-undo"></i> Reset
             </button>
@@ -270,6 +289,7 @@ export default function AdminReportsPage() {
 
           {/* Reports List */}
           <div className="dashboard-reports admin-reports-list">
+            {isLoading && <p role="status">Loading reports…</p>}
             {error && (
               <div className="error-banner" role="alert">
                 <i className="fas fa-exclamation-triangle"></i>
@@ -301,6 +321,7 @@ export default function AdminReportsPage() {
               </>
             )}
           </div>
+          <div className="carousel-navigation" aria-label="Report pages"><button type="button" disabled={isLoading || filters.page === 1} onClick={() => handlePageChange(filters.page - 1)}>Previous</button><span>Page {filters.page} of {Math.max(1, totalPages)} · {total} reports</span><button type="button" disabled={isLoading || filters.page >= totalPages} onClick={() => handlePageChange(filters.page + 1)}>Next</button></div>
         </div>
       </main>
 

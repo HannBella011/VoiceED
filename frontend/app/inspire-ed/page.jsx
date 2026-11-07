@@ -140,6 +140,7 @@ function InspireEDContent() {
     setCommentText(''); await openComments(commentTarget, Math.max(1, Math.ceil((commentTotal + 1) / 10))); setRevision(value => value + 1);
   });
   const deleteComment = comment => act(async () => {
+    if (!comment.owned) { window.location.href = `/admin?kind=comment&content=${comment.id}`; return; }
     const owner = currentUser?.id;
     await inspireRequest(`/comments/${comment.id}`, { method: 'DELETE' });
     if (identity.current !== owner) return;

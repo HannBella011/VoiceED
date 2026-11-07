@@ -476,6 +476,10 @@ async def delete_comment(
     )
     if row is None or (row.user_id != user.id and not user.is_admin):
         raise HTTPException(404, "Comment not found")
+    if row.user_id != user.id:
+        raise HTTPException(
+            409, "Use the administrator moderation endpoint with a removal reason"
+        )
     row.removed_at = datetime.now(timezone.utc)
     await db.commit()
     return {"message": "Comment deleted"}
@@ -488,6 +492,10 @@ async def remove(
     row = await target(db, kind, identity, True)
     if row.user_id != user.id and not user.is_admin:
         raise HTTPException(404, "Post not found")
+    if row.user_id != user.id:
+        raise HTTPException(
+            409, "Use the administrator moderation endpoint with a removal reason"
+        )
     row.removed_at = datetime.now(timezone.utc)
     await db.commit()
     return {"message": "Post deleted"}

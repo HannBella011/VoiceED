@@ -83,6 +83,7 @@ export function Navbar({ currentPage='', onSettingsClick }) {
         {menu==='profile' && <ul className={styles.menu} id="profile-navigation" role="menu" aria-label="Profile" ref={profileMenu} onKeyDown={event=>menuKey(event,'profile')}>
           <li role="none"><Link role="menuitem" href="/profile" onClick={event=>navigate(event,'/profile')}>My Profile</Link></li>
           <li role="none"><Link role="menuitem" href="/dashboard" onClick={event=>navigate(event,'/dashboard')}>Dashboard</Link></li>
+          {['admin', 'super_admin'].includes(currentUser?.role) && <li role="none"><Link role="menuitem" href="/admin" onClick={event=>navigate(event,'/admin')}>Administration</Link></li>}
           <li role="none"><button type="button" role="menuitem" onClick={settings}>Settings</button></li>
           <li role="none"><button type="button" role="menuitem" onClick={()=>{close(); logout();}}>Logout</button></li>
         </ul>}

@@ -347,6 +347,10 @@ class FileUploadResult(BaseModel):
 
 # Admin schemas
 class AdminStatsResponse(BaseModel):
+    under_review_reports: int = 0
+    assigned_reports: int = 0
+    closed_reports: int = 0
+    awaiting_additional_info_reports: int = 0
     total_reports: int
     pending_reports: int
     in_progress_reports: int

@@ -89,7 +89,7 @@ function MessageContent() {
         <div className="container">
           <div className="services-welcome">
             <h2>User Messages</h2>
-            <p>View and manage all messages submitted through the VoiceED contact form.</p>
+            <p>View your contact messages and platform notifications.</p>
           </div>
 
           <div className="services-container">
@@ -129,7 +129,7 @@ function MessageContent() {
                     <div className="no-messages">
                       <i className="fas fa-inbox"></i>
                       <h3>No Messages Yet</h3>
-                      <p>When users submit messages through the contact form, they will appear here.</p>
+                      <p>Your contact messages and platform notifications will appear here.</p>
                     </div>
                   ) : (
                     messages.map(msg => (

@@ -41,3 +41,4 @@ tests/*
 !tests/inspire-flow.test.cjs
 !tests/share-flow.test.cjs
 !tests/dashboard-flow.test.cjs
+!tests/admin-flow.test.cjs

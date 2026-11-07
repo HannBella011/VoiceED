@@ -70,3 +70,4 @@ tests/*
 !tests/migration_sql.py
 !tests/phase2_postgres.test.cjs
 !tests/test_dashboard_flow.py
+!tests/test_moderation_flow.py

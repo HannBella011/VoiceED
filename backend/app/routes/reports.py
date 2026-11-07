@@ -157,13 +157,14 @@ async def admin_list_reports(
     category: Optional[ReportCategory] = Query(None),
     is_anonymous: Optional[bool] = Query(None),
     assignee_id: Optional[str] = Query(None),
+    search: str = Query('', max_length=200),
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_admin_user)
 ):
     """List all reports (admin only)."""
     assignee_uuid = uuid.UUID(assignee_id) if assignee_id else None
     reports, total = await report_service.list_reports(
-        db, page, limit, status, category, is_anonymous, assignee_uuid
+        db, page, limit, status, category, is_anonymous, assignee_uuid, search
     )
     total_pages = (total + limit - 1) // limit
     
@@ -420,7 +421,7 @@ async def delete_report_legacy(
     db: AsyncSession = Depends(get_db),
     current_user: Profile = Depends(get_current_active_user)
 ):
-    """Legacy endpoint for deleting reports (admin only)."""
+    """Retain report evidence and audit history; use the existing closure workflow."""
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
     
@@ -428,9 +429,7 @@ async def delete_report_legacy(
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     
-    await db.delete(report)
-    await db.commit()
-    return {"message": "Report deleted successfully"}
+    raise HTTPException(status_code=409, detail="Close reports through the administrator status workflow to retain their history")
 
 @router.post('/admin/reports/{report_id}/timeline', response_model=ReportResponse)
 async def admin_timeline(report_id: int, data: ReportStatusUpdate, db: AsyncSession = Depends(get_db), current_user: Profile = Depends(get_current_admin_user)):

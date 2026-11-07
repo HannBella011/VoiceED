@@ -980,7 +980,8 @@ class ReportService:
         status: Optional[ReportStatus] = None,
         category: Optional[ReportCategory] = None,
         is_anonymous: Optional[bool] = None,
-        assignee_id: Optional[uuid.UUID] = None
+        assignee_id: Optional[uuid.UUID] = None,
+        search: str = ''
     ) -> tuple[List[Report], int]:
         query = select(Report).options(*self.relations())
         
@@ -992,11 +993,14 @@ class ReportService:
             query = query.where(Report.is_anonymous == is_anonymous)
         if assignee_id:
             query = query.where(Report.assignee_id == assignee_id)
+        if search.strip():
+            term = '%' + search.strip().replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+            query = query.where(or_(Report.title.ilike(term, escape='\\'), Report.description.ilike(term, escape='\\'), Report.tracking_code.ilike(term, escape='\\')))
         
         count_query = select(func.count()).select_from(query.subquery())
         total = (await db.execute(count_query)).scalar_one()
         
-        query = query.offset((page - 1) * limit).limit(limit).order_by(Report.created_at.desc())
+        query = query.offset((page - 1) * limit).limit(limit).order_by(Report.created_at.desc(), Report.id.desc())
         result = await db.execute(query)
         reports = result.scalars().all()
         
@@ -1128,25 +1132,22 @@ class ReportService:
     
     async def get_admin_stats(self, db: AsyncSession) -> dict:
         """Get admin dashboard statistics."""
-        total = (await db.execute(select(func.count(Report.id)))).scalar_one()
-        pending = (await db.execute(select(func.count(Report.id)).where(Report.status == ReportStatus.SUBMITTED))).scalar_one()
-        under_review = (await db.execute(select(func.count(Report.id)).where(Report.status == ReportStatus.UNDER_REVIEW))).scalar_one()
-        in_progress = (await db.execute(select(func.count(Report.id)).where(Report.status.in_([ReportStatus.ASSIGNED, ReportStatus.IN_PROGRESS])))).scalar_one()
-        resolved = (await db.execute(select(func.count(Report.id)).where(Report.status == ReportStatus.RESOLVED))).scalar_one()
-        closed = (await db.execute(select(func.count(Report.id)).where(Report.status == ReportStatus.CLOSED))).scalar_one()
-        anonymous = (await db.execute(select(func.count(Report.id)).where(Report.is_anonymous == True))).scalar_one()
-        authenticated = (await db.execute(select(func.count(Report.id)).where(Report.is_anonymous == False))).scalar_one()
+        from app.services.moderation import report_statistics
+        counts = await report_statistics(db)
         total_users = (await db.execute(select(func.count(Profile.id)))).scalar_one()
         total_admins = (await db.execute(select(func.count(Profile.id)).where(Profile.role.in_([UserRole.ADMIN, UserRole.SUPER_ADMIN])))).scalar_one()
         
         return {
-            "total_reports": total,
-            "pending_reports": pending,
-            "under_review_reports": under_review,
-            "in_progress_reports": in_progress,
-            "resolved_reports": resolved + closed,
-            "anonymous_reports": anonymous,
-            "authenticated_reports": authenticated,
+            "total_reports": counts['total'],
+            "pending_reports": counts['submitted'],
+            "under_review_reports": counts['under_review'],
+            "assigned_reports": counts['assigned'],
+            "in_progress_reports": counts['in_progress'],
+            "resolved_reports": counts['resolved'],
+            "closed_reports": counts['closed'],
+            "awaiting_additional_info_reports": counts['awaiting_additional_info'],
+            "anonymous_reports": counts['anonymous'],
+            "authenticated_reports": counts['authenticated'],
             "total_users": total_users,
             "total_admins": total_admins,
         }
@@ -1246,7 +1247,7 @@ class ShareService:
         material = await self.get_material(db, material_id)
         if not material or material.user_id != user_id:
             return False
-        await db.delete(material)
+        material.removed_at = datetime.now(timezone.utc)
         await db.commit()
         return True
 
