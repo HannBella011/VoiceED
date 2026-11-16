@@ -9,7 +9,7 @@ class InviteInput(BaseModel):
     email: EmailStr
     username: str = Field(min_length=1, max_length=50, pattern=r"^[\w.-]+$")
     full_name: str = Field(min_length=1, max_length=255)
-    school_id: str | None = Field(default=None, max_length=50)
+    school_id: str = Field(min_length=1, max_length=50)
 
 
 class AccountUpdate(BaseModel):
@@ -18,13 +18,13 @@ class AccountUpdate(BaseModel):
     username: str | None = Field(
         default=None, min_length=1, max_length=50, pattern=r"^[\w.-]+$"
     )
-    school_id: str | None = Field(default=None, max_length=50)
+    school_id: str | None = Field(default=None, min_length=1, max_length=50)
     role: Literal["student", "admin", "super_admin"] | None = None
     reason: str = Field(min_length=1, max_length=2000)
 
     @model_validator(mode="after")
     def no_null_authority(self):
-        for field in ["username", "full_name", "role"]:
+        for field in ["username", "full_name", "role", "school_id"]:
             if field in self.model_fields_set and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null")
         return self

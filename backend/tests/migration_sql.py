@@ -31,8 +31,16 @@ def render(direction, revisions):
 def statements(filename, direction):
     """Capture online operation boundaries; batch SQL rendering hides driver errors."""
     captured = []
+
     def execute(statement, *args, **kwargs):
-        captured.append(str(statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})))
+        captured.append(
+            str(
+                statement.compile(
+                    dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+                )
+            )
+        )
+
     connection = create_mock_engine("postgresql://", execute).connect()
     context = MigrationContext.configure(connection)
     path = Path("alembic/versions") / filename
@@ -73,20 +81,52 @@ if __name__ == "__main__":
             table.name: {
                 "columns": {
                     column.name: {
-                        "type": str(column.type.compile(dialect=postgresql.dialect())).lower(),
+                        "type": str(
+                            column.type.compile(dialect=postgresql.dialect())
+                        ).lower(),
                         "nullable": column.nullable,
-                    } for column in table.columns
+                    }
+                    for column in table.columns
                 },
-                "indexes": {index.name: {"columns": [column.name for column in index.expressions if getattr(column, "table", None) is table], "unique": index.unique} for index in table.indexes},
-                "checks": sorted(constraint.name for constraint in table.constraints if constraint.__class__.__name__ == "CheckConstraint"),
-                "unique": sorted(sorted(column.name for column in constraint.columns) for constraint in table.constraints if constraint.__class__.__name__ == "UniqueConstraint"),
-                "foreign_keys": sorted([{
-                    "columns": [element.parent.name for element in constraint.elements],
-                    "target": f"{constraint.elements[0].column.table.schema or 'public'}.{constraint.elements[0].column.table.name}",
-                    "target_columns": [element.column.name for element in constraint.elements],
-                    "ondelete": constraint.ondelete or "NO ACTION",
-                } for constraint in table.foreign_key_constraints], key=lambda item: str(item)),
-            } for table in Base.metadata.sorted_tables
+                "indexes": {
+                    index.name: {
+                        "columns": [
+                            column.name
+                            for column in index.expressions
+                            if getattr(column, "table", None) is table
+                        ],
+                        "unique": index.unique,
+                    }
+                    for index in table.indexes
+                },
+                "checks": sorted(
+                    constraint.name
+                    for constraint in table.constraints
+                    if constraint.__class__.__name__ == "CheckConstraint"
+                ),
+                "unique": sorted(
+                    sorted(column.name for column in constraint.columns)
+                    for constraint in table.constraints
+                    if constraint.__class__.__name__ == "UniqueConstraint"
+                ),
+                "foreign_keys": sorted(
+                    [
+                        {
+                            "columns": [
+                                element.parent.name for element in constraint.elements
+                            ],
+                            "target": f"{constraint.elements[0].column.table.schema or 'public'}.{constraint.elements[0].column.table.name}",
+                            "target_columns": [
+                                element.column.name for element in constraint.elements
+                            ],
+                            "ondelete": constraint.ondelete or "NO ACTION",
+                        }
+                        for constraint in table.foreign_key_constraints
+                    ],
+                    key=lambda item: str(item),
+                ),
+            }
+            for table in Base.metadata.sorted_tables
         },
     }
     revisions = {
@@ -103,11 +143,31 @@ if __name__ == "__main__":
         "reporting": "e52f7d903ab1_report_submission_receipts.py",
     }
     definitions["statements"] = {}
-    definitions['shareQueries'] = {
-        'filtered': str(query_materials(subject='CS101', search='databas CS1', resource_type='document', file_format='pdf', postgres=True).limit(6).compile(dialect=postgresql.dialect(), compile_kwargs={'literal_binds': True})),
-        'prefix': str(query_materials(search='databas', postgres=True).order_by(None).compile(dialect=postgresql.dialect(), compile_kwargs={'literal_binds': True})),
+    definitions["shareQueries"] = {
+        "filtered": str(
+            query_materials(
+                subject="CS101",
+                search="databas CS1",
+                resource_type="document",
+                file_format="pdf",
+                postgres=True,
+            )
+            .limit(6)
+            .compile(
+                dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+            )
+        ),
+        "prefix": str(
+            query_materials(search="databas", postgres=True)
+            .order_by(None)
+            .compile(
+                dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+            )
+        ),
     }
     for name, filename in revisions.items():
         definitions["statements"][name] = statements(filename, "upgrade")
-        definitions["statements"][f"down{name.capitalize()}"] = statements(filename, "downgrade")
+        definitions["statements"][f"down{name.capitalize()}"] = statements(
+            filename, "downgrade"
+        )
     print(json.dumps(definitions))

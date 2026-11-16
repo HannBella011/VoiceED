@@ -418,6 +418,13 @@ class InspireFlowTests(unittest.IsolatedAsyncioTestCase):
             many = await self.client.get("/inspire/feed?limit=20")
             self.assertEqual(len(many.json()), 20)
             self.assertEqual(len(statements), first)
+            profile_queries = [
+                statement for statement in statements if "FROM profiles" in statement
+            ]
+            self.assertEqual(len(profile_queries), 1)
+            self.assertNotIn("profiles.email", profile_queries[0])
+            self.assertNotIn("profiles.birthday", profile_queries[0])
+            self.assertIn("profiles.is_verified", profile_queries[0])
         finally:
             event.remove(self.engine, "before_cursor_execute", capture)
 

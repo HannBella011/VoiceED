@@ -74,7 +74,8 @@ export function ModalProvider({ children }) {
         onClose={() => setLoginRequiredOpen(false)}
         onGoToLogin={() => {
           const returnUrl = window.location.pathname + window.location.search;
-          if (!sessionStorage.getItem('shielded_return_url')) sessionStorage.setItem('shielded_return_url', returnUrl);
+          if (!sessionStorage.getItem('shielded_return_url'))
+            sessionStorage.setItem('shielded_return_url', returnUrl);
           setLoginRequiredOpen(false);
           router.push('/login');
         }}

@@ -4,10 +4,13 @@
 // Class name utility (similar to clsx)
 export function cn(...classes) {
   return classes
-    .flatMap(cls => {
+    .flatMap((cls) => {
       if (!cls) return [];
       if (typeof cls === 'string') return cls;
-      if (typeof cls === 'object') return Object.entries(cls).filter(([, v]) => v).map(([k]) => k);
+      if (typeof cls === 'object')
+        return Object.entries(cls)
+          .filter(([, v]) => v)
+          .map(([k]) => k);
       return [];
     })
     .join(' ');
@@ -36,7 +39,11 @@ export function formatRelativeTime(date) {
   if (diffMins < 60) return diffMins + 'm ago';
   if (diffHours < 24) return diffHours + 'h ago';
   if (diffDays < 7) return diffDays + 'd ago';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 // Validation utilities
@@ -47,10 +54,13 @@ export function isValidEmail(email) {
 export function isStrongPassword(password) {
   const errors = [];
   if (password.length < 8) errors.push('Password must be at least 8 characters');
-  if (!/[A-Z]/.test(password)) errors.push('Password must contain at least one uppercase letter');
-  if (!/[a-z]/.test(password)) errors.push('Password must contain at least one lowercase letter');
+  if (!/[A-Z]/.test(password))
+    errors.push('Password must contain at least one uppercase letter');
+  if (!/[a-z]/.test(password))
+    errors.push('Password must contain at least one lowercase letter');
   if (!/[0-9]/.test(password)) errors.push('Password must contain at least one number');
-  if (!/[^A-Za-z0-9]/.test(password)) errors.push('Password must contain at least one special character');
+  if (!/[^A-Za-z0-9]/.test(password))
+    errors.push('Password must contain at least one special character');
   return { valid: errors.length === 0, errors };
 }
 
@@ -66,7 +76,7 @@ export function groupBy(array, key) {
 
 export function uniqueBy(array, key) {
   const seen = new Set();
-  return array.filter(item => {
+  return array.filter((item) => {
     const k = item[key];
     if (seen.has(k)) return false;
     seen.add(k);

@@ -12,13 +12,22 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
-  const handleLoginClick = () => { window.location.href = '/login'; };
+  const handleLoginClick = () => {
+    window.location.href = '/login';
+  };
   const handleSettingsClick = () => setSettingsOpen(true);
-  const handleSubmit = async event => {
-    event.preventDefault(); if (busy) return;
-    setBusy(true); setMessage('');
-    try { setMessage(await requestRecovery(email)); } catch(err) { setMessage(err.message); }
-    finally { setBusy(false); }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setMessage('');
+    try {
+      setMessage(await requestRecovery(email));
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -42,13 +51,32 @@ export default function ForgotPassword() {
                 <p>Enter your email to reset your password</p>
               </div>
 
-              <form id="forgotPasswordForm" className="signup-form" onSubmit={handleSubmit}>
+              <form
+                id="forgotPasswordForm"
+                className="signup-form"
+                onSubmit={handleSubmit}
+              >
                 {message && <p role="status">{message}</p>}
-                <div className="form-field"><label htmlFor="email">Email</label><input type="email" id="email" autoComplete="email" placeholder="Enter your registered email" value={email} onChange={event => setEmail(event.target.value)} required /></div>
-                <button type="submit" className="signup-btn" disabled={busy}>{busy ? 'Sending...' : 'Send Reset Link'}</button>
+                <div className="form-field">
+                  <label htmlFor="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    autoComplete="email"
+                    placeholder="Enter your registered email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    required
+                  />
+                </div>
+                <button type="submit" className="signup-btn" disabled={busy}>
+                  {busy ? 'Sending...' : 'Send Reset Link'}
+                </button>
 
                 <div className="legal-text">
-                  <p>Remember your password? <a href="/login">Back to Login</a></p>
+                  <p>
+                    Remember your password? <a href="/login">Back to Login</a>
+                  </p>
                 </div>
               </form>
             </div>

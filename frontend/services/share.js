@@ -5,8 +5,9 @@ import { authFetch } from '@/lib/authFetch';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 async function request(endpoint, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
   const headers = { ...options.headers };
   if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
 
@@ -21,7 +22,11 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(Array.isArray(error.detail) ? error.detail.map(item => item.msg).join('; ') : error.detail || `HTTP ${response.status}`);
+    throw new Error(
+      Array.isArray(error.detail)
+        ? error.detail.map((item) => item.msg).join('; ')
+        : error.detail || `HTTP ${response.status}`
+    );
   }
 
   if (response.status === 204) {

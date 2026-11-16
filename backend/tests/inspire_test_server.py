@@ -27,8 +27,16 @@ from app.models import (
     MoodRecord,
     WellnessGoal,
     WellnessGoalProgress,
+    ModerationAction,
+    ContactMessage,
+    UserRole,
+    AccountAction,
+    VerificationAction,
+    ApiSession,
 )
-from app.routes import inspire, share, dashboard
+from app.routes import inspire, share, dashboard, admin, messages, super_admin
+from app.services import accounts
+from types import SimpleNamespace
 from app.services import supabase_service
 from app.services import inspire_storage
 
@@ -56,15 +64,34 @@ for model in [
     MoodRecord,
     WellnessGoal,
     WellnessGoalProgress,
+    ModerationAction,
+    ContactMessage,
+    AccountAction,
+    VerificationAction,
+    ApiSession,
 ]:
     model.__table__.create(engine)
 owner = uuid.uuid4()
 other = uuid.uuid4()
+administrator = uuid.uuid4()
+superadministrator = uuid.uuid4()
 with Session(engine) as db:
     db.add_all(
         [
             Profile(id=owner, username="owner", email="owner@example.test"),
             Profile(id=other, username="other", email="other@example.test"),
+            Profile(
+                id=administrator,
+                username="administrator",
+                email="administrator@example.test",
+                role=UserRole.ADMIN,
+            ),
+            Profile(
+                id=superadministrator,
+                username="superadministrator",
+                email="super@example.com",
+                role=UserRole.SUPER_ADMIN,
+            ),
         ]
     )
     db.commit()
@@ -111,7 +138,12 @@ async def database():
 async def optional_user(authorization: str | None = Header(None)):
     if authorization is None:
         return None
-    identities = {"Bearer test-owner": owner, "Bearer test-other": other}
+    identities = {
+        "Bearer test-owner": owner,
+        "Bearer test-other": other,
+        "Bearer test-admin": administrator,
+        "Bearer test-super": superadministrator,
+    }
     if authorization not in identities:
         raise HTTPException(401, "Invalid test session")
     with Session(engine) as db:
@@ -129,6 +161,9 @@ app = FastAPI()
 app.include_router(inspire.router, prefix="/api/v1/inspire")
 app.include_router(share.router, prefix="/api/v1/share")
 app.include_router(dashboard.router, prefix="/api/v1/dashboard")
+app.include_router(admin.router, prefix="/api/v1/admin")
+app.include_router(messages.router, prefix="/api/v1/messages")
+app.include_router(super_admin.router, prefix="/api/v1/super")
 app.dependency_overrides[inspire.get_db] = database
 app.dependency_overrides[inspire.optional_user] = optional_user
 app.dependency_overrides[inspire.get_current_active_user] = required_user
@@ -159,6 +194,23 @@ async def private_bucket(name):
 
 
 inspire_storage.private_bucket = private_bucket
+
+# Administrative identity calls are fixtures, never the configured live SDK.
+identity_admin = Mock()
+identity_emails = {}
+
+
+def invite_identity(email, options):
+    identity = str(uuid.uuid4())
+    identity_emails[identity] = email
+    return SimpleNamespace(user=SimpleNamespace(id=identity))
+
+
+identity_admin.invite_user_by_email.side_effect = invite_identity
+identity_admin.get_user_by_id.side_effect = lambda identity: SimpleNamespace(
+    user=SimpleNamespace(id=identity, email=identity_emails.get(identity))
+)
+accounts.auth_admin = lambda: identity_admin
 
 
 @app.get("/fixture-object/{token}")

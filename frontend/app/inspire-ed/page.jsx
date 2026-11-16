@@ -60,7 +60,8 @@ function InspireEDContent() {
     const query = new URLSearchParams(window.location.search);
     setMine(query.get('mine') === '1');
     const type = { story: 'stories', quote: 'quotes' }[query.get('post_type')];
-    if (type) setActiveTab(type);
+    const view=query.get('view');
+    setActiveTab(['home','quotes','stories','kudos','milestones','activity'].includes(view)?view:(type||'home'));
     const value = query.get('post');
     if (value) {
       if (/^(stories|quotes):[1-9][0-9]*$/.test(value)) setDirectId(value);
@@ -176,7 +177,7 @@ function InspireEDContent() {
     catch (error) { setError(error.message || 'Unable to copy quote.'); }
   };
   const handleQuoteShare = () => selectedQuote && sharePost(selectedQuote);
-  const openPost = post => { setDirectId(post.id); setActiveTab('home'); window.history.pushState({}, '', `/inspire-ed?post=${encodeURIComponent(post.id)}`); };
+  const openPost = post => { window.location.href = `/inspire-ed?post=${encodeURIComponent(post.id)}`; };
 
   const tabs = [
     { id: 'home', icon: 'fas fa-home', label: 'Home' },
@@ -211,25 +212,25 @@ function InspireEDContent() {
             <aside className="inspireED-sidebar">
               <nav className="sidebar-nav">
                 {tabs.map(tab => (
-                  <button
+                  <a
                     key={tab.id}
                     className={`sidebar-tab ${activeTab === tab.id ? 'active' : ''}`}
-                    onClick={() => { setActiveTab(tab.id); setPage(1); setSearchTerm(''); setDirectId(null); window.history.replaceState({}, '', mine ? '/inspire-ed?mine=1' : '/inspire-ed'); }}
+                    href={`/inspire-ed?view=${tab.id}${mine?'&mine=1':''}`}
+                    aria-current={activeTab===tab.id?'page':undefined}
                     data-tab={tab.id}
                   >
-                    <i className={tab.icon}></i>
-                    <span>{tab.label}</span>
-                  </button>
+                    <i className={tab.icon}></i><span>{tab.label}</span>
+                  </a>
                 ))}
               </nav>
             </aside>
 
             <div className="inspireED-content">
-              {mine && <p>Your published content. <a href="/inspire-ed" onClick={event => { event.preventDefault(); setMine(false); setPage(1); window.history.replaceState({}, '', '/inspire-ed'); }}>Browse all posts</a></p>}
+              {mine && <p>Your published content. <a href="/inspire-ed">Browse all posts</a></p>}
               {error && <p role="alert">{error} <button type="button" onClick={() => setRevision(value => value + 1)}>Retry</button></p>}
               {notice && <p role="status">{notice}</p>}
               {loading && <p role="status">Loading posts…</p>}
-              {directId && <button type="button" className="quote-btn" onClick={() => { setDirectId(null); window.history.replaceState({}, "", "/inspire-ed"); }}>Back to posts</button>}
+              {directId && <a className="quote-btn" href="/inspire-ed">Back to posts</a>}
               {/* Home Tab */}
               <div className={`tab-content ${activeTab === 'home' ? 'active' : ''}`} id="home-tab">
                 <div className="content-container">
@@ -367,7 +368,7 @@ function InspireEDContent() {
                             <p className="story-author">{story.author} • {story.year}</p>
                           </div>
                         </div>
-                        <div className="story-narrative"><RichBody body={story.body} fallback={story.narrative} /></div><PostAttachments attachments={story.attachments} /><button type="button" className="post-interaction-btn" onClick={() => openPost(story)}>View post and comments</button>
+                        <div className="story-narrative"><RichBody body={story.body} fallback={story.narrative} /></div><PostAttachments attachments={story.attachments} /><a className="post-interaction-btn" href={`/inspire-ed?post=${encodeURIComponent(story.id)}`}>View post and comments</a>
                         <p className="story-takeaways">{story.keyTakeaways}</p>
                       </div>
                     ))}
@@ -399,7 +400,7 @@ function InspireEDContent() {
                         </div>
                         <div className="kudos-message"><RichBody body={kudo.body} fallback={kudo.message} /></div>
                         <p className="kudos-sender">From: {kudo.sender}</p>
-                        <PostAttachments attachments={kudo.attachments} /><button type="button" className="post-interaction-btn" onClick={() => openPost(kudo)}>View post and comments</button>
+                        <PostAttachments attachments={kudo.attachments} /><a className="post-interaction-btn" href={`/inspire-ed?post=${encodeURIComponent(kudo.id)}`}>View post and comments</a>
                       </div>
                     ))}
                   </div>
@@ -421,7 +422,7 @@ function InspireEDContent() {
                         <div className="milestone-icon"><i className="fas fa-trophy"></i></div>
                         <h4>{milestone.title}</h4>
                         <div className="milestone-description"><RichBody body={milestone.body} fallback={milestone.description} /></div>
-                        <PostAttachments attachments={milestone.attachments} /><button type="button" className="post-interaction-btn" onClick={() => openPost(milestone)}>View post and comments</button>
+                        <PostAttachments attachments={milestone.attachments} /><a className="post-interaction-btn" href={`/inspire-ed?post=${encodeURIComponent(milestone.id)}`}>View post and comments</a>
                         <div className="cheer-system">
                           <button className="cheer-btn" disabled={busy} onClick={() => handleLike(milestone.id)} data-id={milestone.title}>
                             <i className="fas fa-heart"></i> Send Congratulations
@@ -451,7 +452,7 @@ function InspireEDContent() {
         </div>
       </main>
 
-      {composer && <PostComposer initialType={composer} onClose={() => setComposer(null)} onSaved={post => { setComposer(null); setSearchTerm(''); setPage(1); setActiveTab('home'); setNotice('Post published.'); openPost(post); }} />}
+      {composer && <PostComposer authorName={currentUser?.full_name || currentUser?.username || "You"} authorVerified={Boolean(currentUser?.is_verified)} initialType={composer} onClose={() => setComposer(null)} onSaved={post => { setComposer(null); setSearchTerm(''); setPage(1); setActiveTab('home'); setNotice('Post published.'); openPost(post); }} />}
       {commentTarget && <InspireDialog title="Comments" busy={busy} onClose={() => { commentSequence.current++; setCommentTarget(null); setCommentText(''); }}>
         {commentError && <p role="alert">{commentError} <button type="button" onClick={() => openComments(commentTarget, commentPage)}>Retry</button></p>}
         {error && <p role="alert">{error}</p>}

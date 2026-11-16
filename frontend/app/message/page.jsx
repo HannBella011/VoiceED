@@ -29,13 +29,21 @@ function MessageContent() {
   };
 
   const loadMessages = async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const rows = [];
-      for (let page=1; ; page++) { const batch = await accountRequest(`/messages?limit=100&page=${page}`); rows.push(...batch); if(batch.length<100) break; }
+      for (let page = 1; ; page++) {
+        const batch = await accountRequest(`/messages?limit=100&page=${page}`);
+        rows.push(...batch);
+        if (batch.length < 100) break;
+      }
       setMessages(rows);
-    } catch(err) { setError(err.message); }
-    finally { setLoading(false); }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatDate = (timestamp) => {
@@ -49,20 +57,38 @@ function MessageContent() {
     } else if (diffDays === 1) {
       return 'Yesterday, ' + date.toLocaleTimeString();
     } else if (diffDays < 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: 'numeric' });
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        hour: 'numeric',
+        minute: 'numeric',
+      });
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
     }
   };
 
-  const deleteMessage = async id => {
+  const deleteMessage = async (id) => {
     if (window.confirm('Are you sure you want to delete this message?')) {
-      try { await accountRequest(`/messages/${id}`, 'DELETE'); await loadMessages(); } catch(err) { setError(err.message); }
+      try {
+        await accountRequest(`/messages/${id}`, 'DELETE');
+        await loadMessages();
+      } catch (err) {
+        setError(err.message);
+      }
     }
   };
   const clearAll = async () => {
     if (window.confirm('Are you sure you want to delete all received messages?')) {
-      try { await accountRequest('/messages','DELETE'); await loadMessages(); } catch(err) { setError(err.message); }
+      try {
+        await accountRequest('/messages', 'DELETE');
+        await loadMessages();
+      } catch (err) {
+        setError(err.message);
+      }
     }
   };
   const refreshMessages = () => loadMessages();
@@ -70,7 +96,9 @@ function MessageContent() {
   const totalMessages = messages.length;
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
-  const recentMessages = messages.filter(msg => new Date(msg.timestamp) > weekAgo).length;
+  const recentMessages = messages.filter(
+    (msg) => new Date(msg.timestamp) > weekAgo
+  ).length;
 
   useEffect(() => {
     loadMessages();
@@ -109,7 +137,8 @@ function MessageContent() {
                     </span>
                     <span className="stat-item">
                       <i className="fas fa-clock"></i>
-                      <span id="recentMessages">{recentMessages}</span> Recent (Last 7 Days)
+                      <span id="recentMessages">{recentMessages}</span> Recent (Last 7
+                      Days)
                     </span>
                   </div>
                   <div className="message-actions">
@@ -129,10 +158,13 @@ function MessageContent() {
                     <div className="no-messages">
                       <i className="fas fa-inbox"></i>
                       <h3>No Messages Yet</h3>
-                      <p>Your contact messages and platform notifications will appear here.</p>
+                      <p>
+                        Your contact messages and platform notifications will appear
+                        here.
+                      </p>
                     </div>
                   ) : (
-                    messages.map(msg => (
+                    messages.map((msg) => (
                       <div key={msg.id} className="message-item">
                         <div className="message-header">
                           <div className="message-info">
@@ -140,8 +172,14 @@ function MessageContent() {
                             <span className="message-email">{msg.email}</span>
                           </div>
                           <div className="message-meta">
-                            <span className="message-date">{formatDate(msg.timestamp)}</span>
-                            <button className="delete-btn" disabled={!msg.can_delete} onClick={() => deleteMessage(msg.id)}>
+                            <span className="message-date">
+                              {formatDate(msg.timestamp)}
+                            </span>
+                            <button
+                              className="delete-btn"
+                              disabled={!msg.can_delete}
+                              onClick={() => deleteMessage(msg.id)}
+                            >
                               <i className="fas fa-trash"></i>
                             </button>
                           </div>
@@ -166,7 +204,6 @@ function MessageContent() {
 
       {/* Modals */}
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-
     </>
   );
 }

@@ -2,8 +2,8 @@
 // Re-export all service modules
 
 export { authService } from './auth';
-export { 
-  reportsService, 
+export {
+  reportsService,
   submitReportAuthenticated,
   submitReportAnonymous,
   submitReportGuest,
@@ -15,6 +15,7 @@ export {
   adminGetReport,
   adminUpdateReportStatus,
   adminAssignReport,
+  adminRejectReport,
   adminUpdateReport,
   adminAddTimelineEntry,
   getAvailableAssignees,

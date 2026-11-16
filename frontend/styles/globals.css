@@ -1,5 +1,7 @@
 @import './index-style.css';
 @import './user-menu.css';
+@import './controls.css';
+@import './spacing.css';
 
 /* Global reset to match base HTML rendering */
 body {

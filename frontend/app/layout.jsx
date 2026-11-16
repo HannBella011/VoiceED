@@ -1,11 +1,12 @@
-import '../styles/globals.css'
-import { AuthProvider } from '@/context/AuthContext'
-import { ModalProvider } from '@/components/shared/GlobalModals'
+import '../styles/globals.css';
+import { AuthProvider } from '@/context/AuthContext';
+import { ModalProvider } from '@/components/shared/GlobalModals';
 
 export const metadata = {
   title: "VoiceED - Where Every Student's Voice Matters",
-  description: 'A student-driven platform that empowers learners to be heard, supported, and inspired.',
-}
+  description:
+    'A student-driven platform that empowers learners to be heard, supported, and inspired.',
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -22,11 +23,9 @@ export default function RootLayout({ children }) {
       </head>
       <body className="blue-theme">
         <AuthProvider>
-          <ModalProvider>
-            {children}
-          </ModalProvider>
+          <ModalProvider>{children}</ModalProvider>
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

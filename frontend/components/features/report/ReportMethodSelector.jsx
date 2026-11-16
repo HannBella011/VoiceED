@@ -31,7 +31,8 @@ export function ReportMethodSelector({ onMethodSelect }) {
       <div className="method-selector-header">
         <h2>How would you like to submit your report?</h2>
         <p className="method-selector-subtitle">
-          Choose the option that best fits your needs. Both methods use the same secure form.
+          Choose the option that best fits your needs. Both methods use the same secure
+          form.
         </p>
       </div>
 
@@ -43,18 +44,27 @@ export function ReportMethodSelector({ onMethodSelect }) {
           </div>
           <h3>Submit as Logged-in User</h3>
           <p className="method-card-description">
-            Your report will be linked to your VoiceED account. You can track all your reports 
-            from your dashboard and receive email updates.
+            Your report will be linked to your VoiceED account. You can track all your
+            reports from your dashboard and receive email updates.
           </p>
-          
+
           <ul className="method-features">
-            <li><i className="fas fa-check"></i> View all submitted reports in your dashboard</li>
-            <li><i className="fas fa-check"></i> Automatic email notifications</li>
-            <li><i className="fas fa-check"></i> Reports linked to your account history</li>
-            <li><i className="fas fa-check"></i> Administrators can contact you if needed</li>
+            <li>
+              <i className="fas fa-check"></i> View all submitted reports in your
+              dashboard
+            </li>
+            <li>
+              <i className="fas fa-check"></i> Automatic email notifications
+            </li>
+            <li>
+              <i className="fas fa-check"></i> Reports linked to your account history
+            </li>
+            <li>
+              <i className="fas fa-check"></i> Administrators can contact you if needed
+            </li>
           </ul>
 
-          <button 
+          <button
             className={`method-card-btn ${isLoggedIn ? '' : 'btn--secondary'}`}
             onClick={handleAuthenticatedClick}
             disabled={isLoading}
@@ -85,29 +95,36 @@ export function ReportMethodSelector({ onMethodSelect }) {
           </div>
           <h3>Submit Anonymously</h3>
           <p className="method-card-description">
-            No account required. Your identity will never be stored or shared with administrators.
-            Optionally provide an email for updates.
+            No account required. Your identity will never be stored or shared with
+            administrators. Optionally provide an email for updates.
           </p>
 
           <ul className="method-features">
-            <li><i className="fas fa-check"></i> No account or login required</li>
-            <li><i className="fas fa-check"></i> No personally identifying information stored</li>
-            <li><i className="fas fa-check"></i> Complete anonymity guaranteed</li>
-            <li><i className="fas fa-check"></i> Optional email for tracking updates</li>
+            <li>
+              <i className="fas fa-check"></i> No account or login required
+            </li>
+            <li>
+              <i className="fas fa-check"></i> No personally identifying information
+              stored
+            </li>
+            <li>
+              <i className="fas fa-check"></i> Complete anonymity guaranteed
+            </li>
+            <li>
+              <i className="fas fa-check"></i> Optional email for tracking updates
+            </li>
           </ul>
 
           <div className="anonymous-warning">
             <i className="fas fa-exclamation-triangle"></i>
             <span>
-              <strong>Important:</strong> If you don't provide an email, save your tracking code 
-              immediately after submission. It cannot be recovered if lost.
+              <strong>Important:</strong> If you don't provide an email, save your
+              tracking code immediately after submission. It cannot be recovered if
+              lost.
             </span>
           </div>
 
-          <button 
-            className="method-card-btn"
-            onClick={handleAnonymousClick}
-          >
+          <button className="method-card-btn" onClick={handleAnonymousClick}>
             Submit Anonymously
           </button>
         </div>

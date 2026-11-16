@@ -16,8 +16,12 @@ export function SettingsModal({ isOpen, onClose }) {
   const applySettings = (newSettings) => {
     // Remove all existing color themes
     document.body.classList.remove(
-      'blue-theme', 'purple-theme', 'red-theme',
-      'green-theme', 'orange-theme', 'pink-theme'
+      'blue-theme',
+      'purple-theme',
+      'red-theme',
+      'green-theme',
+      'orange-theme',
+      'pink-theme'
     );
     if (newSettings.color) {
       document.body.classList.add(`${newSettings.color}-theme`);
@@ -35,14 +39,22 @@ export function SettingsModal({ isOpen, onClose }) {
     setSaving(true);
     try {
       if (currentUser) {
-        const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/auth/me`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-          body: JSON.stringify({ theme: updated.color }),
-        });
+        const response = await authFetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/auth/me`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+            body: JSON.stringify({ theme: updated.color }),
+          }
+        );
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
-          throw new Error(typeof body.detail === 'string' ? body.detail : 'Unable to save settings');
+          throw new Error(
+            typeof body.detail === 'string' ? body.detail : 'Unable to save settings'
+          );
         }
         const profile = await response.json();
         updateProfile(profile);
@@ -50,8 +62,11 @@ export function SettingsModal({ isOpen, onClose }) {
       }
       setSettings(updated);
       applySettings(updated);
-    } catch (err) { setError(err.message); }
-    finally { setSaving(false); }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -63,9 +78,15 @@ export function SettingsModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div id="settingsModal" className={'modal ' + (isOpen ? 'show' : '')} onClick={onClose}>
+    <div
+      id="settingsModal"
+      className={'modal ' + (isOpen ? 'show' : '')}
+      onClick={onClose}
+    >
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <span className="close" onClick={onClose}>&times;</span>
+        <span className="close" onClick={onClose}>
+          &times;
+        </span>
         <h2>Settings</h2>
         <div className="settings-content">
           {error && <p role="alert">{error}</p>}
@@ -81,9 +102,12 @@ export function SettingsModal({ isOpen, onClose }) {
                   checked={settings.color === 'blue'}
                   onChange={() => saveSettings({ color: 'blue' })}
                 />
-                <span 
-                  className="color-preview" 
-                  style={{ background: 'linear-gradient(135deg, #0a0a0a, #1a1a2e)', border: '2px solid #00d4ff' }}
+                <span
+                  className="color-preview"
+                  style={{
+                    background: 'linear-gradient(135deg, #0a0a0a, #1a1a2e)',
+                    border: '2px solid #00d4ff',
+                  }}
                 ></span>
                 <span>Blue</span>
               </label>
@@ -96,9 +120,12 @@ export function SettingsModal({ isOpen, onClose }) {
                   checked={settings.color === 'purple'}
                   onChange={() => saveSettings({ color: 'purple' })}
                 />
-                <span 
-                  className="color-preview" 
-                  style={{ background: 'linear-gradient(135deg, #1a0033, #330066)', border: '2px solid #9933ff' }}
+                <span
+                  className="color-preview"
+                  style={{
+                    background: 'linear-gradient(135deg, #1a0033, #330066)',
+                    border: '2px solid #9933ff',
+                  }}
                 ></span>
                 <span>Purple</span>
               </label>
@@ -111,9 +138,12 @@ export function SettingsModal({ isOpen, onClose }) {
                   checked={settings.color === 'red'}
                   onChange={() => saveSettings({ color: 'red' })}
                 />
-                <span 
-                  className="color-preview" 
-                  style={{ background: 'linear-gradient(135deg, #330000, #660000)', border: '2px solid #ff3333' }}
+                <span
+                  className="color-preview"
+                  style={{
+                    background: 'linear-gradient(135deg, #330000, #660000)',
+                    border: '2px solid #ff3333',
+                  }}
                 ></span>
                 <span>Red</span>
               </label>
@@ -126,9 +156,12 @@ export function SettingsModal({ isOpen, onClose }) {
                   checked={settings.color === 'green'}
                   onChange={() => saveSettings({ color: 'green' })}
                 />
-                <span 
-                  className="color-preview" 
-                  style={{ background: 'linear-gradient(135deg, #003300, #006600)', border: '2px solid #33ff33' }}
+                <span
+                  className="color-preview"
+                  style={{
+                    background: 'linear-gradient(135deg, #003300, #006600)',
+                    border: '2px solid #33ff33',
+                  }}
                 ></span>
                 <span>Green</span>
               </label>
@@ -141,9 +174,12 @@ export function SettingsModal({ isOpen, onClose }) {
                   checked={settings.color === 'orange'}
                   onChange={() => saveSettings({ color: 'orange' })}
                 />
-                <span 
-                  className="color-preview" 
-                  style={{ background: 'linear-gradient(135deg, #332200, #664400)', border: '2px solid #ff9933' }}
+                <span
+                  className="color-preview"
+                  style={{
+                    background: 'linear-gradient(135deg, #332200, #664400)',
+                    border: '2px solid #ff9933',
+                  }}
                 ></span>
                 <span>Orange</span>
               </label>
@@ -156,16 +192,27 @@ export function SettingsModal({ isOpen, onClose }) {
                   checked={settings.color === 'pink'}
                   onChange={() => saveSettings({ color: 'pink' })}
                 />
-                <span 
-                  className="color-preview" 
-                  style={{ background: 'linear-gradient(135deg, #330033, #660066)', border: '2px solid #ff66cc' }}
+                <span
+                  className="color-preview"
+                  style={{
+                    background: 'linear-gradient(135deg, #330033, #660066)',
+                    border: '2px solid #ff66cc',
+                  }}
                 ></span>
                 <span>Pink</span>
               </label>
             </div>
           </div>
 
-          <button disabled={saving} className="save-settings-btn" onClick={() => { onClose(); }}>Save Settings</button>
+          <button
+            disabled={saving}
+            className="save-settings-btn"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            Save Settings
+          </button>
         </div>
       </div>
     </div>

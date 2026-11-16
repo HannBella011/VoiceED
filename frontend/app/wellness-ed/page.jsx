@@ -9,7 +9,14 @@ import { useModals } from '@/components/shared/GlobalModals';
 function WellnessEDContent() {
   const pathname = usePathname();
   const { isLoggedIn } = useAuth();
-  const { settingsOpen, setSettingsOpen, userMenuOpen, setUserMenuOpen, loginRequiredOpen, setLoginRequiredOpen } = useModals();
+  const {
+    settingsOpen,
+    setSettingsOpen,
+    userMenuOpen,
+    setUserMenuOpen,
+    loginRequiredOpen,
+    setLoginRequiredOpen,
+  } = useModals();
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -23,45 +30,49 @@ function WellnessEDContent() {
     {
       icon: 'fas fa-wind',
       title: 'Breathing Exercise',
-      description: 'Practice guided breathing exercises to reduce stress and improve focus.',
+      description:
+        'Practice guided breathing exercises to reduce stress and improve focus.',
       href: '/breathing',
-      btnText: 'Start Exercise'
+      btnText: 'Start Exercise',
     },
     {
       icon: 'fas fa-heart',
       title: 'Mood Tracker',
-      description: 'Track your daily mood and emotional patterns for better self-awareness.',
+      description:
+        'Track your daily mood and emotional patterns for better self-awareness.',
       href: '/mood-tracker',
-      btnText: 'Track Mood'
+      btnText: 'Track Mood',
     },
     {
       icon: 'fas fa-bullseye',
       title: 'Daily Goals',
       description: 'Set and track daily wellness goals to build healthy habits.',
       href: '/daily-goals',
-      btnText: 'Set Goals'
+      btnText: 'Set Goals',
     },
     {
       icon: 'fas fa-hourglass-half',
       title: 'Focus Timer',
-      description: 'Use the Pomodoro technique to boost productivity and manage study time.',
+      description:
+        'Use the Pomodoro technique to boost productivity and manage study time.',
       href: '/focus-timer',
-      btnText: 'Start Timer'
+      btnText: 'Start Timer',
     },
     {
       icon: 'fas fa-spa',
       title: 'Meditation',
       description: 'Guided meditation sessions for relaxation and mental clarity.',
       href: '/meditation',
-      btnText: 'Start Meditation'
+      btnText: 'Start Meditation',
     },
     {
       icon: 'fas fa-book-open',
       title: 'Wellness Journal',
-      description: 'Write and reflect on your thoughts, feelings, and daily experiences.',
+      description:
+        'Write and reflect on your thoughts, feelings, and daily experiences.',
       href: '/wellness-journal',
-      btnText: 'Write Journal'
-    }
+      btnText: 'Write Journal',
+    },
   ];
 
   const handleNavigation = (href) => {
@@ -91,7 +102,15 @@ function WellnessEDContent() {
 
           <div className="wellness-grid">
             {activities.map((activity, index) => (
-              <a key={activity.href} href={activity.href} className="wellness-card activity-card" onClick={event => { event.preventDefault(); handleNavigation(activity.href); }}>
+              <a
+                key={activity.href}
+                href={activity.href}
+                className="wellness-card activity-card"
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleNavigation(activity.href);
+                }}
+              >
                 <div className="card-header">
                   <div className="card-icon">
                     <i className={activity.icon}></i>

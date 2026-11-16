@@ -34,4 +34,5 @@ async def health_check():
 
 # Import and include API routes
 from app.routes import api_router
+
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

@@ -11,26 +11,29 @@ export function useForm(initialValues) {
   const [touched, setTouched] = useState({});
 
   const handleChange = useCallback((name, value) => {
-    setValues(prev => ({ ...prev, [name]: value }));
+    setValues((prev) => ({ ...prev, [name]: value }));
   }, []);
 
   const handleBlur = useCallback((name) => {
-    setTouched(prev => ({ ...prev, [name]: true }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
   }, []);
 
-  const validate = useCallback((validationRules) => {
-    const newErrors = {};
-    let isValid = true;
-    Object.keys(validationRules).forEach(key => {
-      const error = validationRules[key](values[key]);
-      if (error) {
-        newErrors[key] = error;
-        isValid = false;
-      }
-    });
-    setErrors(newErrors);
-    return isValid;
-  }, [values]);
+  const validate = useCallback(
+    (validationRules) => {
+      const newErrors = {};
+      let isValid = true;
+      Object.keys(validationRules).forEach((key) => {
+        const error = validationRules[key](values[key]);
+        if (error) {
+          newErrors[key] = error;
+          isValid = false;
+        }
+      });
+      setErrors(newErrors);
+      return isValid;
+    },
+    [values]
+  );
 
   const reset = useCallback(() => {
     setValues(initialValues);
@@ -38,7 +41,16 @@ export function useForm(initialValues) {
     setTouched({});
   }, [initialValues]);
 
-  return { values, errors, touched, handleChange, handleBlur, validate, reset, setValues };
+  return {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleBlur,
+    validate,
+    reset,
+    setValues,
+  };
 }
 
 export default useForm;

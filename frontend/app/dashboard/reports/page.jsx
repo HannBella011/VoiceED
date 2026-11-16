@@ -107,7 +107,7 @@ export default function DashboardReportsPage() {
         <UserMenuModal
           isOpen={userMenuOpen}
           onClose={() => setUserMenuOpen(false)}
-          onProfileClick={() => window.location.href = '/profile'}
+          onProfileClick={() => (window.location.href = '/profile')}
           onLogoutClick={handleLogout}
         />
       </>
@@ -148,19 +148,31 @@ export default function DashboardReportsPage() {
             </div>
             <div className="stat-card warning">
               <span className="stat-value">
-                {reports.filter(r => r.status === 'submitted' || r.status === 'under_review').length}
+                {
+                  reports.filter(
+                    (r) => r.status === 'submitted' || r.status === 'under_review'
+                  ).length
+                }
               </span>
               <span className="stat-label">Pending Review</span>
             </div>
             <div className="stat-card info">
               <span className="stat-value">
-                {reports.filter(r => r.status === 'in_progress' || r.status === 'assigned').length}
+                {
+                  reports.filter(
+                    (r) => r.status === 'in_progress' || r.status === 'assigned'
+                  ).length
+                }
               </span>
               <span className="stat-label">In Progress</span>
             </div>
             <div className="stat-card success">
               <span className="stat-value">
-                {reports.filter(r => r.status === 'resolved' || r.status === 'closed').length}
+                {
+                  reports.filter(
+                    (r) => r.status === 'resolved' || r.status === 'closed'
+                  ).length
+                }
               </span>
               <span className="stat-label">Resolved</span>
             </div>
@@ -169,15 +181,21 @@ export default function DashboardReportsPage() {
           {/* Filters */}
           <div className="dashboard-filters">
             <div className="filter-group">
-              <label htmlFor="statusFilter" className="filter-label">Filter by Status</label>
+              <label htmlFor="statusFilter" className="filter-label">
+                Filter by Status
+              </label>
               <select
                 id="statusFilter"
                 className="filter-select"
                 value={filters.status || ''}
-                onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
+                onChange={(e) =>
+                  handleFilterChange('status', e.target.value || undefined)
+                }
               >
-                {statusOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {statusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -207,7 +225,7 @@ export default function DashboardReportsPage() {
             ) : (
               <>
                 <div className="reports-list">
-                  {reports.map(report => (
+                  {reports.map((report) => (
                     <ReportCard
                       key={report.id}
                       report={report}
@@ -250,7 +268,7 @@ export default function DashboardReportsPage() {
       <UserMenuModal
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
+        onProfileClick={() => (window.location.href = '/profile')}
         onLogoutClick={handleLogout}
       />
     </>

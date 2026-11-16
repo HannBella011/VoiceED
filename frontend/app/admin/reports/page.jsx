@@ -9,14 +9,17 @@ import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/share
 import { ReportCard } from '@/components/features/report';
 import { adminListReports, getAdminStats, getAvailableAssignees } from '@/services';
 import { useAuth } from '@/hooks';
+import styles from '../admin.module.css';
+import ReportWorkloads from '@/components/features/report/ReportWorkloads';
 
 export default function AdminReportsPage() {
   const pathname = usePathname();
-  const { isLoggedIn, currentUser, logout } = useAuth();
+  const { isLoggedIn, currentUser, logout, isLoading: authLoading } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [reports, setReports] = useState([]);
   const [stats, setStats] = useState(null);
+  const [workloadRevision, setWorkloadRevision] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
@@ -31,15 +34,40 @@ export default function AdminReportsPage() {
   const [assignees, setAssignees] = useState([]);
   const [search, setSearch] = useState('');
   const requestSequence = useRef(0);
-  const allowed = isLoggedIn && ['admin', 'super_admin'].includes(currentUser?.role);
+  const allowed =
+    !authLoading && isLoggedIn && ['admin', 'super_admin'].includes(currentUser?.role);
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get('status');
-    if (['submitted','under_review','assigned','in_progress','awaiting_additional_info','resolved','closed'].includes(value)) setFilters(previous => ({ ...previous, status: value, page: 1 }));
+    if (
+      [
+        'submitted',
+        'under_review',
+        'assigned',
+        'in_progress',
+        'awaiting_additional_info',
+        'resolved',
+        'closed',
+      ].includes(value)
+    )
+      setFilters((previous) => ({ ...previous, status: value, page: 1 }));
+  }, []);
+  useEffect(() => {
+    const identity = new URLSearchParams(window.location.search).get('assignee_id');
+    if (identity)
+      setFilters((previous) => ({ ...previous, assignee_id: identity, page: 1 }));
   }, []);
   useEffect(() => {
     if (search.trim() === (filters.search || '')) return;
-    const timer = setTimeout(() => setFilters(previous => ({ ...previous, search: search.trim() || undefined, page: 1 })), 300);
+    const timer = setTimeout(
+      () =>
+        setFilters((previous) => ({
+          ...previous,
+          search: search.trim() || undefined,
+          page: 1,
+        })),
+      300
+    );
     return () => clearTimeout(timer);
   }, [search, filters.search]);
 
@@ -74,7 +102,8 @@ export default function AdminReportsPage() {
       setStats(statsData);
       setAssignees(assigneesData);
     } catch (err) {
-      if (sequence === requestSequence.current) setError(err instanceof Error ? err.message : 'Failed to load data');
+      if (sequence === requestSequence.current)
+        setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       if (sequence === requestSequence.current) setIsLoading(false);
     }
@@ -82,8 +111,19 @@ export default function AdminReportsPage() {
 
   useEffect(() => {
     fetchData();
-    return () => { requestSequence.current++; };
-  }, [allowed, currentUser?.id, filters.page, filters.status, filters.category, filters.is_anonymous, filters.search]);
+    return () => {
+      requestSequence.current++;
+    };
+  }, [
+    allowed,
+    currentUser?.id,
+    filters.page,
+    filters.status,
+    filters.category,
+    filters.is_anonymous,
+    filters.search,
+    filters.assignee_id,
+  ]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
@@ -126,7 +166,7 @@ export default function AdminReportsPage() {
   ];
 
   // Check admin access
-  if (!allowed) {
+  if (!authLoading && !allowed) {
     return (
       <>
         <Navbar
@@ -135,7 +175,7 @@ export default function AdminReportsPage() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="dashboard-main">
+        <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="access-denied">
               <i className="fas fa-lock"></i>
@@ -149,14 +189,14 @@ export default function AdminReportsPage() {
         <UserMenuModal
           isOpen={userMenuOpen}
           onClose={() => setUserMenuOpen(false)}
-          onProfileClick={() => window.location.href = '/profile'}
+          onProfileClick={() => (window.location.href = '/profile')}
           onLogoutClick={handleLogout}
         />
       </>
     );
   }
 
-  if (isLoading && !stats) {
+  if (authLoading || (isLoading && !stats)) {
     return (
       <>
         <Navbar
@@ -165,11 +205,13 @@ export default function AdminReportsPage() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="dashboard-main">
+        <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="dashboard-loading">
               <div className="spinner"></div>
-              <p>Loading admin dashboard...</p>
+              <p role="status">
+                {authLoading ? 'Checking administrator access…' : 'Loading reports…'}
+              </p>
             </div>
           </div>
         </main>
@@ -178,7 +220,7 @@ export default function AdminReportsPage() {
         <UserMenuModal
           isOpen={userMenuOpen}
           onClose={() => setUserMenuOpen(false)}
-          onProfileClick={() => window.location.href = '/profile'}
+          onProfileClick={() => (window.location.href = '/profile')}
           onLogoutClick={handleLogout}
         />
       </>
@@ -194,97 +236,183 @@ export default function AdminReportsPage() {
         onSettingsClick={handleSettingsClick}
       />
 
-      <main className="dashboard-main">
+      <main className={`dashboard-main ${styles.page}`}>
         <div className="container">
           {/* Admin Header */}
-          <div className="dashboard-header">
+          <div className={styles.header}>
             <div className="dashboard-header-left">
-              <h1>Admin Dashboard</h1>
-              <a href="/admin">Platform statistics and content moderation</a>
+              <h1>Reports Dashboard</h1>
               <p className="dashboard-subtitle">
                 Manage and review all submitted reports
               </p>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          {stats && (
-            <div className="dashboard-stats admin-stats">
-              <div className="stat-card">
-                <span className="stat-value">{stats.total_reports}</span>
-                <span className="stat-label">Total Reports</span>
-              </div>
-              <div className="stat-card warning">
-                <span className="stat-value">{stats.pending_reports + stats.under_review_reports}</span>
-                <span className="stat-label">Pending Review</span>
-              </div>
-              <div className="stat-card info">
-                <span className="stat-value">{stats.in_progress_reports}</span>
-                <span className="stat-label">In Progress</span>
-              </div>
-              <div className="stat-card success">
-                <span className="stat-value">{stats.resolved_reports}</span>
-                <span className="stat-label">Resolved</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-value">{stats.anonymous_reports}</span>
-                <span className="stat-label">Anonymous</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-value">{stats.authenticated_reports}</span>
-                <span className="stat-label">Authenticated</span>
-              </div>
-            </div>
+          {currentUser.role === 'super_admin' ? (
+            <>
+              <section aria-label="Report statistics">
+                <h2>Report Overview</h2>
+                <div className={styles.stats}>
+                  {[
+                    ['total_reports', 'Total Reports', ''],
+                    ['pending_reports', 'Submitted', 'submitted'],
+                    ['under_review_reports', 'Under Review', 'under_review'],
+                    ['assigned_reports', 'Assigned', 'assigned'],
+                    ['in_progress_reports', 'In Progress', 'in_progress'],
+                    [
+                      'awaiting_additional_info_reports',
+                      'Awaiting Additional Info',
+                      'awaiting_additional_info',
+                    ],
+                    ['resolved_reports', 'Resolved', 'resolved'],
+                    ['closed_reports', 'Closed', 'closed'],
+                  ].map(([key, label, status]) => (
+                    <a
+                      key={key}
+                      className="stat-card"
+                      href={`/admin/reports${status ? `?status=${status}` : ''}`}
+                    >
+                      <span className="stat-value">{stats?.[key] ?? '\u2014'}</span>
+                      <span className="stat-label">{label}</span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+              <ReportWorkloads
+                currentUser={currentUser}
+                revision={workloadRevision}
+                oversight
+              />
+            </>
+          ) : (
+            <ReportWorkloads currentUser={currentUser} revision={workloadRevision} />
           )}
 
           {/* Filters */}
-          <div className="dashboard-filters admin-filters">
-            <div className="filter-group"><label htmlFor="adminReportSearch" className="filter-label">Search reports</label><input id="adminReportSearch" className="search-input" maxLength={200} value={search} onChange={event => setSearch(event.target.value)} placeholder="Title, description or tracking code" /></div>
+          <div className={`${styles.filters} ${styles.filterBar}`}>
             <div className="filter-group">
-              <label htmlFor="statusFilter" className="filter-label">Status</label>
+              <label htmlFor="assigneeFilter" className="filter-label">
+                Assigned administrator
+              </label>
+              <select
+                id="assigneeFilter"
+                value={filters.assignee_id || ''}
+                onChange={(event) =>
+                  handleFilterChange('assignee_id', event.target.value || undefined)
+                }
+              >
+                <option value="">All administrators</option>
+                {filters.assignee_id &&
+                  !assignees.some(
+                    (user) => String(user.id) === filters.assignee_id
+                  ) && (
+                    <option value={filters.assignee_id}>Selected administrator</option>
+                  )}
+                {assignees.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.full_name || user.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="filter-group">
+              <label htmlFor="adminReportSearch" className="filter-label">
+                Search reports
+              </label>
+              <input
+                id="adminReportSearch"
+                className="search-input"
+                maxLength={200}
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Title, description or tracking code"
+              />
+            </div>
+            <div className="filter-group">
+              <label htmlFor="statusFilter" className="filter-label">
+                Status
+              </label>
               <select
                 id="statusFilter"
                 className="filter-select"
                 value={filters.status || ''}
-                onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
+                onChange={(e) =>
+                  handleFilterChange('status', e.target.value || undefined)
+                }
               >
-                {statusOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {statusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="filter-group">
-              <label htmlFor="categoryFilter" className="filter-label">Category</label>
+              <label htmlFor="categoryFilter" className="filter-label">
+                Category
+              </label>
               <select
                 id="categoryFilter"
                 className="filter-select"
                 value={filters.category || ''}
-                onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
+                onChange={(e) =>
+                  handleFilterChange('category', e.target.value || undefined)
+                }
               >
-                {categoryOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {categoryOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="filter-group">
-              <label htmlFor="anonymityFilter" className="filter-label">Type</label>
+              <label htmlFor="anonymityFilter" className="filter-label">
+                Type
+              </label>
               <select
                 id="anonymityFilter"
                 className="filter-select"
-                value={filters.is_anonymous === undefined ? '' : String(filters.is_anonymous)}
-                onChange={(e) => handleFilterChange('is_anonymous', e.target.value === '' ? undefined : e.target.value === 'true')}
+                value={
+                  filters.is_anonymous === undefined ? '' : String(filters.is_anonymous)
+                }
+                onChange={(e) =>
+                  handleFilterChange(
+                    'is_anonymous',
+                    e.target.value === '' ? undefined : e.target.value === 'true'
+                  )
+                }
               >
-                {anonymityOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {anonymityOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
-            <button 
-              className="btn btn--secondary btn--sm filter-reset"
-              onClick={() => { setSearch(''); setFilters({ page: 1, limit: 20 }); }}
-            >
-              <i className="fas fa-undo"></i> Reset
-            </button>
+            <div className={styles.filterActions}>
+              <button
+                type="button"
+                className="btn btn--secondary btn--sm"
+                disabled={isLoading}
+                onClick={() => {
+                  setWorkloadRevision((value) => value + 1);
+                  fetchData();
+                }}
+              >
+                Refresh
+              </button>
+              <button
+                type="button"
+                className="btn btn--secondary btn--sm filter-reset"
+                onClick={() => {
+                  setSearch('');
+                  setFilters({ page: 1, limit: 20 });
+                }}
+              >
+                <i className="fas fa-undo"></i> Clear filters
+              </button>
+            </div>
           </div>
 
           {/* Reports List */}
@@ -309,7 +437,7 @@ export default function AdminReportsPage() {
             ) : (
               <>
                 <div className="reports-list">
-                  {reports.map(report => (
+                  {reports.map((report) => (
                     <ReportCard
                       key={report.id}
                       report={report}
@@ -321,7 +449,27 @@ export default function AdminReportsPage() {
               </>
             )}
           </div>
-          <div className="carousel-navigation" aria-label="Report pages"><button type="button" disabled={isLoading || filters.page === 1} onClick={() => handlePageChange(filters.page - 1)}>Previous</button><span>Page {filters.page} of {Math.max(1, totalPages)} · {total} reports</span><button type="button" disabled={isLoading || filters.page >= totalPages} onClick={() => handlePageChange(filters.page + 1)}>Next</button></div>
+          <div className={styles.pagination} aria-label="Report pages">
+            <button
+              type="button"
+              className="btn btn--secondary btn--sm"
+              disabled={isLoading || filters.page === 1}
+              onClick={() => handlePageChange(filters.page - 1)}
+            >
+              Previous
+            </button>
+            <span>
+              Page {filters.page} of {Math.max(1, totalPages)} · {total} reports
+            </span>
+            <button
+              type="button"
+              className="btn btn--secondary btn--sm"
+              disabled={isLoading || filters.page >= totalPages}
+              onClick={() => handlePageChange(filters.page + 1)}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </main>
 
@@ -330,7 +478,7 @@ export default function AdminReportsPage() {
       <UserMenuModal
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
+        onProfileClick={() => (window.location.href = '/profile')}
         onLogoutClick={handleLogout}
       />
     </>

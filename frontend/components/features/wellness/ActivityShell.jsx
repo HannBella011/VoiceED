@@ -10,14 +10,24 @@ function ActivityFrame({ Activity }) {
   const pathname = usePathname();
   const { currentUser } = useAuthContext();
   const { setSettingsOpen, setUserMenuOpen } = useModals();
-  return <>
-    <Navbar currentPage={pathname} variant="wellness"
-      onSettingsClick={() => setSettingsOpen(true)} onUserMenuClick={() => setUserMenuOpen(true)} />
-    <Activity key={currentUser.id} />
-    <Footer />
-  </>;
+  return (
+    <>
+      <Navbar
+        currentPage={pathname}
+        variant="wellness"
+        onSettingsClick={() => setSettingsOpen(true)}
+        onUserMenuClick={() => setUserMenuOpen(true)}
+      />
+      <Activity key={currentUser.id} />
+      <Footer />
+    </>
+  );
 }
 
 export function ActivityShell({ Activity }) {
-  return <ProtectedRoute><ActivityFrame Activity={Activity} /></ProtectedRoute>;
+  return (
+    <ProtectedRoute>
+      <ActivityFrame Activity={Activity} />
+    </ProtectedRoute>
+  );
 }

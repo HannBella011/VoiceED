@@ -10,7 +10,11 @@ import { submitReportAuthenticated, submitReportAnonymous } from '@/services';
 const CATEGORIES = [
   { value: 'academic', label: 'Academic Concern', icon: 'fas fa-book' },
   { value: 'harassment', label: 'Harassment or Bullying', icon: 'fas fa-user-slash' },
-  { value: 'safety', label: 'Facility/Safety Hazard', icon: 'fas fa-exclamation-triangle' },
+  {
+    value: 'safety',
+    label: 'Facility/Safety Hazard',
+    icon: 'fas fa-exclamation-triangle',
+  },
   { value: 'discrimination', label: 'Discrimination', icon: 'fas fa-balance-scale' },
   { value: 'mental-health', label: 'Mental Health Concern', icon: 'fas fa-brain' },
   { value: 'violence', label: 'Violence or Threat', icon: 'fas fa-fist-raised' },
@@ -23,7 +27,7 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 export function ReportForm({ isAnonymous, onBack, onSuccess }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -33,14 +37,14 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
     incident_date: '',
     reporter_email: '',
   });
-  
+
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [fileErrors, setFileErrors] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [rightNow, setRightNow] = useState(false);
-  
+
   const fileInputRef = useRef(null);
   const dropZoneRef = useRef(null);
 
@@ -56,23 +60,26 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
   }, []);
 
   // Handle file selection
-  const handleFilesChange = useCallback((selectedFiles) => {
-    const newFiles = Array.from(selectedFiles);
-    const newErrors = [];
-    const validFiles = [];
+  const handleFilesChange = useCallback(
+    (selectedFiles) => {
+      const newFiles = Array.from(selectedFiles);
+      const newErrors = [];
+      const validFiles = [];
 
-    for (const file of newFiles) {
-      const error = validateFile(file);
-      if (error) {
-        newErrors.push(error);
-      } else {
-        validFiles.push(file);
+      for (const file of newFiles) {
+        const error = validateFile(file);
+        if (error) {
+          newErrors.push(error);
+        } else {
+          validFiles.push(file);
+        }
       }
-    }
 
-    setFiles(prev => [...prev, ...validFiles]);
-    setFileErrors(newErrors);
-  }, [validateFile]);
+      setFiles((prev) => [...prev, ...validFiles]);
+      setFileErrors(newErrors);
+    },
+    [validateFile]
+  );
 
   // Handle drag and drop
   const handleDragOver = useCallback((e) => {
@@ -87,19 +94,22 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
     dropZoneRef.current?.classList.remove('drag-over');
   }, []);
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZoneRef.current?.classList.remove('drag-over');
-    
-    if (e.dataTransfer.files.length > 0) {
-      handleFilesChange(e.dataTransfer.files);
-    }
-  }, [handleFilesChange]);
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZoneRef.current?.classList.remove('drag-over');
+
+      if (e.dataTransfer.files.length > 0) {
+        handleFilesChange(e.dataTransfer.files);
+      }
+    },
+    [handleFilesChange]
+  );
 
   // Remove file
   const removeFile = useCallback((index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   // Format file size
@@ -111,10 +121,10 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
 
   // Handle input change
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user types
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -134,7 +144,11 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
     if (!formData.location?.trim()) {
       newErrors.location = 'Location is required';
     }
-    if (isAnonymous && formData.reporter_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.reporter_email)) {
+    if (
+      isAnonymous &&
+      formData.reporter_email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.reporter_email)
+    ) {
       newErrors.reporter_email = 'Please enter a valid email address';
     }
 
@@ -159,10 +173,14 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
       } else {
         report = await submitReportAuthenticated(formData, files);
       }
-      
+
       onSuccess(report);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Failed to submit report. Please try again.');
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to submit report. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -183,7 +201,7 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
 
   // Get category icon
   const getCategoryIcon = (category) => {
-    const cat = CATEGORIES.find(c => c.value === category);
+    const cat = CATEGORIES.find((c) => c.value === category);
     return cat?.icon || 'fas fa-tag';
   };
 
@@ -230,7 +248,7 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
             disabled={isSubmitting}
           >
             <option value="">Select category...</option>
-            {CATEGORIES.map(cat => (
+            {CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
               </option>
@@ -306,7 +324,9 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
           disabled={isSubmitting}
         />
         {errors.description && <span className="form-error">{errors.description}</span>}
-        <p className="form-hint">Be as specific as possible. This helps us respond effectively.</p>
+        <p className="form-hint">
+          Be as specific as possible. This helps us respond effectively.
+        </p>
       </div>
 
       {/* Anonymous Email (only for anonymous) */}
@@ -324,20 +344,20 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
             onChange={(e) => handleChange('reporter_email', e.target.value)}
             disabled={isSubmitting}
           />
-          {errors.reporter_email && <span className="form-error">{errors.reporter_email}</span>}
+          {errors.reporter_email && (
+            <span className="form-error">{errors.reporter_email}</span>
+          )}
           <p className="form-hint">
-            If provided, you'll receive email updates and your tracking code. 
-            Your email is never shared with administrators.
+            If provided, you'll receive email updates and your tracking code. Your email
+            is never shared with administrators.
           </p>
         </div>
       )}
 
       {/* File Upload */}
       <div className="form-group">
-        <label className="form-label">
-          Evidence Attachments (Optional)
-        </label>
-        
+        <label className="form-label">Evidence Attachments (Optional)</label>
+
         <div
           ref={dropZoneRef}
           className={`file-upload-area ${files.length > 0 ? 'has-files' : ''} ${fileErrors.length > 0 ? 'error' : ''}`}
@@ -355,7 +375,7 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
             disabled={isSubmitting}
             style={{ display: 'none' }}
           />
-          
+
           <div className="file-upload-label">
             <i className="fas fa-cloud-upload-alt"></i>
             <p>Drag and drop files here or click to browse</p>
@@ -379,9 +399,15 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
         {files.length > 0 && (
           <div className="selected-files" role="list">
             {files.map((file, index) => (
-              <div key={`${file.name}-${index}-${file.size}`} className="selected-file-item" role="listitem">
+              <div
+                key={`${file.name}-${index}-${file.size}`}
+                className="selected-file-item"
+                role="listitem"
+              >
                 <div className="file-info">
-                  <i className={`file-icon ${file.type.startsWith('image/') ? 'fas fa-image' : 'fas fa-file-pdf'}`}></i>
+                  <i
+                    className={`file-icon ${file.type.startsWith('image/') ? 'fas fa-image' : 'fas fa-file-pdf'}`}
+                  ></i>
                   <div className="file-details">
                     <span className="file-name">{file.name}</span>
                     <span className="file-size">{formatFileSize(file.size)}</span>
@@ -406,9 +432,9 @@ export function ReportForm({ isAnonymous, onBack, onSuccess }) {
       <div className="data-handling-statement">
         <i className="fas fa-shield-alt"></i>
         <span>
-          Your safety is our priority. All reports are encrypted. 
-          {isAnonymous 
-            ? 'Your identity will never be disclosed or tracked.' 
+          Your safety is our priority. All reports are encrypted.
+          {isAnonymous
+            ? 'Your identity will never be disclosed or tracked.'
             : 'If anonymous, your identity will not be shared with anyone.'}
         </span>
       </div>

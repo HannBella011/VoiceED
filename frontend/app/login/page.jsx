@@ -1,37 +1,37 @@
-"use client";
+'use client';
 
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { useAuthContext } from "@/context/AuthContext";
-import Link from "next/link";
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const pathname = usePathname();
   const router = useRouter();
   const { login } = useAuthContext();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const message = new URLSearchParams(window.location.search).get("error");
+    const message = new URLSearchParams(window.location.search).get('error');
     if (message) setError(message);
   }, []);
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
-      const { supabase } = await import("@/lib/supabaseClient");
-      
+      const { supabase } = await import('@/lib/supabaseClient');
+
       // Preserve intended destination after OAuth
-      const next = sessionStorage.getItem("shielded_return_url") || "/dashboard";
+      const next = sessionStorage.getItem('shielded_return_url') || '/dashboard';
       const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
 
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
+        provider: 'google',
         options: {
           redirectTo,
         },
@@ -41,24 +41,32 @@ export default function LoginPage() {
         throw new Error(error.message);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Google login failed. Please try again.");
+      setError(
+        err instanceof Error ? err.message : 'Google login failed. Please try again.'
+      );
       setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
     try {
       await login(email.trim(), password);
 
-      const returnUrl = sessionStorage.getItem("shielded_return_url");
+      const returnUrl = sessionStorage.getItem('shielded_return_url');
       if (returnUrl) {
-        sessionStorage.removeItem("shielded_return_url");
-        router.replace(returnUrl.startsWith('/') && !returnUrl.startsWith('//') && !returnUrl.includes('\\') ? returnUrl : '/dashboard');
+        sessionStorage.removeItem('shielded_return_url');
+        router.replace(
+          returnUrl.startsWith('/') &&
+            !returnUrl.startsWith('//') &&
+            !returnUrl.includes('\\')
+            ? returnUrl
+            : '/dashboard'
+        );
       } else {
-        router.replace("/dashboard");
+        router.replace('/dashboard');
       }
     } catch (err) {
       setError(err.message);
@@ -78,11 +86,17 @@ export default function LoginPage() {
               <p>Sign in to access your VoiceED account</p>
             </div>
 
-            {error && <div className="error-message" role="alert">{error}</div>}
+            {error && (
+              <div className="error-message" role="alert">
+                {error}
+              </div>
+            )}
 
             <form id="loginForm" onSubmit={handleSubmit}>
               <div className="input-group">
-                <label htmlFor="email" className="input-label">Email</label>
+                <label htmlFor="email" className="input-label">
+                  Email
+                </label>
                 <div className="input-wrapper">
                   <i className="fas fa-user input-icon-left" aria-hidden="true"></i>
                   <input
@@ -99,7 +113,9 @@ export default function LoginPage() {
               </div>
 
               <div className="input-group">
-                <label htmlFor="password" className="input-label">Password</label>
+                <label htmlFor="password" className="input-label">
+                  Password
+                </label>
                 <div className="input-wrapper">
                   <i className="fas fa-lock input-icon-left" aria-hidden="true"></i>
                   <input
@@ -131,7 +147,7 @@ export default function LoginPage() {
                     Logging in...
                   </>
                 ) : (
-                  "Log In"
+                  'Log In'
                 )}
               </button>
 

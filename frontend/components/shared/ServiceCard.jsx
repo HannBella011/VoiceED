@@ -6,15 +6,15 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
-export function ServiceCard({ 
-  icon, 
-  title, 
-  description, 
-  features, 
-  onClick, 
+export function ServiceCard({
+  icon,
+  title,
+  description,
+  features,
+  onClick,
   href,
   className = '',
-  style
+  style,
 }) {
   const router = useRouter();
 
@@ -36,7 +36,9 @@ export function ServiceCard({
       style={isClickable ? { cursor: 'pointer', ...style } : style}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      onKeyDown={(e) => isClickable && (e.key === 'Enter' || e.key === ' ') && handleClick(e)}
+      onKeyDown={(e) =>
+        isClickable && (e.key === 'Enter' || e.key === ' ') && handleClick(e)
+      }
     >
       <div className="service-header">
         <div className="service-icon">{icon}</div>
@@ -46,7 +48,9 @@ export function ServiceCard({
         <p>{description}</p>
         <div className="service-features">
           {features.map((feature, index) => (
-            <div key={index} className="feature-item">{feature}</div>
+            <div key={index} className="feature-item">
+              {feature}
+            </div>
           ))}
         </div>
       </div>

@@ -24,7 +24,10 @@ export default function AboutPage() {
         <div className="container">
           <div className="services-welcome">
             <h2>About</h2>
-            <p>Dedicated to empower students by blending safety, learning, and community into one supportive platform.</p>
+            <p>
+              Dedicated to empower students by blending safety, learning, and community
+              into one supportive platform.
+            </p>
           </div>
 
           <div className="about-content-grid">
@@ -39,12 +42,28 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="about-section-content">
-                <p>VoiceED creates a safe and supportive educational environment through four core services: ReportED for safety concerns, WellnessED for mental health and motivation, InspireED for encouragement and achievements, and ShareED for collaborative learning. We believe in blending technology with compassion to empower every student's voice and build communities where learning becomes a shared journey of growth.</p>
+                <p>
+                  VoiceED creates a safe and supportive educational environment through
+                  four core services: ReportED for safety concerns, WellnessED for
+                  mental health and motivation, InspireED for encouragement and
+                  achievements, and ShareED for collaborative learning. We believe in
+                  blending technology with compassion to empower every student's voice
+                  and build communities where learning becomes a shared journey of
+                  growth.
+                </p>
                 <div className="about-key-points">
-                  <div className="about-key-point">ReportED - Safe Reporting System</div>
-                  <div className="about-key-point">WellnessED - Mental Health & Motivation</div>
-                  <div className="about-key-point">InspireED - Encouragement & Achievement</div>
-                  <div className="about-key-point">ShareED - Collaborative Learning</div>
+                  <div className="about-key-point">
+                    ReportED - Safe Reporting System
+                  </div>
+                  <div className="about-key-point">
+                    WellnessED - Mental Health & Motivation
+                  </div>
+                  <div className="about-key-point">
+                    InspireED - Encouragement & Achievement
+                  </div>
+                  <div className="about-key-point">
+                    ShareED - Collaborative Learning
+                  </div>
                 </div>
               </div>
             </div>
@@ -60,7 +79,12 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="about-section-content">
-                <p>A world where every student has access to safe learning environments, quality educational resources, and supportive communities. We envision schools and universities as hubs of innovation, safety, and academic excellence.</p>
+                <p>
+                  A world where every student has access to safe learning environments,
+                  quality educational resources, and supportive communities. We envision
+                  schools and universities as hubs of innovation, safety, and academic
+                  excellence.
+                </p>
                 <div className="about-key-points">
                   <div className="about-key-point">Safe Learning Environments</div>
                   <div className="about-key-point">Quality Educational Resources</div>
@@ -81,7 +105,11 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="about-section-content">
-                <p>Safety, empathy, innovation, and community-driven solutions. We prioritize student voices, practical implementation, and measurable impact over futuristic concepts that can't be realistically deployed.</p>
+                <p>
+                  Safety, empathy, innovation, and community-driven solutions. We
+                  prioritize student voices, practical implementation, and measurable
+                  impact over futuristic concepts that can't be realistically deployed.
+                </p>
                 <div className="about-key-points">
                   <div className="about-key-point">Safety First</div>
                   <div className="about-key-point">Empathy-Driven</div>
@@ -104,7 +132,13 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="about-section-content">
-                <p>To unite safety and education in one platform, offering practical, student‑centered solutions that can be implemented immediately while building sustainable systems for the future. We exist to empower learners, protect communities, and ensure that education is accessible and secure for all.</p>
+                <p>
+                  To unite safety and education in one platform, offering practical,
+                  student‑centered solutions that can be implemented immediately while
+                  building sustainable systems for the future. We exist to empower
+                  learners, protect communities, and ensure that education is accessible
+                  and secure for all.
+                </p>
                 <div className="about-key-points">
                   <div className="about-key-point">Student-Centered Design</div>
                   <div className="about-key-point">Practical Implementation</div>
@@ -125,19 +159,32 @@ export default function AboutPage() {
                 </div>
               </div>
               <div className="about-section-content">
-                <p>Aligns its mission and initiatives with the United Nations Sustainable Development Goals (SDGs), ensuring that our work contributes to global progress while addressing local student needs. By focusing on safety, education, and community empowerment, we connect our platform to goals that matter most for learners and their communities.</p>
+                <p>
+                  Aligns its mission and initiatives with the United Nations Sustainable
+                  Development Goals (SDGs), ensuring that our work contributes to global
+                  progress while addressing local student needs. By focusing on safety,
+                  education, and community empowerment, we connect our platform to goals
+                  that matter most for learners and their communities.
+                </p>
                 <p>Six SDG Connections:</p>
                 <div className="about-key-points">
                   <div className="about-key-point">SDG 4: Quality Education</div>
-                  <div className="about-key-point">SDG 3: Good Health and Well-Being</div>
-                  <div className="about-key-point">SDG 16: Peace, Justice, and Strong Institutions</div>
-                  <div className="about-key-point">SDG 17: Partnerships for the Goals</div>
+                  <div className="about-key-point">
+                    SDG 3: Good Health and Well-Being
+                  </div>
+                  <div className="about-key-point">
+                    SDG 16: Peace, Justice, and Strong Institutions
+                  </div>
+                  <div className="about-key-point">
+                    SDG 17: Partnerships for the Goals
+                  </div>
                   <div className="about-key-point">SDG 10: Reduced Inequalities</div>
-                  <div className="about-key-point">SDG 9: Industry, Innovation, and Infrastructure</div>
+                  <div className="about-key-point">
+                    SDG 9: Industry, Innovation, and Infrastructure
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </main>

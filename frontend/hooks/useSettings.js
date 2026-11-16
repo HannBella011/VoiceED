@@ -16,20 +16,24 @@ export function useSettings() {
   const applySettings = useCallback((newSettings) => {
     setSettings((prevSettings) => {
       const updatedSettings = { ...prevSettings, ...newSettings };
-      
+
       // Remove all existing color themes
       document.body.classList.remove(
-        'blue-theme', 'purple-theme', 'red-theme', 
-        'green-theme', 'orange-theme', 'pink-theme'
+        'blue-theme',
+        'purple-theme',
+        'red-theme',
+        'green-theme',
+        'orange-theme',
+        'pink-theme'
       );
-      
+
       // Apply selected color theme
       if (updatedSettings.color) {
         document.body.classList.add(`${updatedSettings.color}-theme`);
       } else {
         document.body.classList.add('blue-theme');
       }
-      
+
       return updatedSettings;
     });
   }, []);
@@ -39,10 +43,10 @@ export function useSettings() {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        setSettings({ 
-          color: parsed.color || 'blue', 
+        setSettings({
+          color: parsed.color || 'blue',
           notifications: parsed.notifications ?? true,
-          theme: parsed.color || 'blue'
+          theme: parsed.color || 'blue',
         });
         applySettings(parsed);
       } catch (e) {
@@ -59,8 +63,12 @@ export function useSettings() {
       localStorage.setItem('shielded_settings', JSON.stringify(updated));
       // Apply settings directly without calling applySettings to avoid circular dependency
       document.body.classList.remove(
-        'blue-theme', 'purple-theme', 'red-theme', 
-        'green-theme', 'orange-theme', 'pink-theme'
+        'blue-theme',
+        'purple-theme',
+        'red-theme',
+        'green-theme',
+        'orange-theme',
+        'pink-theme'
       );
       if (updated.color) {
         document.body.classList.add(`${updated.color}-theme`);

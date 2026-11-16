@@ -45,9 +45,9 @@ const STATUS_COLORS = {
 
 export function ReportTimeline({ timeline, currentStatus, isAdmin = false }) {
   // Combine timeline entries with current status if not already in timeline
-  const currentStatusEntry = timeline.find(t => t.status === currentStatus);
+  const currentStatusEntry = timeline.find((t) => t.status === currentStatus);
   const hasCurrentInTimeline = !!currentStatusEntry;
-  
+
   // Sort timeline by date
   const sortedTimeline = [...timeline].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -59,31 +59,51 @@ export function ReportTimeline({ timeline, currentStatus, isAdmin = false }) {
   return (
     <div className="report-timeline">
       {/* Progress Indicator */}
-      <div className="timeline-progress" role="progressbar" aria-valuenow={currentStatusIndex + 1} aria-valuemin={1} aria-valuemax={STATUS_ORDER.length}>
+      <div
+        className="timeline-progress"
+        role="progressbar"
+        aria-valuenow={currentStatusIndex + 1}
+        aria-valuemin={1}
+        aria-valuemax={STATUS_ORDER.length}
+      >
         {STATUS_ORDER.map((status, index) => {
           const isCompleted = index < currentStatusIndex;
           const isCurrent = index === currentStatusIndex;
           const isFuture = index > currentStatusIndex;
-          
+
           return (
-            <div key={status} className={`timeline-step ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isFuture ? 'future' : ''}`}>
-              <div 
+            <div
+              key={status}
+              className={`timeline-step ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isFuture ? 'future' : ''}`}
+            >
+              <div
                 className="step-marker"
-                style={{ backgroundColor: isCompleted || isCurrent ? STATUS_COLORS[status] : '#e0e0e0' }}
+                style={{
+                  backgroundColor:
+                    isCompleted || isCurrent ? STATUS_COLORS[status] : '#e0e0e0',
+                }}
               >
                 {isCompleted ? (
                   <i className="fas fa-check" style={{ color: 'white' }} />
                 ) : (
-                  <i className={STATUS_ICONS[status]} style={{ color: isCurrent ? 'white' : '#999' }} />
+                  <i
+                    className={STATUS_ICONS[status]}
+                    style={{ color: isCurrent ? 'white' : '#999' }}
+                  />
                 )}
               </div>
-              <span className="step-label" style={{ fontWeight: isCurrent ? 600 : 400 }}>
+              <span
+                className="step-label"
+                style={{ fontWeight: isCurrent ? 600 : 400 }}
+              >
                 {STATUS_LABELS[status]}
               </span>
               {index < STATUS_ORDER.length - 1 && (
-                <div 
+                <div
                   className="step-connector"
-                  style={{ backgroundColor: isCompleted ? STATUS_COLORS[status] : '#e0e0e0' }}
+                  style={{
+                    backgroundColor: isCompleted ? STATUS_COLORS[status] : '#e0e0e0',
+                  }}
                 />
               )}
             </div>
@@ -97,21 +117,22 @@ export function ReportTimeline({ timeline, currentStatus, isAdmin = false }) {
           <div key={entry.id} className="timeline-entry">
             {/* Timeline Dot/Connector */}
             <div className="timeline-marker">
-              <div 
+              <div
                 className="timeline-dot"
                 style={{ backgroundColor: STATUS_COLORS[entry.status] }}
               >
-                <i className={STATUS_ICONS[entry.status]} style={{ color: 'white', fontSize: '10px' }} />
+                <i
+                  className={STATUS_ICONS[entry.status]}
+                  style={{ color: 'white', fontSize: '10px' }}
+                />
               </div>
-              {index < sortedTimeline.length - 1 && (
-                <div className="timeline-line" />
-              )}
+              {index < sortedTimeline.length - 1 && <div className="timeline-line" />}
             </div>
 
             {/* Entry Content */}
             <div className="timeline-content">
               <div className="timeline-entry-header">
-                <span 
+                <span
                   className="timeline-status-badge"
                   style={{ backgroundColor: STATUS_COLORS[entry.status] }}
                 >
@@ -140,7 +161,9 @@ export function ReportTimeline({ timeline, currentStatus, isAdmin = false }) {
                         rel="noopener noreferrer"
                         className="attachment-link"
                       >
-                        <i className={`fas ${att.attachment.mime_type.startsWith('image/') ? 'fa-image' : 'fa-file-pdf'}`}></i>
+                        <i
+                          className={`fas ${att.attachment.mime_type.startsWith('image/') ? 'fa-image' : 'fa-file-pdf'}`}
+                        ></i>
                         <span>{att.attachment.filename}</span>
                         <span className="attachment-size">
                           {(att.attachment.file_size / 1024).toFixed(1)} KB
@@ -164,25 +187,27 @@ export function ReportTimeline({ timeline, currentStatus, isAdmin = false }) {
         {!hasCurrentInTimeline && (
           <div className="timeline-entry current-status-entry">
             <div className="timeline-marker">
-              <div 
+              <div
                 className="timeline-dot current"
                 style={{ backgroundColor: STATUS_COLORS[currentStatus] }}
               >
-                <i className={STATUS_ICONS[currentStatus]} style={{ color: 'white', fontSize: '10px' }} />
+                <i
+                  className={STATUS_ICONS[currentStatus]}
+                  style={{ color: 'white', fontSize: '10px' }}
+                />
               </div>
               <div className="timeline-line" />
             </div>
             <div className="timeline-content">
               <div className="timeline-entry-header">
-                <span 
+                <span
                   className="timeline-status-badge current"
                   style={{ backgroundColor: STATUS_COLORS[currentStatus] }}
                 >
-                  {STATUS_LABELS[currentStatus]} <span className="current-indicator">(Current)</span>
+                  {STATUS_LABELS[currentStatus]}{' '}
+                  <span className="current-indicator">(Current)</span>
                 </span>
-                <time className="timeline-timestamp">
-                  Just now
-                </time>
+                <time className="timeline-timestamp">Just now</time>
               </div>
             </div>
           </div>

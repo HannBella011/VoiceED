@@ -30,7 +30,11 @@ export default function TrackingPage() {
           access ||= sessionStorage.getItem(`voiceed:report-access:${params.code}`);
           if (fragment.has('access')) {
             sessionStorage.setItem(`voiceed:report-access:${params.code}`, access);
-            window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+            window.history.replaceState(
+              window.history.state,
+              '',
+              window.location.pathname + window.location.search
+            );
           }
         } catch {
           // Private browsing can block storage; the fragment still authorizes this request.
@@ -84,7 +88,9 @@ export default function TrackingPage() {
             <div className="tracking-error">
               <i className="fas fa-exclamation-triangle"></i>
               <h2>Report Not Found</h2>
-              <p>{error || 'The tracking code you entered does not match any report.'}</p>
+              <p>
+                {error || 'The tracking code you entered does not match any report.'}
+              </p>
               <a href="/report" className="btn btn--primary">
                 <i className="fas fa-plus"></i> Submit a New Report
               </a>
@@ -97,7 +103,7 @@ export default function TrackingPage() {
   }
 
   const formatStatus = (status) => {
-    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const getStatusColor = (status) => {
@@ -130,7 +136,7 @@ export default function TrackingPage() {
               <div className="tracking-code-display">
                 <span className="code-label">Tracking Code:</span>
                 <code>{report.tracking_code}</code>
-                <button 
+                <button
                   className="copy-btn"
                   onClick={() => navigator.clipboard.writeText(report.tracking_code)}
                 >
@@ -138,9 +144,9 @@ export default function TrackingPage() {
                 </button>
               </div>
             </div>
-            
+
             <div className="tracking-status">
-              <span 
+              <span
                 className="status-badge"
                 style={{ backgroundColor: getStatusColor(report.status) }}
               >
@@ -149,18 +155,21 @@ export default function TrackingPage() {
             </div>
           </div>
 
-          {report.access_required && <p role="status">This code shows limited status only. Open the private tracking link saved after submission for detailed updates and shared evidence. Account owners and authorized staff can also view their reports while signed in.</p>}
+          {report.access_required && (
+            <p role="status">
+              This code shows limited status only. Open the private tracking link saved
+              after submission for detailed updates and shared evidence. Account owners
+              and authorized staff can also view their reports while signed in.
+            </p>
+          )}
           {/* Report Summary Card */}
-          <ReportCard 
-            report={report} 
-            variant="tracking"
-          />
+          <ReportCard report={report} variant="tracking" />
 
           {/* Timeline */}
           <div className="tracking-timeline-section">
             <h3>Progress Timeline</h3>
-            <ReportTimeline 
-              timeline={report.timeline || []} 
+            <ReportTimeline
+              timeline={report.timeline || []}
               currentStatus={report.status}
             />
           </div>
@@ -168,7 +177,9 @@ export default function TrackingPage() {
           {/* Help */}
           <div className="tracking-help-section">
             <h3>Need Help?</h3>
-            <p>If you have questions about this report, contact the VoiceED support team.</p>
+            <p>
+              If you have questions about this report, contact the VoiceED support team.
+            </p>
             <a href="/contacts" className="btn btn--secondary">
               <i className="fas fa-envelope"></i> Contact Support
             </a>

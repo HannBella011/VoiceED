@@ -6,8 +6,9 @@ import { submissionKey } from '@/lib/reportSubmission';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 async function request(endpoint, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -35,8 +36,9 @@ async function request(endpoint, options = {}) {
 }
 
 async function requestFormData(endpoint, formData, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
   const headers = {
     ...options.headers,
   };
@@ -65,30 +67,56 @@ async function requestFormData(endpoint, formData, options = {}) {
 // ============================================================================
 
 async function submitWizardReport(path, data, files, key, publicSubmission) {
-  if (!key) key=await submissionKey(data,files,path);
-  if (data.incident_date) data={...data,incident_date:new Date(data.incident_date).toISOString()};
+  if (!key) key = await submissionKey(data, files, path);
+  if (data.incident_date)
+    data = { ...data, incident_date: new Date(data.incident_date).toISOString() };
   const form = new FormData();
-  for (const field of ['title','description','category','location','incident_date','reporter_email']) if(data[field]!=null) form.append(field,data[field]);
-  if(data.reporter_details) form.append('reporter_details',JSON.stringify(data.reporter_details));
-  files.forEach(file=>form.append('files',file));
-  if(publicSubmission) {
+  for (const field of [
+    'title',
+    'description',
+    'category',
+    'location',
+    'incident_date',
+    'reporter_email',
+  ])
+    if (data[field] != null) form.append(field, data[field]);
+  if (data.reporter_details)
+    form.append('reporter_details', JSON.stringify(data.reporter_details));
+  files.forEach((file) => form.append('files', file));
+  if (publicSubmission) {
     // Anonymous/guest submissions do not transmit an account token or session cookie.
-    const response=await fetch(`${API_BASE_URL}${path}`,{method:'POST',credentials:'omit',headers:{'Idempotency-Key':key},body:form});
-    const result=await response.json().catch(()=>({}));
-    if(!response.ok) throw new Error(typeof result.detail==='string'?result.detail:'Unable to submit. Check your entries and try again.');
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      credentials: 'omit',
+      headers: { 'Idempotency-Key': key },
+      body: form,
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok)
+      throw new Error(
+        typeof result.detail === 'string'
+          ? result.detail
+          : 'Unable to submit. Check your entries and try again.'
+      );
     return result;
   }
-  return requestFormData(path,form,{headers:{'Idempotency-Key':key}});
+  return requestFormData(path, form, { headers: { 'Idempotency-Key': key } });
 }
-export async function submitReportAuthenticated(data,files=[],key) {
-  return submitWizardReport('/reports/submit',data,files,key,false);
+export async function submitReportAuthenticated(data, files = [], key) {
+  return submitWizardReport('/reports/submit', data, files, key, false);
 }
-export async function submitReportAnonymous(data,files=[],key) {
-  const { reporter_details, ...anonymousData }=data;
-  return submitWizardReport('/reports/submit/anonymous',anonymousData,files,key,true);
+export async function submitReportAnonymous(data, files = [], key) {
+  const { reporter_details, ...anonymousData } = data;
+  return submitWizardReport(
+    '/reports/submit/anonymous',
+    anonymousData,
+    files,
+    key,
+    true
+  );
 }
-export async function submitReportGuest(data,files=[],key) {
-  return submitWizardReport('/reports/submit/guest',data,files,key,true);
+export async function submitReportGuest(data, files = [], key) {
+  return submitWizardReport('/reports/submit/guest', data, files, key, true);
 }
 
 // ============================================================================
@@ -96,7 +124,9 @@ export async function submitReportGuest(data,files=[],key) {
 // ============================================================================
 
 export async function trackReport(trackingCode, accessToken) {
-  return request(`/tracking/track/${encodeURIComponent(trackingCode)}`, { headers: accessToken ? { "X-Report-Access": accessToken } : {} });
+  return request(`/tracking/track/${encodeURIComponent(trackingCode)}`, {
+    headers: accessToken ? { 'X-Report-Access': accessToken } : {},
+  });
 }
 
 // ============================================================================
@@ -153,6 +183,13 @@ export async function adminAssignReport(reportId, data) {
   });
 }
 
+export async function adminRejectReport(reportId, data) {
+  return request(`/reports/admin/reports/${reportId}/reject`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 export async function adminUpdateReport(reportId, data) {
   return request(`/reports/admin/reports/${reportId}`, {
     method: 'PATCH',
@@ -160,14 +197,14 @@ export async function adminUpdateReport(reportId, data) {
   });
 }
 
-export async function adminAddTimelineEntry(
-  reportId, 
-  status, 
-  remarks, 
-  attachmentIds
-) {
+export async function adminAddTimelineEntry(reportId, status, remarks, attachmentIds) {
   return request(`/reports/admin/reports/${reportId}/timeline`, {
-    method: 'POST', body: JSON.stringify({ status, remarks: remarks || null, attachment_ids: attachmentIds || [] }),
+    method: 'POST',
+    body: JSON.stringify({
+      status,
+      remarks: remarks || null,
+      attachment_ids: attachmentIds || [],
+    }),
   });
 }
 
@@ -175,18 +212,13 @@ export async function getAvailableAssignees() {
   return request('/tracking/admin/assignees');
 }
 
-export async function adminListUsers(
-  page = 1, 
-  limit = 20, 
-  role, 
-  isActive
-) {
+export async function adminListUsers(page = 1, limit = 20, role, isActive) {
   const searchParams = new URLSearchParams();
   searchParams.append('page', String(page));
   searchParams.append('limit', String(limit));
   if (role) searchParams.append('role', role);
   if (isActive !== undefined) searchParams.append('is_active', String(isActive));
-  
+
   return request(`/users/admin?${searchParams.toString()}`);
 }
 
@@ -213,10 +245,10 @@ export async function adminDeleteUser(userId) {
 
 export async function uploadAttachments(reportId, files) {
   const formData = new FormData();
-  files.forEach(file => {
+  files.forEach((file) => {
     formData.append('files', file);
   });
-  
+
   return requestFormData(`/reports/${reportId}/attachments`, formData);
 }
 

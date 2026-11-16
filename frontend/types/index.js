@@ -31,4 +31,4 @@
  * @property {string} createdAt
  */
 
-export { };
+export {};

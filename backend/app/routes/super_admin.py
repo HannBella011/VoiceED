@@ -48,6 +48,20 @@ async def users(
     )
 
 
+@router.get("/workloads")
+async def report_workloads(
+    response: Response,
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db=Depends(get_db),
+    user=Depends(get_current_super_admin_user),
+):
+    from app.services.report_management import workloads
+
+    private(response)
+    return await workloads(db, page, limit)
+
+
 @router.post("/users/invite", status_code=201)
 async def invite(
     data: InviteInput,

@@ -354,6 +354,7 @@ async def verify(db, identity, data, actor):
         )
     )
     await commit(db)
+    await db.refresh(row)
     return user_response(row)
 
 

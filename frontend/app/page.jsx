@@ -25,8 +25,15 @@ export default function HomePage() {
           {/* Hero Section - match base HTML: NO card wrapper, just dashboard-welcome */}
           <div className="dashboard-welcome">
             <h2>Welcome back, Student!</h2>
-            <p>Your safety hub for voices, wellness, and collaboration—built for schools, open to all!</p>
-            <button className="cta-button" id="getStartedBtn" onClick={handleGetStarted}>
+            <p>
+              Your safety hub for voices, wellness, and collaboration—built for schools,
+              open to all!
+            </p>
+            <button
+              className="cta-button"
+              id="getStartedBtn"
+              onClick={handleGetStarted}
+            >
               Get Started
             </button>
           </div>
@@ -43,7 +50,8 @@ export default function HomePage() {
               </div>
               <h3>ReportED</h3>
               <p className="stat-label">
-                A safe, anonymous space where students submit crime reports, raise safety concerns, and ensure their voices are heard.
+                A safe, anonymous space where students submit crime reports, raise
+                safety concerns, and ensure their voices are heard.
               </p>
             </div>
 
@@ -57,7 +65,8 @@ export default function HomePage() {
               </div>
               <h3>WellnessED</h3>
               <p className="stat-label">
-                Practical tips on mental health, stress management, and motivation to help students balance academics and personal wellbeing.
+                Practical tips on mental health, stress management, and motivation to
+                help students balance academics and personal wellbeing.
               </p>
             </div>
 
@@ -71,11 +80,9 @@ export default function HomePage() {
               </div>
               <h3>InspireED</h3>
               <p className="stat-label">
-                Motivational stories, student achievements, and encouraging quotes designed to inspire persistence and hope among learners.
+                Motivational stories, student achievements, and encouraging quotes
+                designed to inspire persistence and hope among learners.
               </p>
-              <button type="button" className="create-post-btn" onClick={event => { event.stopPropagation(); navigateToService('/inspire-ed?compose=1'); }}>
-                <i className="fas fa-plus" /> Create Post
-              </button>
             </div>
 
             <div
@@ -88,11 +95,11 @@ export default function HomePage() {
               </div>
               <h3>ShareED</h3>
               <p className="stat-label">
-                A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.
+                A simple hub where students can upload, download, and share notes,
+                reviewer sheets, and study materials with peers.
               </p>
             </div>
           </div>
-
         </div>
       </main>
 

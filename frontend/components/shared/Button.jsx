@@ -9,6 +9,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   isLoading = false,
+  iconOnly = false,
   children,
   className = '',
   disabled,
@@ -17,12 +18,21 @@ export function Button({
   ...props
 }) {
   const baseClasses = 'btn';
-  const variantClass = `btn-${variant}`;
-  const sizeClass = `btn-${size}`;
+  // Keep legacy selectors while sharing the classes used by existing pages.
+  const variantClass = `btn-${variant} btn--${variant}`;
+  const sizeClass = `btn-${size} btn--${size}`;
   const loadingClass = isLoading ? 'btn-loading' : '';
   const disabledClass = disabled ? 'btn-disabled' : '';
 
-  const combinedClassName = [baseClasses, variantClass, sizeClass, loadingClass, disabledClass, className]
+  const combinedClassName = [
+    baseClasses,
+    variantClass,
+    sizeClass,
+    loadingClass,
+    disabledClass,
+    iconOnly ? 'btn--icon' : '',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 
@@ -31,6 +41,7 @@ export function Button({
       className={combinedClassName}
       disabled={disabled || isLoading}
       type={type}
+      aria-busy={isLoading || undefined}
       onClick={onClick}
       {...props}
     >

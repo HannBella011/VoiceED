@@ -18,8 +18,10 @@ export function Card({
   ...props
 }) {
   const variantClass = `card-${variant}`;
-  const clickableClass = (onClick || href) ? 'card-clickable' : '';
-  const combinedClassName = ['card', variantClass, clickableClass, className].filter(Boolean).join(' ');
+  const clickableClass = onClick || href ? 'card-clickable' : '';
+  const combinedClassName = ['card', variantClass, clickableClass, className]
+    .filter(Boolean)
+    .join(' ');
 
   const handleKeyDown = (e) => {
     if ((onClick || href) && (e.key === 'Enter' || e.key === ' ')) {

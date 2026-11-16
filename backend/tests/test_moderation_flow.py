@@ -6,7 +6,7 @@ from unittest.mock import patch, AsyncMock, Mock
 from datetime import datetime, timezone, timedelta
 import httpx
 from fastapi import FastAPI
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, event
 from sqlalchemy.orm import Session
 from app.models import (
     Profile,
@@ -29,7 +29,7 @@ from app.models import (
 )
 from app.routes import admin, inspire, share, messages, reports, users
 from app.routes.auth import get_current_user
-from app.services import moderation
+from app.services import moderation, report_service
 from test_share_flow import LocalAsyncSession
 
 
@@ -45,6 +45,64 @@ class ModerationSession(LocalAsyncSession):
 
 
 class ModerationFlowTests(unittest.IsolatedAsyncioTestCase):
+    async def test_personal_report_pages_break_timestamp_ties_by_id(self):
+        timestamp = datetime.now(timezone.utc)
+        reports = [
+            Report(
+                tracking_code=f"VED-PAGE-{index:04d}",
+                title="Same time",
+                description="Report",
+                category=ReportCategory.OTHER,
+                user_id=self.owner.id,
+                created_at=timestamp,
+            )
+            for index in range(3)
+        ]
+        self.session.add_all(reports)
+        self.session.commit()
+        first, total = await report_service.get_user_reports(
+            ModerationSession(self.session), self.owner.id, page=1, limit=2
+        )
+        second, _ = await report_service.get_user_reports(
+            ModerationSession(self.session), self.owner.id, page=2, limit=2
+        )
+        self.assertEqual(total, 3)
+        self.assertEqual(
+            [row.id for row in first + second],
+            sorted([row.id for row in reports], reverse=True),
+        )
+
+    async def test_platform_statistics_scan_each_source_once_including_empty_sources(
+        self,
+    ):
+        statements = []
+
+        def capture(conn, cursor, statement, parameters, context, many):
+            statements.append(statement.lower())
+
+        event.listen(self.engine, "before_cursor_execute", capture)
+        try:
+            empty = await moderation.statistics(ModerationSession(self.session))
+            self.assertTrue(all(value == 0 for value in empty["content"].values()))
+            self.assertEqual(empty["moderation"]["removed_content"], 0)
+            self.assertEqual(len(statements), 2)
+            for table in [
+                "shared_materials",
+                "inspire_stories",
+                "inspire_quotes",
+                "inspire_comments",
+                "moderation_actions",
+            ]:
+                self.assertEqual(statements[0].count("from " + table), 1, statements[0])
+        finally:
+            event.remove(self.engine, "before_cursor_execute", capture)
+        story = self.content("story")
+        story.removed_at = datetime.now(timezone.utc)
+        self.session.commit()
+        values = await moderation.statistics(ModerationSession(self.session))
+        self.assertEqual(values["content"]["stories"], 1)
+        self.assertEqual(values["moderation"]["removed_content"], 1)
+
     async def asyncSetUp(self):
         self.engine = create_engine("sqlite://")
         for model in [

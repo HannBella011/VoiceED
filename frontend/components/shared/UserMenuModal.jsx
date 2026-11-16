@@ -6,13 +6,13 @@
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
 
-export function UserMenuModal({ 
-  isOpen, 
-  onClose, 
-  onProfileClick, 
+export function UserMenuModal({
+  isOpen,
+  onClose,
+  onProfileClick,
   onLogoutClick,
   username,
-  email
+  email,
 }) {
   const { logout, currentUser } = useAuthContext();
   const router = useRouter();
@@ -33,8 +33,13 @@ export function UserMenuModal({
 
   return (
     <div className="modal user-menu-modal show" id="userMenuModal" onClick={onClose}>
-      <div className="modal-content user-menu-modal-content" onClick={(e) => e.stopPropagation()}>
-        <span className="close-button" onClick={onClose}>&times;</span>
+      <div
+        className="modal-content user-menu-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className="close-button" onClick={onClose}>
+          &times;
+        </span>
         <h2>User Menu</h2>
         <div className="user-info">
           <div className="user-avatar">

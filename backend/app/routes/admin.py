@@ -52,6 +52,16 @@ async def contents(
     )
 
 
+@router.get("/workload")
+async def own_workload(
+    response: Response, db=Depends(get_db), user=Depends(get_current_admin_user)
+):
+    from app.services.report_management import workload
+
+    private_response(response)
+    return await workload(db, user.id)
+
+
 @router.get("/content/{kind}/{identity}")
 async def detail(
     kind: Kind,

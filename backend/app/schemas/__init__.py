@@ -7,10 +7,11 @@ from enum import Enum
 class BaseModel(PydanticBaseModel):
     model_config = {"coerce_numbers_to_str": True}
 
-    @field_validator('*', mode='before', check_fields=False)
+    @field_validator("*", mode="before", check_fields=False)
     @classmethod
     def uuid_strings(cls, value):
         from uuid import UUID
+
         return str(value) if isinstance(value, UUID) else value
 
 
@@ -87,7 +88,6 @@ class UserUpdate(BaseModel):
     model_config = {"extra": "forbid"}
     full_name: Optional[str] = Field(None, max_length=255)
     avatar_url: Optional[str] = Field(None, max_length=500)
-
 
 
 class UserResponse(UserBase):
@@ -217,9 +217,12 @@ class ReportStatusUpdate(BaseModel):
 
 class ReportAssignment(BaseModel):
     assignee_id: str
+    remarks: Optional[str] = Field(None, max_length=2000)
 
 
 class ReportResponse(ReportBase):
+    # Old records can have an empty heading; creation still requires a title.
+    title: Optional[str] = None
     id: str
     tracking_code: str
     status: ReportStatus
@@ -259,14 +262,18 @@ class PublicEvidence(BaseModel):
     file_size: int
     filename: str
     url: str
+
     class Config:
         from_attributes = True
+
 
 class PublicTimelineAttachment(BaseModel):
     id: str
     attachment: PublicEvidence
+
     class Config:
         from_attributes = True
+
 
 class PublicTimeline(BaseModel):
     id: str
@@ -275,6 +282,7 @@ class PublicTimeline(BaseModel):
     created_at: datetime
     created_by_name: Optional[str] = None
     attachments: List[PublicTimelineAttachment] = []
+
     class Config:
         from_attributes = True
 

@@ -16,15 +16,21 @@ export function useParticles() {
 
     const particle = document.createElement('div');
     const size = Math.random() * 3 + 1;
-    
+
     particle.style.position = 'absolute';
     particle.style.width = size + 'px';
     particle.style.height = size + 'px';
-    particle.style.background = 'rgba(0, 212, 255, ' + (Math.random() * 0.8 + 0.2) + ')';
+    particle.style.background =
+      'rgba(0, 212, 255, ' + (Math.random() * 0.8 + 0.2) + ')';
     particle.style.borderRadius = '50%';
-    particle.style.boxShadow = '0 0 ' + (Math.random() * 10 + 5) + 'px rgba(0, 212, 255, ' + (Math.random() * 0.5) + ')';
-    particle.style.left = (Math.random() * 100) + '%';
-    particle.style.top = (Math.random() * 100) + '%';
+    particle.style.boxShadow =
+      '0 0 ' +
+      (Math.random() * 10 + 5) +
+      'px rgba(0, 212, 255, ' +
+      Math.random() * 0.5 +
+      ')';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
 
     containerRef.current.appendChild(particle);
 
@@ -39,7 +45,7 @@ export function useParticles() {
   }, []);
 
   const animate = useCallback(() => {
-    particlesRef.current.forEach(particle => {
+    particlesRef.current.forEach((particle) => {
       particle.x += particle.vx;
       particle.y += particle.vy;
 
@@ -62,7 +68,7 @@ export function useParticles() {
 
   const init = useCallback(() => {
     if (initializedRef.current || !containerRef.current) return;
-    
+
     // Create floating particles
     for (let i = 0; i < 30; i++) {
       createParticle();
@@ -79,7 +85,7 @@ export function useParticles() {
         cancelAnimationFrame(animationIdRef.current);
       }
       // Remove particle elements
-      particlesRef.current.forEach(p => {
+      particlesRef.current.forEach((p) => {
         if (p.element && p.element.parentNode) {
           p.element.parentNode.removeChild(p.element);
         }

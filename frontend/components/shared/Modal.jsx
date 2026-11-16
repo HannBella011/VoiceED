@@ -19,7 +19,7 @@ export function Modal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div 
+      <div
         className={`modal ${sizeClass} ${className}`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -34,9 +34,7 @@ export function Modal({
             </button>
           </div>
         )}
-        <div className="modal-body">
-          {children}
-        </div>
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );

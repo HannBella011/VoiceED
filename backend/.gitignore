@@ -72,3 +72,7 @@ tests/*
 !tests/test_dashboard_flow.py
 !tests/test_moderation_flow.py
 !tests/test_accounts_flow.py
+!tests/live_preflight.py
+!tests/test_integration_flow.py
+!tests/live_service_client.cjs
+!tests/admin_browser_check.py

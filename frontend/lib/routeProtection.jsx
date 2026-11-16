@@ -103,16 +103,29 @@ export function useProtectedNavigation() {
   const { isLoggedIn, isLoading } = useAuthContext();
   const { setLoginRequiredOpen } = useContext(ModalContext);
 
-  const navigateToService = useCallback((href) => {
-    const publicRoutes = new Set(['/', '/about', '/services', '/contacts', '/report', '/inspire-ed', '/login', '/register', '/forgot-password']);
-    if (isLoading && !publicRoutes.has(href)) return;
-    if (publicRoutes.has(href) || isLoggedIn) {
-      router.push(href);
-    } else {
-      sessionStorage.setItem('shielded_return_url', href);
-      setLoginRequiredOpen(true);
-    }
-  }, [isLoggedIn, isLoading, router, setLoginRequiredOpen]);
+  const navigateToService = useCallback(
+    (href) => {
+      const publicRoutes = new Set([
+        '/',
+        '/about',
+        '/services',
+        '/contacts',
+        '/report',
+        '/inspire-ed',
+        '/login',
+        '/register',
+        '/forgot-password',
+      ]);
+      if (isLoading && !publicRoutes.has(href)) return;
+      if (publicRoutes.has(href) || isLoggedIn) {
+        router.push(href);
+      } else {
+        sessionStorage.setItem('shielded_return_url', href);
+        setLoginRequiredOpen(true);
+      }
+    },
+    [isLoggedIn, isLoading, router, setLoginRequiredOpen]
+  );
 
   return { navigateToService };
 }

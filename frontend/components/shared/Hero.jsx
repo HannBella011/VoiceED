@@ -25,10 +25,15 @@ export function Hero({
           {subtitle && <p className="hero-subtitle">{subtitle}</p>}
           {title && <h1 className="hero-title">{title}</h1>}
           {description && <p className="hero-description">{description}</p>}
-          {(ctaText && (ctaHref || ctaOnClick)) && (
+          {ctaText && (ctaHref || ctaOnClick) && (
             <a
               href={ctaHref}
-              onClick={(e) => { if (ctaOnClick) { e.preventDefault(); ctaOnClick(); } }}
+              onClick={(e) => {
+                if (ctaOnClick) {
+                  e.preventDefault();
+                  ctaOnClick();
+                }
+              }}
               className="hero-cta"
             >
               {ctaText}

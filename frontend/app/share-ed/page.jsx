@@ -165,12 +165,11 @@ export default function ShareEd() {
             <h2>ShareED</h2>
             <p>A simple hub where students can upload, download, and share notes, reviewer sheets, and study materials with peers.</p>
           </div>
-          <div className="share-upload-action"><button type="button" className="submit-btn" onClick={() => { if (!isLoggedIn) { setLoginRequiredOpen(true); return; } setUploadOpen(true); setSuccess(''); }}><i className="fas fa-upload" /> Upload</button></div>
           {mine && <p>Your shared resources. <a href="/share-ed" onClick={event => { event.preventDefault(); setMine(false); setPage(1); window.history.replaceState({}, '', '/share-ed'); }}>Browse all resources</a></p>}
           {success && <p className="success-message" role="status">{success}</p>}
           <section className="search-quick-access-section" aria-label="Resource search controls">
             <div className="wellness-card">
-              <div className="card-header"><div className="card-icon"><i className="fas fa-search" /></div><h3>Resource Search</h3></div>
+              <div className="card-header"><h3>Resource search</h3><div className="share-upload-action"><button type="button" className="btn btn--primary btn--sm" aria-label="Upload resource" onClick={() => { if (!isLoggedIn) { setLoginRequiredOpen(true); return; } setUploadOpen(true); setSuccess(''); }}><i className="fas fa-upload" /> Upload</button></div></div>
               <div className="card-body">
                 <p className="card-description">Learn together, grow together — access community-contributed study materials and reviewer sheets.</p>
                 <div className="search-bar-container">
@@ -201,7 +200,7 @@ export default function ShareEd() {
           </section>
           <section className="search-quick-access-section" aria-label="Resource search results">
             <div className="wellness-card">
-              <div className="card-header"><div className="card-icon"><i className="fas fa-book" /></div><h3>Resource Search</h3></div>
+              <div className="card-header"><div className="card-icon"><i className="fas fa-book" /></div><h3>Study materials</h3></div>
               <div className="card-body">
                 <div className="resources-carousel" aria-busy={loading || isLoading}>
                   {(loading || isLoading) && <p role="status">Loading study materials...</p>}

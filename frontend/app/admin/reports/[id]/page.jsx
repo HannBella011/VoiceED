@@ -7,13 +7,22 @@ import { usePathname, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
 import { AdminReportDetail } from '@/components/features/report';
-import { adminGetReport, getAvailableAssignees, adminUpdateReportStatus, adminAssignReport } from '@/services';
+import {
+  adminGetReport,
+  getAvailableAssignees,
+  adminUpdateReportStatus,
+  adminAssignReport,
+  adminRejectReport,
+} from '@/services';
 import { useAuth } from '@/hooks';
+import styles from '../../admin.module.css';
 
 export default function AdminReportDetailPage() {
   const pathname = usePathname();
   const params = useParams();
-  const { isLoggedIn, currentUser, logout } = useAuth();
+  const { isLoggedIn, currentUser, logout, isLoading: authLoading } = useAuth();
+  const allowed =
+    !authLoading && isLoggedIn && ['admin', 'super_admin'].includes(currentUser?.role);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [report, setReport] = useState(null);
@@ -36,6 +45,7 @@ export default function AdminReportDetailPage() {
   };
 
   const fetchData = async () => {
+    if (!allowed) return;
     setIsLoading(true);
     setError(null);
     try {
@@ -54,7 +64,7 @@ export default function AdminReportDetailPage() {
 
   useEffect(() => {
     fetchData();
-  }, [params.id]);
+  }, [allowed, currentUser?.id, params.id]);
 
   const handleStatusUpdate = async (reportId, status, remarks) => {
     setUpdating(true);
@@ -65,17 +75,28 @@ export default function AdminReportDetailPage() {
     }
   };
 
-  const handleAssign = async (reportId, assigneeId) => {
+  const handleAssign = async (reportId, assigneeId, remarks) => {
     setUpdating(true);
     try {
-      setReport(await adminAssignReport(reportId, { assignee_id: assigneeId }));
+      setReport(
+        await adminAssignReport(reportId, { assignee_id: assigneeId, remarks })
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleReject = async (reportId, data) => {
+    setUpdating(true);
+    try {
+      setReport(await adminRejectReport(reportId, data));
     } finally {
       setUpdating(false);
     }
   };
 
   // Check admin access
-  if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'super_admin')) {
+  if (!authLoading && !allowed) {
     return (
       <>
         <Navbar
@@ -84,7 +105,7 @@ export default function AdminReportDetailPage() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="dashboard-main">
+        <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="access-denied">
               <i className="fas fa-lock"></i>
@@ -98,14 +119,14 @@ export default function AdminReportDetailPage() {
         <UserMenuModal
           isOpen={userMenuOpen}
           onClose={() => setUserMenuOpen(false)}
-          onProfileClick={() => window.location.href = '/profile'}
+          onProfileClick={() => (window.location.href = '/profile')}
           onLogoutClick={handleLogout}
         />
       </>
     );
   }
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <>
         <Navbar
@@ -114,11 +135,15 @@ export default function AdminReportDetailPage() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="dashboard-main">
+        <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="dashboard-loading">
               <div className="spinner"></div>
-              <p>Loading report details...</p>
+              <p role="status">
+                {authLoading
+                  ? 'Checking administrator access…'
+                  : 'Loading report details…'}
+              </p>
             </div>
           </div>
         </main>
@@ -127,7 +152,7 @@ export default function AdminReportDetailPage() {
         <UserMenuModal
           isOpen={userMenuOpen}
           onClose={() => setUserMenuOpen(false)}
-          onProfileClick={() => window.location.href = '/profile'}
+          onProfileClick={() => (window.location.href = '/profile')}
           onLogoutClick={handleLogout}
         />
       </>
@@ -143,7 +168,7 @@ export default function AdminReportDetailPage() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="dashboard-main">
+        <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="error-state">
               <i className="fas fa-exclamation-triangle"></i>
@@ -160,7 +185,7 @@ export default function AdminReportDetailPage() {
         <UserMenuModal
           isOpen={userMenuOpen}
           onClose={() => setUserMenuOpen(false)}
-          onProfileClick={() => window.location.href = '/profile'}
+          onProfileClick={() => (window.location.href = '/profile')}
           onLogoutClick={handleLogout}
         />
       </>
@@ -176,7 +201,7 @@ export default function AdminReportDetailPage() {
         onSettingsClick={handleSettingsClick}
       />
 
-      <main className="dashboard-main">
+      <main className={`dashboard-main ${styles.page}`}>
         <div className="container">
           {/* Back Button */}
           <div className="detail-header">
@@ -190,6 +215,7 @@ export default function AdminReportDetailPage() {
             currentUser={currentUser}
             onStatusUpdate={handleStatusUpdate}
             onAssign={handleAssign}
+            onReject={handleReject}
             availableAssignees={assignees}
             isLoading={updating}
           />
@@ -201,7 +227,7 @@ export default function AdminReportDetailPage() {
       <UserMenuModal
         isOpen={userMenuOpen}
         onClose={() => setUserMenuOpen(false)}
-        onProfileClick={() => window.location.href = '/profile'}
+        onProfileClick={() => (window.location.href = '/profile')}
         onLogoutClick={handleLogout}
       />
     </>

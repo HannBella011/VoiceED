@@ -5,8 +5,9 @@ import { authFetch } from '@/lib/authFetch';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 async function request(endpoint, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -52,31 +53,35 @@ export const usersService = {
   async changePassword(currentPassword, newPassword) {
     return request('/users/me/password', {
       method: 'PUT',
-      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
     });
   },
 
   async uploadAvatar(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
+    const token =
+      typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     const response = await authFetch(`${API_BASE_URL}/users/me/avatar`, {
       method: 'POST',
       headers,
       body: formData,
     });
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || `HTTP ${response.status}`);
     }
-    
+
     return response.json();
   },
 

@@ -58,7 +58,7 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
             Save this code to track your report status
           </p>
         </div>
-        
+
         <div className="tracking-code-value">
           <code>{report.tracking_code}</code>
           <button
@@ -92,7 +92,7 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
           <div className="meta-item">
             <span className="meta-label">Status</span>
             <span className={`meta-value status-badge status-${report.status}`}>
-              {report.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              {report.status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
             </span>
           </div>
         </div>
@@ -102,7 +102,7 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
           <div className="anonymous-warning-banner">
             <i className="fas fa-exclamation-triangle"></i>
             <div>
-              <strong>Important:</strong> You did not provide an email address. 
+              <strong>Important:</strong> You did not provide an email address.
               <strong>This tracking code cannot be recovered if lost.</strong>
               Please save it in a secure place.
             </div>
@@ -114,8 +114,8 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
           <div className="email-notice-banner">
             <i className="fas fa-envelope"></i>
             <div>
-              Your tracking code has been sent to <strong>{reporterEmail}</strong>. 
-              You will receive status updates at this email.
+              Your tracking code has been sent to <strong>{reporterEmail}</strong>. You
+              will receive status updates at this email.
             </div>
           </div>
         )}
@@ -125,7 +125,7 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
           <div className="authenticated-notice-banner">
             <i className="fas fa-user-check"></i>
             <div>
-              This report is linked to your account. You can view it anytime in your 
+              This report is linked to your account. You can view it anytime in your
               <a href="/dashboard/reports">dashboard</a>.
             </div>
           </div>
@@ -134,17 +134,11 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
 
       {/* Action Buttons */}
       <div className="tracking-actions">
-        <button
-          className="btn btn--primary btn--large"
-          onClick={handleGoToTracking}
-        >
+        <button className="btn btn--primary btn--large" onClick={handleGoToTracking}>
           <i className="fas fa-search"></i> Track My Report
         </button>
-        
-        <button
-          className="btn btn--secondary btn--large"
-          onClick={handleSubmitAnother}
-        >
+
+        <button className="btn btn--secondary btn--large" onClick={handleSubmitAnother}>
           <i className="fas fa-plus"></i> Submit Another Report
         </button>
       </div>
@@ -153,10 +147,20 @@ export function TrackingCodeDisplay({ report, isAnonymous, reporterEmail }) {
       <div className="tracking-help">
         <h4>What happens next?</h4>
         <ul>
-          <li><i className="fas fa-clock"></i> Your report enters the review queue</li>
-          <li><i className="fas fa-user-shield"></i> Our team assesses the situation</li>
-          <li><i className="fas fa-bell"></i> You'll receive updates via email (if provided)</li>
-          <li><i className="fas fa-check-circle"></i> Track progress anytime with your code</li>
+          <li>
+            <i className="fas fa-clock"></i> Your report enters the review queue
+          </li>
+          <li>
+            <i className="fas fa-user-shield"></i> Our team assesses the situation
+          </li>
+          <li>
+            <i className="fas fa-bell"></i> You'll receive updates via email (if
+            provided)
+          </li>
+          <li>
+            <i className="fas fa-check-circle"></i> Track progress anytime with your
+            code
+          </li>
         </ul>
       </div>
     </div>

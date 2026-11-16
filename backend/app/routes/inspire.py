@@ -88,7 +88,18 @@ async def serialize_many(db, pairs, viewer):
     profiles = (
         {
             p.id: p
-            for p in await db.scalars(select(Profile).options(load_only(Profile.id, Profile.username, Profile.full_name, Profile.is_verified)).where(Profile.id.in_(authors)))
+            for p in await db.scalars(
+                select(Profile)
+                .options(
+                    load_only(
+                        Profile.id,
+                        Profile.username,
+                        Profile.full_name,
+                        Profile.is_verified,
+                    )
+                )
+                .where(Profile.id.in_(authors))
+            )
         }
         if authors
         else {}

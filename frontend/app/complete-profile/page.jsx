@@ -277,7 +277,7 @@ export default function CompleteProfilePage() {
                   className="gender-select"
                   disabled={loading}
                 >
-                  <option value="">Select gender (optional)</option>
+                  <option value="">Select gender</option>
                   {genderOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}

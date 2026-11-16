@@ -14,7 +14,7 @@ export function ReportSubmission() {
   const [anonymous,setAnonymous]=useState(false);
   const [reporter,setReporter]=useState(()=>reporterFromProfile(currentUser));
   const [contactEmail,setContactEmail]=useState('');
-  const [details,setDetails]=useState({category:'',incident_date:'',location:'',description:''});
+  const [details,setDetails]=useState({title:'',category:'',incident_date:'',location:'',description:''});
   const [files,setFiles]=useState([]);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
@@ -89,6 +89,7 @@ export function ReportSubmission() {
             </>}
           </>}
           {step===2&&<>
+            <div className="form-group"><label htmlFor="complaintTitle">Complaint title</label><input id="complaintTitle" required maxLength={200} value={details.title} onChange={event=>setDetails({...details,title:event.target.value})} placeholder="Give your complaint a short, descriptive title" /></div>
             <div className={styles.fields}>
               <div className="form-group"><label htmlFor="incidentCategory">Incident Category</label><select id="incidentCategory" required value={details.category} onChange={event=>setDetails({...details,category:event.target.value})}><option value="">Select a category</option>{REPORT_CATEGORIES.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></div>
               <div className="form-group"><label htmlFor="incidentDate">Date &amp; Time of Incident</label><input id="incidentDate" type="datetime-local" required value={details.incident_date} onChange={event=>setDetails({...details,incident_date:event.target.value})} /></div>
@@ -101,7 +102,7 @@ export function ReportSubmission() {
           {step===3&&<div className={styles.review}>
             <h5>Reporter Information</h5>
             {anonymous?<p>Submitted Anonymously{contactEmail?`; Optional contact: ${contactEmail}`:''}</p>:<dl>{[['full_name','Full Name'],['display_name','Display Name'],['birthday','Birthday'],['school_id','School ID Number'],['email','Email Address']].map(([key,label])=><div key={key}><dt>{label}</dt><dd>{reporter[key]}</dd></div>)}</dl>}
-            <h5>Incident Information</h5><dl><div><dt>Incident Category</dt><dd>{category}</dd></div><div><dt>Date &amp; Time</dt><dd>{new Date(details.incident_date).toLocaleString()}</dd></div><div><dt>Location</dt><dd>{details.location||'Not provided'}</dd></div><div><dt>Description</dt><dd className={styles.description}>{details.description}</dd></div><div><dt>Evidence</dt><dd>{files.length?files.map(file=>file.name).join(', '):'No attachments'}</dd></div></dl>
+            <h5>Incident Information</h5><dl><div><dt>Complaint title</dt><dd>{details.title}</dd></div><div><dt>Incident Category</dt><dd>{category}</dd></div><div><dt>Date &amp; Time</dt><dd>{new Date(details.incident_date).toLocaleString()}</dd></div><div><dt>Location</dt><dd>{details.location||'Not provided'}</dd></div><div><dt>Description</dt><dd className={styles.description}>{details.description}</dd></div><div><dt>Evidence</dt><dd>{files.length?files.map(file=>file.name).join(', '):'No attachments'}</dd></div></dl>
             <p>Review your entries before submitting. Your report has not been submitted yet.</p>
           </div>}
           {step===4&&receipt&&<div className={styles.success}>

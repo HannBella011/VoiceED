@@ -43,11 +43,11 @@ const CATEGORY_ICONS = {
   other: 'fas fa-ellipsis-h',
 };
 
-export function ReportCard({ 
-  report, 
-  onClick, 
+export function ReportCard({
+  report,
+  onClick,
   variant = 'dashboard',
-  showActions = false 
+  showActions = false,
 }) {
   const statusColor = STATUS_COLORS[report.status] || '#7f8c8d';
   const categoryLabel = CATEGORY_LABELS[report.category] || report.category;
@@ -71,30 +71,43 @@ export function ReportCard({
   };
 
   return (
-    <article 
+    <article
       className={`report-card report-card--${variant} ${onClick ? 'clickable' : ''}`}
       onClick={handleClick}
       role={onClick ? 'button' : 'article'}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={(e) => { if (onClick && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleClick(); }}}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
     >
       <div className="report-card-header">
         <div className="report-card-title-section">
           <h3 className="report-card-title">{report.title}</h3>
           <div className="report-card-meta">
-            <span className="report-card-tracking">Tracking: <code>{report.tracking_code}</code></span>
+            <span className="report-card-tracking">
+              Tracking: <code>{report.tracking_code}</code>
+            </span>
             {variant !== 'tracking' && (
               <>
                 <span className="report-card-divider">•</span>
-                <span className="report-card-date">Submitted {formatDate(report.created_at)}</span>
+                <span className="report-card-date">
+                  Submitted {formatDate(report.created_at)}
+                </span>
               </>
             )}
           </div>
         </div>
-        
-        <span 
+
+        <span
           className="report-card-status"
-          style={{ backgroundColor: statusColor }}
+          style={
+            variant === 'admin'
+              ? { '--report-status-color': statusColor }
+              : { backgroundColor: statusColor }
+          }
         >
           {statusLabel}
         </span>
@@ -121,37 +134,45 @@ export function ReportCard({
         )}
 
         {'description' in report && report.description && (
-        <p className="report-card-description">
-          {report.description.length > 150 
-            ? report.description.substring(0, 150) + '...' 
-            : report.description}
-        </p>
-      )}
+          <p className="report-card-description">
+            {report.description.length > 150
+              ? report.description.substring(0, 150) + '...'
+              : report.description}
+          </p>
+        )}
 
-      {report.is_anonymous && (
-        <div className="report-card-anonymous-badge">
-          <i className="fas fa-user-secret"></i>
-          <span>Anonymous Report</span>
-        </div>
-      )}
+        {report.is_anonymous && (
+          <div className="report-card-anonymous-badge">
+            <i className="fas fa-user-secret"></i>
+            <span>Anonymous Report</span>
+          </div>
+        )}
 
-      {'attachments' in report && report.attachments && report.attachments.length > 0 && (
-        <div className="report-card-attachments">
-          <i className="fas fa-paperclip"></i>
-          <span>{report.attachments.length} attachment{report.attachments.length > 1 ? 's' : ''}</span>
-        </div>
-      )}
+        {'attachments' in report &&
+          report.attachments &&
+          report.attachments.length > 0 && (
+            <div className="report-card-attachments">
+              <i className="fas fa-paperclip"></i>
+              <span>
+                {report.attachments.length} attachment
+                {report.attachments.length > 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
       </div>
 
       {showActions && (
         <div className="report-card-actions">
           <button
             className="btn btn--ghost btn--sm"
-            onClick={(e) => { e.stopPropagation(); handleClick(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
           >
             <i className="fas fa-eye"></i> View Details
           </button>
-          
+
           {variant === 'admin' && (
             <>
               <button className="btn btn--ghost btn--sm">

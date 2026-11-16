@@ -36,10 +36,6 @@ next-env.d.ts
 # Misc
 *.pem
 .vercel
+test-artifacts/
 
-tests/*
-!tests/inspire-flow.test.cjs
-!tests/share-flow.test.cjs
-!tests/dashboard-flow.test.cjs
-!tests/admin-flow.test.cjs
-!tests/super-flow.test.cjs
+tests
