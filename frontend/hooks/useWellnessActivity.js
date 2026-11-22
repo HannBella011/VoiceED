@@ -1,5 +1,6 @@
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { accountRequest } from '@/services/account';
@@ -10,7 +11,9 @@ export function useWellnessStorage(name, initialValue) {
   const { currentUser } = useAuthContext();
   const [value, setValue] = useState(initialValue);
   const [ready, setReady] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  useBlockingLoading(Boolean(currentUser?.id) && (saving || (!ready && !error)));
   const current = useRef(initialValue);
   const busy = useRef(false);
   const activeKey = useRef(`${currentUser?.id}:${name}`);
@@ -79,15 +82,16 @@ export function useWellnessStorage(name, initialValue) {
     async (change) => {
       if (!ready || busy.current) return false;
       busy.current = true;
+      setSaving(true);
       const ownerKey = activeKey.current;
       const request = (...args) => {
         if (activeKey.current !== ownerKey)
           throw new Error('Account changed. Please retry.');
         return accountRequest(...args);
       };
-      const previous = current.current;
-      const next = typeof change === 'function' ? change(previous) : change;
       try {
+        const previous = current.current;
+        const next = typeof change === 'function' ? change(previous) : change;
         if (name === 'moods' || name === 'journals') {
           const path = `/wellness/${name === 'moods' ? 'moods' : 'journal'}`;
           if (next.length === 0) await request(path, 'DELETE');
@@ -142,6 +146,7 @@ export function useWellnessStorage(name, initialValue) {
         return false;
       } finally {
         busy.current = false;
+        setSaving(false);
       }
     },
     [ready, name, load]

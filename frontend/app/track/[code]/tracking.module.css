@@ -1,0 +1,255 @@
+.page {
+  min-height: 80vh;
+  padding-bottom: clamp(2rem, 6vw, 4rem);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.page > :global(.container) {
+  display: grid;
+  gap: var(--space-md);
+  max-width: 1000px;
+}
+
+.page :global(.tracking-header),
+.page :global(.report-card--tracking),
+.page :global(.tracking-timeline-section),
+.page :global(.tracking-help-section),
+.page :global(.tracking-error),
+.page :global(.tracking-loading) {
+  padding: clamp(1rem, 4vw, 1.75rem);
+  border: 1px solid var(--border-glow);
+  border-radius: 1rem;
+  background: var(--primary-dark);
+}
+
+.page :global(.tracking-header),
+.page :global(.report-card-header),
+.page :global(.tracking-code-display),
+.page :global(.timeline-entry-header) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.page :global(.tracking-header),
+.page :global(.report-card-header) {
+  justify-content: space-between;
+}
+
+.page h1 {
+  margin: 0 0 var(--space-sm);
+  font-size: clamp(1.65rem, 4vw, 2.4rem);
+  line-height: 1.2;
+}
+
+.page h3,
+.page p {
+  margin: 0;
+}
+
+.page :global(.tracking-code-display),
+.page :global(.report-card-meta),
+.page :global(.timeline-timestamp),
+.page :global(.timeline-author),
+.page :global(.attachment-size) {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.page code,
+.page :global(.copy-btn) {
+  border-radius: 0.375rem;
+  background: var(--card-background);
+  color: var(--text-primary);
+}
+
+.page code {
+  padding: 0.25rem 0.5rem;
+}
+
+.page :global(.copy-btn) {
+  display: grid;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  place-items: center;
+  border: 1px solid var(--border-glow);
+  cursor: pointer;
+}
+
+.page :global(.copy-btn):is(:hover, :focus-visible) {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.page :global(.status-badge),
+.page :global(.report-card-status),
+.page :global(.timeline-status-badge) {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  color: #080916;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.page .accessNotice {
+  padding: 0.875rem 1rem;
+  border-inline-start: 3px solid var(--accent-cyan);
+  background: var(--primary-dark);
+}
+
+.page :global(.report-card-meta) {
+  margin-top: var(--space-xs);
+}
+
+.page :global(.report-card-body) {
+  display: grid;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+  color: var(--text-secondary);
+}
+
+.page :global(.report-card-body) i {
+  width: 1.5em;
+  color: var(--accent-cyan);
+}
+
+.page :global(.report-card-description) {
+  color: var(--text-primary);
+}
+
+.page :global(.timeline-progress) {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: var(--space-lg) 0;
+}
+
+.page :global(.timeline-step) {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-xs);
+  text-align: center;
+}
+
+.page :global(.step-marker),
+.page :global(.timeline-dot) {
+  z-index: 1;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.page :global(.step-label) {
+  padding-inline: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.page :global(.step-connector) {
+  position: absolute;
+  top: calc(1.125rem - 1px);
+  left: 50%;
+  width: 100%;
+  height: 2px;
+}
+
+.page :global(.timeline-entry) {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: var(--space-sm);
+}
+
+.page :global(.timeline-marker) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.75rem;
+}
+
+.page :global(.timeline-dot) {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+}
+
+.page :global(.timeline-line) {
+  width: 2px;
+  flex: 1;
+  background: var(--border-glow);
+}
+
+.page :global(.timeline-content) {
+  display: grid;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+  padding: var(--space-sm);
+  border-radius: 0.625rem;
+  background: var(--card-background);
+}
+
+.page :global(.timeline-attachments) h5 {
+  margin: 0 0 var(--space-xs);
+}
+
+.page :global(.attachments-list) {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-xs);
+}
+
+.page :global(.attachment-link) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs);
+  color: var(--accent-cyan);
+}
+
+.page :global(.tracking-help-section),
+.page :global(.tracking-error),
+.page :global(.tracking-loading) {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-sm);
+}
+
+.page :global(.tracking-error),
+.page :global(.tracking-loading) {
+  justify-items: center;
+  text-align: center;
+}
+
+.page :global(.tracking-error) > i {
+  color: var(--accent-cyan);
+  font-size: 1.75rem;
+}
+
+.page :global(.tracking-error) h2 {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .page :global(.timeline-progress) {
+    grid-template-columns: 1fr;
+  }
+
+  .page :global(.timeline-step) {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    align-items: center;
+    justify-items: start;
+    padding-bottom: var(--space-xs);
+    text-align: start;
+  }
+
+  .page :global(.step-connector) {
+    top: 1.125rem;
+    left: calc(1.125rem - 1px);
+    width: 2px;
+    height: 100%;
+  }
+}

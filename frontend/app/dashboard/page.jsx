@@ -1,5 +1,6 @@
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useState, useEffect } from 'react';
 import { accountRequest } from '@/services/account';
 import { localDate } from '@/lib/wellness';
@@ -20,6 +21,7 @@ function DashboardContent() {
   const [revision, setRevision] = useState(0);
   const summary = result?.owner === currentUser?.id ? result?.data : null;
   const error = failure?.owner === currentUser?.id ? failure?.message : '';
+  useBlockingLoading(Boolean(currentUser?.id && !summary && !error));
   useEffect(() => {
     let active = true;
     setResult(null); setFailure(null);

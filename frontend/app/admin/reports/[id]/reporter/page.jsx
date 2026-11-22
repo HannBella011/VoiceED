@@ -1,5 +1,6 @@
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useEffect, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 import { Navbar, Footer } from '@/components/shared';
@@ -19,6 +20,7 @@ export default function ReporterProfilePage() {
     !isLoading && isLoggedIn && ['admin', 'super_admin'].includes(currentUser?.role);
   const owner = `${currentUser?.id}:${currentUser?.role}:${id}`;
   const visible = result?.owner === owner ? result : null;
+  useBlockingLoading(allowed && !visible);
   useEffect(() => {
     if (!allowed) return;
     let active = true;

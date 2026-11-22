@@ -2,33 +2,14 @@
   margin: 1.5rem 0;
 }
 .page {
-  --admin-background: url('/bg.png');
-  --admin-surface: color-mix(in srgb, var(--primary-dark) 88%, transparent);
   overflow-wrap: anywhere;
   color: var(--text-primary);
   min-height: calc(100vh - 160px);
   padding: calc(var(--voiceed-navbar-height, 8rem) + var(--space-page-gap, 2rem)) 0 3rem;
-  background:
-    linear-gradient(var(--admin-surface), var(--admin-surface)),
-    var(--admin-background) center / cover;
+  background: var(--voiceed-background-overlay), var(--voiceed-background-image) center / cover;
 }
 .page:global(.dashboard-main) {
   padding: calc(var(--voiceed-navbar-height, 8rem) + var(--space-page-gap, 2rem)) 0 3rem;
-}
-:global(body.purple-theme) .page {
-  --admin-background: url('/bg1.png');
-}
-:global(body.red-theme) .page {
-  --admin-background: url('/bg2.png');
-}
-:global(body.green-theme) .page {
-  --admin-background: url('/bg3.png');
-}
-:global(body.orange-theme) .page {
-  --admin-background: url('/bg4.png');
-}
-:global(body.pink-theme) .page {
-  --admin-background: url('/bg5.png');
 }
 .page > :global(.container) {
   width: min(1280px, 100% - 3rem);

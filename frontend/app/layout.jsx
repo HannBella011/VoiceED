@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { LoadingProvider } from '@/components/shared/GlobalLoading';
 import { ModalProvider } from '@/components/shared/GlobalModals';
 
 export const metadata = {
@@ -22,9 +23,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="blue-theme">
-        <AuthProvider>
-          <ModalProvider>{children}</ModalProvider>
-        </AuthProvider>
+        <LoadingProvider>
+          <AuthProvider>
+            <ModalProvider>{children}</ModalProvider>
+          </AuthProvider>
+        </LoadingProvider>
       </body>
     </html>
   );

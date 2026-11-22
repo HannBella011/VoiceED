@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import {
   createContext,
   useContext,
@@ -46,7 +47,7 @@ interface AuthContextType {
   session: Session | null;
   isLoggedIn: boolean;
   loginStats: LoginStats;
-  login: (email: string, password: string) => Promise<Profile>;
+  login: (identifier: string, password: string) => Promise<Profile>;
   register: (userData: {
     fullName: string;
     displayName: string;
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     lastLogin: undefined,
   });
   const [isLoading, setIsLoading] = useState(true);
+  useBlockingLoading(isLoading);
 
   useEffect(() => {
     const themes = ['blue', 'purple', 'red', 'green', 'orange', 'pink'];
@@ -156,14 +158,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (identifier: string, password: string) => {
       const epoch = ++authEpoch.current;
       const response = await authFetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       });
 
       if (!response.ok) {

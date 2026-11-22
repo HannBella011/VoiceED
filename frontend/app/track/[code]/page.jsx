@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer } from '@/components/shared';
@@ -10,6 +11,7 @@ import { ReportCard } from '@/components/features/report';
 import { ReportTimeline } from '@/components/features/report';
 import { trackReport } from '@/services';
 import { useModals } from '@/components/shared/GlobalModals';
+import styles from './tracking.module.css';
 
 export default function TrackingPage() {
   const pathname = usePathname();
@@ -17,6 +19,7 @@ export default function TrackingPage() {
   const { settingsOpen, setSettingsOpen } = useModals();
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  useBlockingLoading(isLoading);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -62,10 +65,9 @@ export default function TrackingPage() {
           variant="public"
           onSettingsClick={handleSettingsClick}
         />
-        <main className="tracking-main">
+        <main className={`tracking-main ${styles.page}`}>
           <div className="container">
             <div className="tracking-loading">
-              <div className="spinner"></div>
               <p>Loading report...</p>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default function TrackingPage() {
           variant="public"
           onSettingsClick={handleSettingsClick}
         />
-        <main className="tracking-main">
+        <main className={`tracking-main ${styles.page}`}>
           <div className="container">
             <div className="tracking-error">
               <i className="fas fa-exclamation-triangle"></i>
@@ -127,7 +129,7 @@ export default function TrackingPage() {
         onSettingsClick={handleSettingsClick}
       />
 
-      <main className="tracking-main">
+      <main className={`tracking-main ${styles.page}`}>
         <div className="container">
           {/* Report Header */}
           <div className="tracking-header">
@@ -138,6 +140,8 @@ export default function TrackingPage() {
                 <code>{report.tracking_code}</code>
                 <button
                   className="copy-btn"
+                  type="button"
+                  aria-label="Copy tracking code"
                   onClick={() => navigator.clipboard.writeText(report.tracking_code)}
                 >
                   <i className="fas fa-copy"></i>
@@ -156,7 +160,7 @@ export default function TrackingPage() {
           </div>
 
           {report.access_required && (
-            <p role="status">
+            <p className={styles.accessNotice} role="status">
               This code shows limited status only. Open the private tracking link saved
               after submission for detailed updates and shared evidence. Account owners
               and authorized staff can also view their reports while signed in.

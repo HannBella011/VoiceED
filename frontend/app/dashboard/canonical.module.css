@@ -8,35 +8,10 @@
 .canonical :global(.dashboard-main) {
   padding: calc(var(--voiceed-navbar-height, 8rem) + var(--space-page-gap, 2rem)) 0 3rem;
   min-height: calc(100vh - 200px);
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/bg.png');
+  background-image: var(--voiceed-background-overlay), var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-}
-
-/* Theme-based background changes */
-:global(body.pink-theme) .canonical :global(.dashboard-main) {
-  background-image: url('/bg5.png');
-}
-
-:global(body.purple-theme) .canonical :global(.dashboard-main) {
-  background-image: url('/bg1.png');
-}
-
-:global(body.red-theme) .canonical :global(.dashboard-main) {
-  background-image: url('/bg2.png');
-}
-
-:global(body.green-theme) .canonical :global(.dashboard-main) {
-  background-image: url('/bg3.png');
-}
-
-:global(body.orange-theme) .canonical :global(.dashboard-main) {
-  background-image: url('/bg4.png');
-}
-
-:global(body.blue-theme) .canonical :global(.dashboard-main) {
-  background-image: url('/bg.png');
 }
 
 .canonical :global(.dashboard-welcome) {

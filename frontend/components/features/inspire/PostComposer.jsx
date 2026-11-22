@@ -1,4 +1,5 @@
 'use client';
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useEffect, useRef, useState } from 'react';
 import { inspireRequest } from '@/services/inspire';
 import { bodyText, emptyBody } from '@/lib/inspire-body';
@@ -26,6 +27,7 @@ export default function PostComposer({ initialType = 'story', authorName = 'You'
   const [error, setError] = useState('');
   const [progress, setProgress] = useState('');
   const [busy, setBusy] = useState(false);
+  useBlockingLoading(busy);
   const sending = useRef(false);
   const uploaded = useRef(new Map());
   const mounted = useRef(true);

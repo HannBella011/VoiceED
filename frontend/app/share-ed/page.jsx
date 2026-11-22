@@ -1,5 +1,6 @@
 "use client";
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Navbar, Footer } from '@/components/shared';
@@ -23,6 +24,8 @@ export default function ShareEd() {
   const [uploadError, setUploadError] = useState('');
   const [success, setSuccess] = useState('');
   const [uploading, setUploading] = useState(false);
+  const initialMaterialsSettled = useRef(false);
+  useBlockingLoading(uploading || (isLoggedIn && loading && !initialMaterialsSettled.current));
   const [revision, setRevision] = useState(0);
   const [search, setSearch] = useState('');
   const [subject, setSubject] = useState('');
@@ -75,7 +78,12 @@ export default function ShareEd() {
         }
       } catch (err) {
         if (!controller.signal.aborted) setError(err.message || 'Unable to load materials. Please try again.');
-      } finally { if (!controller.signal.aborted) setLoading(false); }
+      } finally {
+        if (!controller.signal.aborted) {
+          initialMaterialsSettled.current = true;
+          setLoading(false);
+        }
+      }
     };
     load();
     return () => controller.abort();

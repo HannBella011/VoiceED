@@ -26,7 +26,7 @@ export default function Services() {
         onSettingsClick={handleSettingsClick}
       />
 
-      <main className="services-main">
+      <main className="services-main voiceed-page-background">
         <div className="container">
           <div className="services-welcome">
             <h2>Services</h2>

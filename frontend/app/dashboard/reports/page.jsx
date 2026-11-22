@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
@@ -17,6 +18,7 @@ export default function DashboardReportsPage() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  useBlockingLoading(isLoading);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     page: 1,
@@ -94,10 +96,9 @@ export default function DashboardReportsPage() {
           onUserMenuClick={handleUserMenuClick}
           onSettingsClick={handleSettingsClick}
         />
-        <main className="dashboard-main">
+        <main className="dashboard-main voiceed-page-background">
           <div className="container">
             <div className="dashboard-loading">
-              <div className="spinner"></div>
               <p>Loading your reports...</p>
             </div>
           </div>
@@ -123,7 +124,7 @@ export default function DashboardReportsPage() {
         onSettingsClick={handleSettingsClick}
       />
 
-      <main className="dashboard-main">
+      <main className="dashboard-main voiceed-page-background">
         <div className="container">
           {/* Dashboard Header */}
           <div className="dashboard-header">

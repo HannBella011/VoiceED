@@ -145,11 +145,16 @@
   box-sizing: border-box;
 }
 
+:root {
+  --voiceed-background-overlay: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+}
+
 body {
+  --voiceed-background-image: url('/bg.png');
   font-family: 'Poppins', sans-serif;
   line-height: 1.6;
   color: var(--text-primary);
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/bg.png');
+  background: var(--voiceed-background-overlay), var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -403,7 +408,8 @@ body {
 }
 
 body.purple-theme {
-  background-image: url('/bg1.png');
+  --voiceed-background-image: url('/bg1.png');
+  background-image: var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -423,7 +429,8 @@ body.purple-theme {
 }
 
 body.red-theme {
-  background-image: url('/bg2.png');
+  --voiceed-background-image: url('/bg2.png');
+  background-image: var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -443,7 +450,8 @@ body.red-theme {
 }
 
 body.green-theme {
-  background-image: url('/bg3.png');
+  --voiceed-background-image: url('/bg3.png');
+  background-image: var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -463,7 +471,8 @@ body.green-theme {
 }
 
 body.orange-theme {
-  background-image: url('/bg4.png');
+  --voiceed-background-image: url('/bg4.png');
+  background-image: var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -483,7 +492,8 @@ body.orange-theme {
 }
 
 body.pink-theme {
-  background-image: url('/bg5.png');
+  --voiceed-background-image: url('/bg5.png');
+  background-image: var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -3761,60 +3771,15 @@ body.orange-theme .notification-header {
 .wellness-main {
   padding: 120px 0 80px;
   min-height: calc(100vh - 200px);
-  background: url('/bg.png');
+}
+
+.wellness-main,
+.tracking-main,
+.voiceed-page-background {
+  background-image: var(--voiceed-background-overlay), var(--voiceed-background-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-}
-
-/* Theme-based background changes for WellnessED */
-body.pink-theme .wellness-main {
-  background-image: url('/bg5.png');
-}
-
-body.purple-theme .wellness-main {
-  background-image: url('/bg1.png');
-}
-
-body.red-theme .wellness-main {
-  background-image: url('/bg2.png');
-}
-
-body.green-theme .wellness-main {
-  background-image: url('/bg3.png');
-}
-
-body.orange-theme .wellness-main {
-  background-image: url('/bg4.png');
-}
-
-body.blue-theme .wellness-main {
-  background-image: url('/bg.png');
-}
-
-/* Theme-based background changes for ShareED */
-body.pink-theme .wellness-main {
-  background-image: url('/bg5.png');
-}
-
-body.purple-theme .wellness-main {
-  background-image: url('/bg1.png');
-}
-
-body.red-theme .wellness-main {
-  background-image: url('/bg2.png');
-}
-
-body.green-theme .wellness-main {
-  background-image: url('/bg3.png');
-}
-
-body.orange-theme .wellness-main {
-  background-image: url('/bg4.png');
-}
-
-body.blue-theme .wellness-main {
-  background-image: url('/bg.png');
 }
 
 .wellness-hero {

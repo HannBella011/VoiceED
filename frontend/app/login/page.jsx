@@ -1,5 +1,6 @@
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
@@ -9,10 +10,11 @@ export default function LoginPage() {
   const pathname = usePathname();
   const router = useRouter();
   const { login } = useAuthContext();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  useBlockingLoading(loading);
 
   useEffect(() => {
     const message = new URLSearchParams(window.location.search).get('error');
@@ -53,7 +55,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      await login(identifier.trim(), password);
 
       const returnUrl = sessionStorage.getItem('shielded_return_url');
       if (returnUrl) {
@@ -94,20 +96,22 @@ export default function LoginPage() {
 
             <form id="loginForm" onSubmit={handleSubmit}>
               <div className="input-group">
-                <label htmlFor="email" className="input-label">
-                  Email
+                <label htmlFor="identifier" className="input-label">
+                  Email or School ID
                 </label>
                 <div className="input-wrapper">
                   <i className="fas fa-user input-icon-left" aria-hidden="true"></i>
                   <input
-                    type="email"
-                    id="email"
-                    placeholder="Enter your email address"
+                    type="text"
+                    id="identifier"
+                    placeholder="Enter your email or school ID"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
                     disabled={loading}
-                    autoComplete="email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
                   />
                 </div>
               </div>

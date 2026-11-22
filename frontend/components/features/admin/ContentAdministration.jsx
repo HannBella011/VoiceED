@@ -1,4 +1,5 @@
 'use client';
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar, Footer } from '@/components/shared';
@@ -40,6 +41,7 @@ export default function ContentAdministration({kind=null, id=null, historyMode=f
   const [policy, setPolicy] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  useBlockingLoading(allowed && (saving || detailLoading));
   const [confirmation, setConfirmation] = useState(null);
   const [preview, setPreview] = useState(null);
   const savingRef = useRef(false);

@@ -1,5 +1,6 @@
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { inspireRequest, postPath, shareLink } from '@/services/inspire';
@@ -31,6 +32,8 @@ function InspireEDContent() {
   const [total, setTotal] = useState(0);
   const [revision, setRevision] = useState(0);
   const [directId, setDirectId] = useState(null);
+  const initialFeedSettled = useRef(false);
+  useBlockingLoading(busy || (loading && (!initialFeedSettled.current || Boolean(directId))));
   const [mine, setMine] = useState(false);
   const [commentTarget, setCommentTarget] = useState(null);
   const [comments, setComments] = useState([]);
@@ -106,7 +109,12 @@ function InspireEDContent() {
         setPosts(data.items); setTotal(data.total); setHasMore(data.has_more); setCurrentQuoteIndex(0);
         if (!directId && page > 1 && !data.items.length) setPage(value => value - 1);
       } catch (error) { if (sequence === feedSequence.current && !controller.signal.aborted) setError(error.message); }
-      finally { if (sequence === feedSequence.current && !controller.signal.aborted) setLoading(false); }
+      finally {
+        if (sequence === feedSequence.current && !controller.signal.aborted) {
+          initialFeedSettled.current = true;
+          setLoading(false);
+        }
+      }
     }, searchTerm ? 300 : 0);
     return () => { controller.abort(); clearTimeout(timer); feedSequence.current++; };
   }, [currentUser?.id, isLoggedIn, authLoading, activeTab, searchTerm, page, directId, revision, mine]);

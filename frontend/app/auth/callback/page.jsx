@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function AuthCallbackPage() {
   const started = useRef(false);
+  const [pending, setPending] = useState(true);
+  useBlockingLoading(pending);
 
   useEffect(() => {
     if (started.current) return;
@@ -27,7 +30,7 @@ export default function AuthCallbackPage() {
         if (!data.session)
           throw new Error('Authentication failed. Please sign in again.');
         const apiBase =
-          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+          process.env.NEXT_PUBLIC_API_URL;
         const response = await fetch(`${apiBase}/auth/callback`, {
           method: 'POST',
           credentials: 'include',
@@ -59,24 +62,8 @@ export default function AuthCallbackPage() {
         );
       }
     };
-    handleAuthCallback();
+    handleAuthCallback().finally(() => setPending(false));
   }, []);
 
-  return (
-    <div
-      className="login-page"
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-    >
-      <div className="login-card" style={{ textAlign: 'center', padding: '3rem' }}>
-        <div className="login-card-header">
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-          <h2>Completing Sign In</h2>
-          <p>Please wait while we finish signing you in...</p>
-        </div>
-        <div style={{ color: 'var(--text-secondary)' }}>
-          <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem' }}></i>
-        </div>
-      </div>
-    </div>
-  );
+  return null;
 }

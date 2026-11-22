@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
@@ -30,6 +31,7 @@ export default function AdminReportDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
+  useBlockingLoading(allowed && (isLoading || updating));
 
   const handleUserMenuClick = () => {
     setUserMenuOpen(true);
@@ -138,7 +140,6 @@ export default function AdminReportDetailPage() {
         <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="dashboard-loading">
-              <div className="spinner"></div>
               <p role="status">
                 {authLoading
                   ? 'Checking administrator access…'

@@ -1,4 +1,5 @@
 'use client';
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useEffect, useRef, useState } from 'react';
 import { recovery } from '@/lib/recovery';
 import { Navbar, Footer } from '@/components/shared';
@@ -10,6 +11,8 @@ export default function ResetPassword() {
   const [confirm, setConfirm] = useState('');
   const [message, setMessage] = useState('Validating recovery link...');
   const [busy, setBusy] = useState(false);
+  const [validating, setValidating] = useState(true);
+  useBlockingLoading(busy || validating);
   useEffect(() => {
     if (started.current) return;
     started.current = true;
@@ -44,7 +47,7 @@ export default function ResetPassword() {
     validate().catch(async (err) => {
       setMessage(err.message);
       await recovery.auth.signOut({ scope: 'local' });
-    });
+    }).finally(() => setValidating(false));
   }, []);
   const submit = async (event) => {
     event.preventDefault();

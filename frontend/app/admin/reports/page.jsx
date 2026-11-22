@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Navbar, Footer, SettingsModal, UserMenuModal } from '@/components/shared';
@@ -36,6 +37,7 @@ export default function AdminReportsPage() {
   const requestSequence = useRef(0);
   const allowed =
     !authLoading && isLoggedIn && ['admin', 'super_admin'].includes(currentUser?.role);
+  useBlockingLoading(allowed && isLoading && !stats);
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get('status');
@@ -208,7 +210,6 @@ export default function AdminReportsPage() {
         <main className={`dashboard-main ${styles.page}`}>
           <div className="container">
             <div className="dashboard-loading">
-              <div className="spinner"></div>
               <p role="status">
                 {authLoading ? 'Checking administrator access…' : 'Loading reports…'}
               </p>

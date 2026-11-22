@@ -1,4 +1,5 @@
 'use client';
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar, Footer } from '@/components/shared';
@@ -30,16 +31,18 @@ export default function AccountAdministration({accountId=null}={}){
   const [recoverId,setRecoverId]=useState(''),[recoverName,setRecoverName]=useState('');
   const selected=selection?.session===session?selection.value:null, users=data?.session===session?data.value:null, counts=stats?.session===session?stats.value:null;
   const events=activity?.session===session?activity.value:null;
+  const [detailPending, setDetailPending] = useState(false);
+  useBlockingLoading(allowed && (saving || detailPending));
   useEffect(()=>{if(search.trim()===debounced)return;const timer=setTimeout(()=>{setDebounced(search.trim());setFilters(value=>({...value,page:1}));},300);return()=>clearTimeout(timer);},[search,debounced]);
   useEffect(()=>{if(!allowed||accountId)return;const controller=new AbortController();superService.stats({signal:controller.signal}).then(value=>{if(!controller.signal.aborted)setStats({session,value});}).catch(error=>{if(!controller.signal.aborted)setError(error.message);});return()=>controller.abort();},[allowed,session,revision,accountId]);
   useEffect(()=>{if(!allowed||accountId)return;const controller=new AbortController();setData(null);setLoading(true);superService.users({...filters,search:debounced,limit:20,verified:filters.verified===''?undefined:filters.verified==='true',active:filters.active===''?undefined:filters.active==='true'},{signal:controller.signal}).then(value=>{if(!controller.signal.aborted){setData({session,value});if(filters.page>1&&!value.items.length)setFilters(previous=>({...previous,page:Math.max(1,value.total_pages)}));}}).catch(error=>{if(!controller.signal.aborted)setError(error.message);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[allowed,session,filters.role,filters.active,filters.verified,filters.sort,filters.page,debounced,revision]);
   useEffect(()=>{if(!allowed||accountId)return;const controller=new AbortController();setActivity(null);const values={page:activityPage,limit:20,actor_id:actor||undefined};const request=activityMode==='account'?superService.audit(values,{signal:controller.signal}):superService.moderation(values,{signal:controller.signal});request.then(value=>{if(!controller.signal.aborted)setActivity({session,value});}).catch(error=>{if(!controller.signal.aborted)setError(error.message);});return()=>controller.abort();},[allowed,session,actor,activityMode,activityPage,revision]);
-  useEffect(()=>{setCreateOpen(false);setNewUser(emptyUser());sequence.current++;pendingAction.current=null;setConfirmation(null);setSelection(null);setError('');setNotice('');setReason('');setNotes('');setReviewed(false);inviteId.current=null;setInvitePending(false);},[session,allowed]);
+  useEffect(()=>{setCreateOpen(false);setNewUser(emptyUser());sequence.current++;setDetailPending(false);pendingAction.current=null;setConfirmation(null);setSelection(null);setError('');setNotice('');setReason('');setNotes('');setReviewed(false);inviteId.current=null;setInvitePending(false);},[session,allowed]);
   useEffect(()=>{if(allowed&&accountId)open(accountId);},[allowed,session,accountId]);
   useEffect(()=>{if(!accountId&&typeof window!=='undefined'&&new URLSearchParams(window.location?.search||'').get('notice')==='account-deactivated')notify('Account deactivated.');},[accountId]);
   useEffect(()=>{if(!accountId&&typeof window!=='undefined'){const id=new URLSearchParams(window.location?.search||'').get('actor');if(id)setActor(id);const mode=new URLSearchParams(window.location?.search||'').get('activity');if(mode==='moderation')setActivityMode(mode);}},[accountId]);
   const change=(key,value)=>setFilters(previous=>({...previous,[key]:value,page:1}));
-  async function open(id){if(busy.current)return;pendingAction.current=null;setConfirmation(null);const number=++sequence.current;setSelection(null);setError('');try{const value=await superService.detail(id);if(number!==sequence.current||owner.current!==session)return;setSelection({session,value});setDraft({username:value.username,full_name:value.full_name||'',school_id:value.school_id||'',role:value.role});setReason('');setNotes('');setReviewed(false);}catch(error){if(number===sequence.current)setError(error.message);}}
+  async function open(id){if(busy.current)return;pendingAction.current=null;setConfirmation(null);const number=++sequence.current;setDetailPending(true);setSelection(null);setError('');try{const value=await superService.detail(id);if(number!==sequence.current||owner.current!==session)return;setSelection({session,value});setDraft({username:value.username,full_name:value.full_name||'',school_id:value.school_id||'',role:value.role});setReason('');setNotes('');setReviewed(false);}catch(error){if(number===sequence.current)setError(error.message);}finally{if(number===sequence.current)setDetailPending(false);}}
   async function run(callback,message){
     if(busy.current)return false;
     busy.current=true;setSaving(true);setError('');setNotice('');

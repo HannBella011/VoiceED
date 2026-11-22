@@ -1,5 +1,6 @@
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Navbar, Footer } from '@/components/shared';
@@ -12,6 +13,7 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  useBlockingLoading(busy);
   const handleLoginClick = () => {
     window.location.href = '/login';
   };

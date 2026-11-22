@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { authFetch } from '@/lib/authFetch';
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
@@ -32,6 +33,7 @@ export function SettingsModal({ isOpen, onClose }) {
 
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  useBlockingLoading(saving && Boolean(currentUser));
   const saveSettings = async (changes) => {
     if (saving) return;
     const updated = { ...settings, ...changes };

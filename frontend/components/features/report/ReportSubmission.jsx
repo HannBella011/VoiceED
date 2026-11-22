@@ -1,4 +1,5 @@
  'use client';
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuthContext } from '@/context/AuthContext';
@@ -18,6 +19,7 @@ export function ReportSubmission() {
   const [files,setFiles]=useState([]);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
+  useBlockingLoading(busy);
   const [receipt,setReceipt]=useState(null);
   const [copyMessage,setCopyMessage]=useState('');
   const submitting=useRef(false);

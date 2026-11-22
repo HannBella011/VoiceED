@@ -1,5 +1,6 @@
 "use client";
 
+import { useBlockingLoading } from '@/components/shared/GlobalLoading';
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -20,6 +21,7 @@ export default function CompleteProfilePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  useBlockingLoading(loading);
   const [nextPath, setNextPath] = useState("/dashboard");
 
   const handleChange = useCallback((field, value) => {
